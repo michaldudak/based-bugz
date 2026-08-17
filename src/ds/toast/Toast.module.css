@@ -1,0 +1,219 @@
+/*
+ * Stacking is driven entirely by Base UI's CSS variables (--toast-index, --toast-offset-y,
+ * --toast-height, --toast-frontmost-height, --toast-swipe-movement-*).
+ *
+ * Base UI's own example scales the stacked toasts down as they recede. This one offsets
+ * and fades instead: no surface in this app scale-animates (AGENTS.md — Appearance), and
+ * one exception is how that rule stops being a rule.
+ */
+
+.viewport {
+	position: fixed;
+	z-index: var(--z-toast);
+	inset: auto var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom, 0px)) auto;
+	width: calc(100vw - 2 * var(--space-4));
+	max-width: 22rem;
+	margin: 0 auto;
+}
+
+.toast {
+	--gap: var(--space-2);
+	--peek: 0.5rem;
+	--height: var(--toast-frontmost-height, var(--toast-height));
+	--offset-y: calc(
+		var(--toast-offset-y) * -1 + (var(--toast-index) * var(--gap) * -1) +
+			var(--toast-swipe-movement-y)
+	);
+
+	box-sizing: border-box;
+	position: absolute;
+	z-index: calc(100 - var(--toast-index));
+	right: 0;
+	bottom: 0;
+	left: auto;
+	width: 100%;
+	height: var(--height);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	outline: none;
+	background: var(--surface-raised);
+	color: var(--text);
+	box-shadow: var(--shadow-lg);
+	user-select: none;
+	transform: translateX(var(--toast-swipe-movement-x))
+		translateY(calc(var(--toast-swipe-movement-y) - (var(--toast-index) * var(--peek))));
+	transition:
+		transform var(--duration) var(--ease),
+		opacity var(--duration) var(--ease),
+		height var(--duration-fast) var(--ease);
+}
+
+.toast[data-expanded] {
+	height: var(--toast-height);
+	transform: translateX(var(--toast-swipe-movement-x)) translateY(var(--offset-y));
+}
+
+.toast[data-starting-style],
+.toast[data-ending-style] {
+	opacity: 0;
+	transform: translateY(120%);
+}
+
+.toast[data-limited] {
+	opacity: 0;
+}
+
+.toast[data-ending-style][data-swipe-direction='up'] {
+	transform: translateY(calc(var(--toast-swipe-movement-y) - 120%));
+}
+
+.toast[data-ending-style][data-swipe-direction='down'] {
+	transform: translateY(calc(var(--toast-swipe-movement-y) + 120%));
+}
+
+.toast[data-ending-style][data-swipe-direction='left'] {
+	transform: translateX(calc(var(--toast-swipe-movement-x) - 120%)) translateY(var(--offset-y));
+}
+
+.toast[data-ending-style][data-swipe-direction='right'] {
+	transform: translateX(calc(var(--toast-swipe-movement-x) + 120%)) translateY(var(--offset-y));
+}
+
+/* Keeps the pointer from falling through the gap between stacked toasts. */
+.toast::after {
+	content: '';
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	height: calc(var(--gap) + 1px);
+}
+
+/* ---- status accent ------------------------------------------------------ */
+
+.toast::before {
+	content: '';
+	position: absolute;
+	top: var(--space-3);
+	bottom: var(--space-3);
+	left: 0;
+	width: 2px;
+	border-radius: var(--radius-full);
+	background: transparent;
+}
+
+.toast[data-type='success']::before {
+	background: var(--success);
+}
+
+.toast[data-type='warning']::before {
+	background: var(--warning);
+}
+
+.toast[data-type='error']::before {
+	background: var(--danger);
+}
+
+.toast[data-type='info']::before {
+	background: var(--info);
+}
+
+/* ---- content ------------------------------------------------------------ */
+
+.content {
+	display: flex;
+	box-sizing: border-box;
+	align-items: center;
+	gap: var(--space-3);
+	padding: var(--space-3);
+	overflow: hidden;
+	transition: opacity var(--duration) var(--ease);
+}
+
+.content[data-behind] {
+	opacity: 0;
+}
+
+.content[data-expanded] {
+	opacity: 1;
+}
+
+.text {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.title {
+	font-size: var(--text-base);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-tight);
+}
+
+.description {
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	line-height: var(--leading-normal);
+}
+
+.action {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	height: var(--control-h-sm);
+	padding: 0 var(--space-2);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--text);
+	font-size: var(--text-sm);
+	font-weight: var(--weight-medium);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: background-color var(--duration-fast) var(--ease);
+}
+
+.action:hover {
+	background: var(--surface-hover);
+}
+
+.close {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border: none;
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+	transition:
+		background-color var(--duration-fast) var(--ease),
+		color var(--duration-fast) var(--ease);
+}
+
+.close:hover {
+	background: var(--surface-hover);
+	color: var(--text);
+}
+
+@media (width <= 640px) {
+	.viewport {
+		right: var(--space-3);
+		left: var(--space-3);
+		width: auto;
+		max-width: none;
+	}
+}
+
+@media (pointer: coarse) {
+	.close {
+		width: var(--control-h-sm);
+		height: var(--control-h-sm);
+	}
+}

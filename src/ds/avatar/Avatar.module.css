@@ -1,0 +1,50 @@
+/*
+ * `--avatar-bg` / `--avatar-fg` are supplied per instance from TS, already wrapped
+ * in light-dark(), so no colour literal appears in this file.
+ */
+.root {
+	display: inline-flex;
+	position: relative;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-full);
+	background: var(--avatar-bg);
+	color: var(--avatar-fg);
+	font-weight: var(--weight-semibold);
+	line-height: 1;
+	text-transform: uppercase;
+	overflow: hidden;
+	user-select: none;
+}
+
+.sm {
+	width: 1.25rem;
+	height: 1.25rem;
+	font-size: var(--text-xs);
+}
+
+.md {
+	width: 1.75rem;
+	height: 1.75rem;
+	font-size: var(--text-sm);
+}
+
+.lg {
+	width: 2.5rem;
+	height: 2.5rem;
+	font-size: var(--text-md);
+}
+
+/* The full name, for assistive tech only — the visible glyphs are just initials. */
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	white-space: nowrap;
+	clip-path: inset(50%);
+	overflow: hidden;
+}

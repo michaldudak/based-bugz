@@ -1,0 +1,89 @@
+.root {
+	display: flex;
+	position: relative;
+	align-items: center;
+	width: 100%;
+	min-width: 0;
+}
+
+.input {
+	width: 100%;
+	min-width: 0;
+	height: var(--control-h);
+	padding: 0 var(--space-3);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--text);
+	font-size: var(--text-base);
+	transition:
+		border-color var(--duration-fast) var(--ease),
+		background-color var(--duration-fast) var(--ease);
+}
+
+.input::placeholder {
+	color: var(--text-subtle);
+}
+
+.input:hover:not(:disabled, [data-disabled]) {
+	border-color: var(--border-strong);
+}
+
+/*
+ * `data-invalid` comes from Field; `aria-invalid` covers a standalone input that
+ * has no Field around it. Neither is a conditional className.
+ */
+.input[data-invalid],
+.input[aria-invalid='true'] {
+	border-color: var(--danger);
+}
+
+.input:disabled,
+.input[data-disabled] {
+	background: var(--surface-sunken);
+	color: var(--text-muted);
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.sm {
+	height: var(--control-h-sm);
+	padding: 0 var(--space-2);
+	font-size: var(--text-sm);
+}
+
+/* Room for the leading glyph: space + 16px icon + space. */
+.hasLeading {
+	padding-inline-start: calc(var(--space-2) * 2 + 1rem);
+}
+
+.hasTrailing {
+	padding-inline-end: calc(var(--space-2) * 2 + 1rem);
+}
+
+.leading,
+.trailing {
+	display: flex;
+	position: absolute;
+	align-items: center;
+	justify-content: center;
+	inset-block: 0;
+	color: var(--text-subtle);
+}
+
+.leading {
+	inset-inline-start: var(--space-2);
+	pointer-events: none;
+}
+
+.trailing {
+	inset-inline-end: var(--space-2);
+	gap: var(--space-1);
+}
+
+/* Below 16px iOS zooms the viewport on focus. */
+@media (pointer: coarse) {
+	.input {
+		font-size: var(--text-lg);
+	}
+}

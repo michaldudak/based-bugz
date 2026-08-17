@@ -1,0 +1,124 @@
+.button {
+	display: inline-flex;
+	position: relative;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	height: var(--control-h);
+	padding: 0 var(--space-3);
+	border: 1px solid transparent;
+	border-radius: var(--radius);
+	font-size: var(--text-base);
+	font-weight: var(--weight-medium);
+	line-height: 1;
+	white-space: nowrap;
+	cursor: pointer;
+	transition:
+		background-color var(--duration-fast) var(--ease),
+		border-color var(--duration-fast) var(--ease),
+		color var(--duration-fast) var(--ease);
+}
+
+.button:disabled,
+.button[data-disabled] {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* ---- variants ---------------------------------------------------------- */
+
+.default {
+	border-color: var(--border);
+	background: var(--surface);
+	color: var(--text);
+}
+
+.default:hover:not(:disabled) {
+	background: var(--surface-hover);
+	border-color: var(--border-strong);
+}
+
+.default:active:not(:disabled) {
+	background: var(--surface-active);
+}
+
+.primary {
+	background: var(--accent);
+	color: var(--accent-fg);
+}
+
+.primary:hover:not(:disabled) {
+	background: var(--accent-hover);
+}
+
+.ghost {
+	background: transparent;
+	color: var(--text-muted);
+}
+
+.ghost:hover:not(:disabled) {
+	background: var(--surface-hover);
+	color: var(--text);
+}
+
+.ghost:active:not(:disabled) {
+	background: var(--surface-active);
+}
+
+.danger {
+	background: var(--danger);
+	color: var(--danger-fg);
+}
+
+.danger:hover:not(:disabled) {
+	filter: brightness(1.1);
+}
+
+/* ---- sizes ------------------------------------------------------------- */
+
+.sm {
+	height: var(--control-h-sm);
+	padding: 0 var(--space-2);
+	font-size: var(--text-sm);
+}
+
+.lg {
+	height: var(--control-h-lg);
+	padding: 0 var(--space-4);
+}
+
+.iconOnly {
+	width: var(--control-h);
+	padding: 0;
+}
+
+.iconOnly.sm {
+	width: var(--control-h-sm);
+}
+
+.iconOnly.lg {
+	width: var(--control-h-lg);
+}
+
+.fullWidth {
+	width: 100%;
+}
+
+.label {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-2);
+}
+
+/* Keep layout stable while loading: the label stays, the spinner overlays. */
+.loadingLabel {
+	visibility: hidden;
+}
+
+.spinner {
+	display: grid;
+	position: absolute;
+	place-items: center;
+	inset: 0;
+}

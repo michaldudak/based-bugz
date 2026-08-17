@@ -1,0 +1,93 @@
+/* Opacity + translate only, never scale (AGENTS.md — Appearance). */
+
+.positioner {
+	z-index: var(--z-popup);
+	max-width: var(--available-width);
+	outline: none;
+}
+
+.popup {
+	box-sizing: border-box;
+	position: relative;
+	max-width: min(18rem, var(--available-width));
+	padding: var(--space-1) var(--space-2);
+	border-radius: var(--radius);
+	background: var(--accent);
+	color: var(--accent-fg);
+	font-size: var(--text-sm);
+	line-height: var(--leading-tight);
+	box-shadow: var(--shadow-sm);
+	transition:
+		opacity var(--duration-fast) var(--ease),
+		translate var(--duration-fast) var(--ease);
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+	opacity: 0;
+}
+
+.popup[data-side='top'][data-starting-style],
+.popup[data-side='top'][data-ending-style] {
+	translate: 0 var(--space-1);
+}
+
+.popup[data-side='bottom'][data-starting-style],
+.popup[data-side='bottom'][data-ending-style] {
+	translate: 0 calc(var(--space-1) * -1);
+}
+
+.popup[data-side='left'][data-starting-style],
+.popup[data-side='left'][data-ending-style] {
+	translate: var(--space-1) 0;
+}
+
+.popup[data-side='right'][data-starting-style],
+.popup[data-side='right'][data-ending-style] {
+	translate: calc(var(--space-1) * -1) 0;
+}
+
+/* Base UI skips the transition when a grouped tooltip opens instantly. */
+.popup[data-instant] {
+	transition: none;
+}
+
+.arrow {
+	display: block;
+	position: relative;
+	width: 10px;
+	height: 5px;
+	overflow: clip;
+}
+
+.arrow[data-side='top'] {
+	bottom: -5px;
+	rotate: 180deg;
+}
+
+.arrow[data-side='bottom'] {
+	top: -5px;
+}
+
+.arrow[data-side='left'] {
+	right: -7px;
+	rotate: 90deg;
+}
+
+.arrow[data-side='right'] {
+	left: -7px;
+	rotate: -90deg;
+}
+
+.arrow::before {
+	content: '';
+	display: block;
+	box-sizing: border-box;
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	width: calc(5px * sqrt(2));
+	height: calc(5px * sqrt(2));
+	background: var(--accent);
+	transform: translate(-50%, 50%) rotate(45deg);
+}

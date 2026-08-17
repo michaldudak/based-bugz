@@ -1,0 +1,60 @@
+.textarea {
+	display: block;
+	width: 100%;
+	min-width: 0;
+	padding: var(--space-2) var(--space-3);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--text);
+	font-family: inherit;
+	font-size: var(--text-base);
+	line-height: var(--leading-normal);
+	resize: vertical;
+	transition:
+		border-color var(--duration-fast) var(--ease),
+		background-color var(--duration-fast) var(--ease);
+}
+
+.textarea::placeholder {
+	color: var(--text-subtle);
+}
+
+.textarea:hover:not(:disabled, [data-disabled]) {
+	border-color: var(--border-strong);
+}
+
+.textarea[data-invalid],
+.textarea[aria-invalid='true'] {
+	border-color: var(--danger);
+}
+
+.textarea:disabled,
+.textarea[data-disabled] {
+	background: var(--surface-sunken);
+	color: var(--text-muted);
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+/*
+ * The height is owned by the resize effect, so the drag handle would only fight it.
+ * The floor and ceiling stay in CSS — `1em` per row times the line height, plus the
+ * padding and borders above — so the effect never has to read computed style.
+ */
+.autoResize {
+	min-height: calc(
+		var(--textarea-min-rows) * var(--leading-normal) * 1em + var(--space-2) * 2 + 2px
+	);
+	max-height: calc(
+		var(--textarea-max-rows) * var(--leading-normal) * 1em + var(--space-2) * 2 + 2px
+	);
+	overflow-y: auto;
+	resize: none;
+}
+
+@media (pointer: coarse) {
+	.textarea {
+		font-size: var(--text-lg);
+	}
+}

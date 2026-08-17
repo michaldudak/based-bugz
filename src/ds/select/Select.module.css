@@ -1,0 +1,164 @@
+.trigger {
+	display: inline-flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+	width: 100%;
+	min-width: 0;
+	height: var(--control-h);
+	padding: 0 var(--space-2) 0 var(--space-3);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+	color: var(--text);
+	font-size: var(--text-base);
+	line-height: 1;
+	text-align: start;
+	cursor: pointer;
+	user-select: none;
+	transition:
+		background-color var(--duration-fast) var(--ease),
+		border-color var(--duration-fast) var(--ease);
+}
+
+.trigger:hover:not([data-disabled]) {
+	background: var(--surface-hover);
+	border-color: var(--border-strong);
+}
+
+.trigger[data-popup-open] {
+	border-color: var(--border-strong);
+}
+
+.trigger[data-invalid] {
+	border-color: var(--danger);
+}
+
+.trigger[data-disabled] {
+	background: var(--surface-sunken);
+	color: var(--text-muted);
+	cursor: not-allowed;
+	opacity: 0.6;
+}
+
+.sm {
+	height: var(--control-h-sm);
+	padding: 0 var(--space-1) 0 var(--space-2);
+	font-size: var(--text-sm);
+}
+
+.value {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+	overflow: hidden;
+}
+
+.value[data-placeholder] {
+	color: var(--text-subtle);
+}
+
+.text {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.icon {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	color: var(--text-muted);
+}
+
+.chevron {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	color: var(--text-muted);
+	transition: rotate var(--duration-fast) var(--ease);
+}
+
+.chevron[data-popup-open] {
+	rotate: 180deg;
+}
+
+.positioner {
+	z-index: var(--z-popup);
+	outline: none;
+}
+
+/*
+ * Opacity only. A popup that scales while its list is being measured hands the
+ * measurement garbage heights (AGENTS.md — Appearance).
+ */
+.popup {
+	display: flex;
+	flex-direction: column;
+	min-width: var(--anchor-width);
+	max-width: var(--available-width);
+	max-height: min(var(--available-height), 18rem);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	background: var(--surface-raised);
+	box-shadow: var(--shadow-md);
+	outline: none;
+	transition: opacity var(--duration-fast) var(--ease);
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+	opacity: 0;
+}
+
+.list {
+	min-height: 0;
+	padding: var(--space-1);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.item {
+	display: grid;
+	grid-template-columns: 1rem 1fr;
+	align-items: center;
+	gap: var(--space-2);
+	min-height: var(--row-h);
+	padding: 0 var(--space-2);
+	border-radius: var(--radius-sm);
+	color: var(--text);
+	font-size: var(--text-base);
+	cursor: pointer;
+	user-select: none;
+	outline: none;
+}
+
+.item[data-highlighted] {
+	background: var(--surface-hover);
+}
+
+.item[data-disabled] {
+	color: var(--text-subtle);
+	cursor: not-allowed;
+}
+
+.indicator {
+	display: flex;
+	grid-column-start: 1;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-muted);
+}
+
+.itemText {
+	display: flex;
+	grid-column-start: 2;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}

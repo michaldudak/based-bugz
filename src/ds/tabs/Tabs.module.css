@@ -1,0 +1,108 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+
+.root[data-orientation='vertical'] {
+	flex-direction: row;
+	gap: var(--space-4);
+}
+
+/*
+ * Horizontal overflow instead of wrapping: at 360px a five-tab bar scrolls, which
+ * keeps every tab reachable and the indicator arithmetic intact.
+ */
+.list {
+	display: flex;
+	position: relative;
+	flex-shrink: 0;
+	gap: var(--space-1);
+	border-bottom: 1px solid var(--border);
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+
+.list::-webkit-scrollbar {
+	display: none;
+}
+
+.list[data-orientation='vertical'] {
+	flex-direction: column;
+	border-right: 1px solid var(--border);
+	border-bottom: none;
+	overflow-x: visible;
+}
+
+.tab {
+	display: inline-flex;
+	flex-shrink: 0;
+	align-items: center;
+	justify-content: center;
+	height: var(--control-h);
+	padding: 0 var(--space-3);
+	border: none;
+	background: transparent;
+	color: var(--text-muted);
+	font-size: var(--text-base);
+	font-weight: var(--weight-medium);
+	line-height: 1;
+	white-space: nowrap;
+	cursor: pointer;
+	transition: color var(--duration-fast) var(--ease);
+}
+
+.tab:hover:not([data-disabled]) {
+	color: var(--text);
+}
+
+.tab[data-active] {
+	color: var(--text);
+}
+
+.tab[data-disabled] {
+	color: var(--text-subtle);
+	cursor: not-allowed;
+}
+
+/*
+ * `--active-tab-*` carry px units and are absent until a tab is selected, so every
+ * read needs a fallback or the indicator renders at the wrong end of the list.
+ */
+.indicator {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: var(--active-tab-width, 0);
+	height: 2px;
+	background: var(--accent);
+	translate: var(--active-tab-left, 0) 0;
+	transition:
+		translate var(--duration) var(--ease),
+		width var(--duration) var(--ease);
+}
+
+.indicator[data-orientation='vertical'] {
+	inset: 0 0 auto auto;
+	width: 2px;
+	height: var(--active-tab-height, 0);
+	translate: 0 var(--active-tab-top, 0);
+	transition:
+		translate var(--duration) var(--ease),
+		height var(--duration) var(--ease);
+}
+
+.panel {
+	min-width: 0;
+	padding-top: var(--space-4);
+	outline: none;
+}
+
+/* Only reachable via `keepMounted`, where Base UI hides rather than unmounts. */
+.panel[hidden] {
+	display: none;
+}
+
+.root[data-orientation='vertical'] .panel {
+	padding-top: 0;
+}

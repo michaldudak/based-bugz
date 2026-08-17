@@ -1,0 +1,144 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-10);
+	max-width: 64rem;
+	margin: 0 auto;
+	padding: var(--space-6) var(--space-4) var(--space-12);
+}
+
+.header {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+}
+
+.title {
+	font-size: var(--text-2xl);
+}
+
+.subtitle {
+	max-width: 42rem;
+	color: var(--text-muted);
+	font-size: var(--text-md);
+}
+
+.subtitle code {
+	padding: 0 var(--space-1);
+	border-radius: var(--radius-sm);
+	background: var(--surface-sunken);
+	font-family: var(--font-mono);
+	font-size: 0.9em;
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+}
+
+.heading {
+	padding-bottom: var(--space-2);
+	border-bottom: 1px solid var(--border);
+	font-size: var(--text-lg);
+}
+
+/* One column at 360px, more only when a 14rem column actually fits. */
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(min(100%, 14rem), 1fr));
+	gap: var(--space-5);
+	align-items: start;
+}
+
+.row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-4);
+	color: var(--text-muted);
+	font-size: var(--text-base);
+}
+
+.stack {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-5);
+}
+
+.demo {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.demoBody {
+	min-width: 0;
+}
+
+.caption {
+	color: var(--text-subtle);
+	font-family: var(--font-mono);
+	font-size: var(--text-xs);
+}
+
+.iconButton {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 1.25rem;
+	height: 1.25rem;
+	padding: 0;
+	border: none;
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.iconButton:hover {
+	background: var(--surface-hover);
+	color: var(--text);
+}
+
+.scroller {
+	height: 12rem;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	background: var(--surface);
+}
+
+.scrollBody {
+	display: flex;
+	flex-direction: column;
+	padding: var(--space-1);
+}
+
+.scrollRow {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	min-height: var(--row-h);
+	padding: 0 var(--space-2);
+	border-radius: var(--radius-sm);
+	font-size: var(--text-base);
+}
+
+.scrollRow:hover {
+	background: var(--surface-hover);
+}
+
+.wideBody {
+	display: flex;
+	flex-direction: column;
+	width: 40rem;
+	padding: var(--space-2);
+}
+
+.wideRow {
+	min-height: var(--row-h);
+	padding: var(--space-1) var(--space-2);
+	font-size: var(--text-base);
+	white-space: nowrap;
+}

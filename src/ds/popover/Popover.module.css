@@ -1,0 +1,104 @@
+/*
+ * Position first, then fade: the popup translates 4px along the anchored side and fades in.
+ * No scale — a scaling surface corrupts height measurement for anything virtualized inside
+ * it (AGENTS.md — Appearance).
+ */
+
+.positioner {
+	z-index: var(--z-popup);
+	max-width: var(--available-width);
+	outline: none;
+}
+
+.popup {
+	box-sizing: border-box;
+	max-width: var(--available-width);
+	max-height: var(--available-height);
+	padding: var(--space-3);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	outline: none;
+	background: var(--surface-raised);
+	color: var(--text);
+	font-size: var(--text-base);
+	box-shadow: var(--shadow-md);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	transition:
+		opacity var(--duration-fast) var(--ease),
+		translate var(--duration-fast) var(--ease);
+}
+
+.popup[data-starting-style],
+.popup[data-ending-style] {
+	opacity: 0;
+}
+
+.popup[data-side='bottom'][data-starting-style],
+.popup[data-side='bottom'][data-ending-style] {
+	translate: 0 calc(var(--space-1) * -1);
+}
+
+.popup[data-side='top'][data-starting-style],
+.popup[data-side='top'][data-ending-style] {
+	translate: 0 var(--space-1);
+}
+
+.popup[data-side='left'][data-starting-style],
+.popup[data-side='left'][data-ending-style] {
+	translate: var(--space-1) 0;
+}
+
+.popup[data-side='right'][data-starting-style],
+.popup[data-side='right'][data-ending-style] {
+	translate: calc(var(--space-1) * -1) 0;
+}
+
+/* ---- arrow ------------------------------------------------------------- */
+
+.arrow {
+	display: block;
+	position: relative;
+	width: 12px;
+	height: 6px;
+	overflow: clip;
+}
+
+.arrow[data-side='top'] {
+	bottom: -6px;
+	rotate: 180deg;
+}
+
+.arrow[data-side='bottom'] {
+	top: -6px;
+}
+
+.arrow[data-side='left'] {
+	right: -9px;
+	rotate: 90deg;
+}
+
+.arrow[data-side='right'] {
+	left: -9px;
+	rotate: -90deg;
+}
+
+.arrow::before {
+	content: '';
+	display: block;
+	box-sizing: border-box;
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	width: calc(6px * sqrt(2));
+	height: calc(6px * sqrt(2));
+	border: 1px solid var(--border);
+	background: var(--surface-raised);
+	transform: translate(-50%, 50%) rotate(45deg);
+}
+
+@media (width <= 640px) {
+	.popup {
+		max-width: calc(100vw - 2 * var(--space-4));
+	}
+}

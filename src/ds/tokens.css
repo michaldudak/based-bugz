@@ -66,6 +66,13 @@
 
 	--ring: light-dark(var(--blue-600), var(--blue-400));
 
+	/*
+	 * Backdrop behind modal surfaces. Deliberately NOT a light-dark() swap: a
+	 * scrim darkens in both themes, it just needs to be heavier in the dark one
+	 * to separate a dark popup from a dark page.
+	 */
+	--scrim: light-dark(rgb(9 9 11 / 40%), rgb(0 0 0 / 60%));
+
 	--danger: light-dark(var(--red-600), var(--red-400));
 	--danger-surface: light-dark(#fef2f2, #2a1315);
 	--danger-fg: light-dark(var(--neutral-0), var(--neutral-950));

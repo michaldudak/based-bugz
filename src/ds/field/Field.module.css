@@ -1,0 +1,40 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.label {
+	color: var(--text);
+	font-size: var(--text-base);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-tight);
+}
+
+.label[data-disabled] {
+	color: var(--text-muted);
+}
+
+.description {
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	line-height: var(--leading-normal);
+}
+
+/*
+ * Base UI unmounts the error, so the transition only fades the message — the
+ * surrounding layout never animates height.
+ */
+.error {
+	color: var(--danger);
+	font-size: var(--text-sm);
+	line-height: var(--leading-normal);
+	transition: opacity var(--duration-fast) var(--ease);
+}
+
+.error[data-starting-style],
+.error[data-ending-style] {
+	opacity: 0;
+}
