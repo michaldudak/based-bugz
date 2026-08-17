@@ -1,0 +1,68 @@
+.lab {
+	max-width: 32rem;
+}
+
+.header {
+	margin-bottom: var(--space-4);
+}
+
+.title {
+	font-size: var(--text-md);
+}
+
+.note {
+	margin-top: var(--space-1);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}
+
+.note code {
+	padding: 0.1em 0.35em;
+	border-radius: var(--radius-sm);
+	background: var(--surface-sunken);
+	font-family: var(--font-mono);
+}
+
+.controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-4);
+	margin-bottom: var(--space-3);
+}
+
+.field {
+	max-width: 24rem;
+}
+
+.rowText {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 1px;
+}
+
+.rowName {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rowMeta {
+	overflow: hidden;
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.check {
+	flex-shrink: 0;
+	margin-inline-start: auto;
+	color: var(--text-muted);
+}
+
+.selection {
+	margin-top: var(--space-3);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}

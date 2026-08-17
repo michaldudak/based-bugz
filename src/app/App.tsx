@@ -5,6 +5,7 @@ import { AppLayout } from '@/app/layout/AppLayout';
 import { IssuesPage } from '@/app/pages/IssuesPage';
 import { SettingsPage } from '@/app/pages/SettingsPage';
 import { Providers } from '@/app/providers';
+import { ComboboxLabPage } from '@/lab/combobox/ComboboxLabPage';
 import { DsGalleryPage } from '@/lab/ds/DsGalleryPage';
 
 export function App() {
@@ -20,6 +21,7 @@ export function App() {
 							<Route path="issues" element={<IssuesPage />} />
 							<Route path="settings" element={<SettingsPage />} />
 							<Route path="lab/ds" element={<DsGalleryPage />} />
+							<Route path="lab/combobox" element={<ComboboxLabPage />} />
 						</Route>
 					</Route>
 					<Route path="*" element={<Navigate to="/issues" replace />} />

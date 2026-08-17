@@ -3,7 +3,9 @@
 Sequence for building Based Bugz. `AGENTS.md` holds the agreements and the reasoning; this file
 holds the order of work and what "done" means at each step. Update it as phases land.
 
-**Current state:** git initialized (branch `master`), `AGENTS.md` + `CLAUDE.md` written, no code yet.
+**Current state:** Phases 0–4 landed. The app runs: sign in, browse the generated backlog, switch
+theme/density/direction, tune the dataset, and exercise the combobox at `/lab/combobox` against
+5,000 async users. Phase 5 (issues list) is next.
 
 **Strategy:** build the whole app against `impls/baseline` — stable `@base-ui/react` + TanStack
 Virtual, wired as the docs describe. That is the control the three PRs must beat, it needs no canary

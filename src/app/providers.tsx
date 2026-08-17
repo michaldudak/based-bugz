@@ -1,9 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useSearchParams } from 'react-router';
 import { RepositoryProvider } from '@/data';
+import { ComboboxImplProvider } from '@/ds/combobox';
 import { ToastProvider } from '@/ds/toast';
 import { TooltipProvider } from '@/ds/tooltip';
+import { IMPL_NAMES, resolveImpl } from './impls';
+import { parseUiParams } from './params';
 import { SessionProvider } from './session';
 import { ThemeProvider } from './theme';
 
@@ -27,15 +31,24 @@ function createQueryClient() {
  */
 export function Providers({ children }: { children: ReactNode }) {
 	const [queryClient] = useState(createQueryClient);
+	const [searchParams] = useSearchParams();
+
+	const registry = useMemo(() => {
+		const { impl } = parseUiParams(searchParams);
+		const { name, component } = resolveImpl(impl);
+		return { active: component, activeName: name, available: IMPL_NAMES };
+	}, [searchParams]);
 
 	return (
 		<QueryClientProvider client={queryClient}>
 			<RepositoryProvider>
 				<SessionProvider>
 					<ThemeProvider>
-						<TooltipProvider>
-							<ToastProvider>{children}</ToastProvider>
-						</TooltipProvider>
+						<ComboboxImplProvider registry={registry}>
+							<TooltipProvider>
+								<ToastProvider>{children}</ToastProvider>
+							</TooltipProvider>
+						</ComboboxImplProvider>
 					</ThemeProvider>
 				</SessionProvider>
 			</RepositoryProvider>
