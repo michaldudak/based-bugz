@@ -1,0 +1,37 @@
+{
+	"name": "based-bugz",
+	"version": "0.0.0",
+	"private": true,
+	"type": "module",
+	"packageManager": "pnpm@9.15.9",
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview",
+		"typecheck": "tsc --noEmit",
+		"lint": "oxlint && stylelint \"src/**/*.css\"",
+		"lint:fix": "oxlint --fix && stylelint \"src/**/*.css\" --fix",
+		"format": "prettier --write .",
+		"format:check": "prettier --check ."
+	},
+	"dependencies": {
+		"@base-ui/react": "^1.7.0",
+		"@tanstack/react-query": "^5.101.4",
+		"@tanstack/react-virtual": "^3.14.9",
+		"react": "^19.2.8",
+		"react-dom": "^19.2.8",
+		"react-router": "^8.3.0"
+	},
+	"devDependencies": {
+		"@types/node": "^26.2.0",
+		"@types/react": "^19.2.18",
+		"@types/react-dom": "^19.2.4",
+		"@vitejs/plugin-react": "^6.0.5",
+		"oxlint": "^1.78.0",
+		"prettier": "^3.9.6",
+		"stylelint": "^17.14.1",
+		"stylelint-config-standard": "^40.0.0",
+		"typescript": "^7.0.2",
+		"vite": "^8.2.1"
+	}
+}

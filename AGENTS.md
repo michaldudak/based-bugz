@@ -12,17 +12,17 @@ Base UI components too, so **nothing may be named or structured around virtualiz
 
 ## Stack
 
-| Concern | Choice |
-|---|---|
-| Build | Vite 8 |
-| UI | React 19.2 (no React Compiler — see Evaluation rules) |
-| Language | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
-| Components | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react` |
-| Styling | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library. |
-| Data | TanStack Query 5 over a repository interface |
-| Virtualization (baseline) | TanStack Virtual 3 |
-| Routing | React Router 8, declarative |
-| Package manager | pnpm |
+| Concern                   | Choice                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Build                     | Vite 8                                                                                                   |
+| UI                        | React 19.2 (no React Compiler — see Evaluation rules)                                                    |
+| Language                  | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
+| Components                | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react`                        |
+| Styling                   | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library.              |
+| Data                      | TanStack Query 5 over a repository interface                                                             |
+| Virtualization (baseline) | TanStack Virtual 3                                                                                       |
+| Routing                   | React Router 8, declarative                                                                              |
+| Package manager           | pnpm                                                                                                     |
 
 Do not add dependencies beyond this list without asking. Every extra library is a confounder in a
 comparison whose whole point is how much code an API makes you write.

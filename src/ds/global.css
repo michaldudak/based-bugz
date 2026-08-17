@@ -1,0 +1,74 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+}
+
+html {
+	-webkit-text-size-adjust: 100%;
+}
+
+body {
+	min-height: 100dvh;
+	background: var(--bg);
+	color: var(--text);
+	font-family: var(--font-sans);
+	font-size: var(--text-base);
+	line-height: var(--leading-normal);
+	-webkit-font-smoothing: antialiased;
+}
+
+#root {
+	min-height: 100dvh;
+	isolation: isolate;
+}
+
+img,
+svg {
+	display: block;
+	max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+	font: inherit;
+	color: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+	font-weight: var(--weight-semibold);
+	line-height: var(--leading-tight);
+}
+
+a {
+	color: inherit;
+}
+
+/*
+ * One focus treatment for the whole app (AGENTS.md — Appearance). Components
+ * should not redefine focus; they inherit this.
+ */
+:focus-visible {
+	outline: 2px solid var(--ring);
+	outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+	outline: none;
+}
+
+/* Base UI sets this on <body> while a popup holds focus. */
+body[data-scroll-locked] {
+	overflow: hidden;
+}

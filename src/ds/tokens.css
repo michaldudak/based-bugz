@@ -1,0 +1,181 @@
+/*
+ * Two-layer tokens (AGENTS.md — Appearance).
+ *
+ * Layer 1: raw palette. Never referenced outside this file.
+ * Layer 2: semantic aliases. The only thing components are allowed to use.
+ *
+ * Light/dark is resolved by light-dark(), which follows `color-scheme`. That means
+ * the theme switch is a single `color-scheme` declaration rather than a duplicated
+ * block of overrides, and no component contains per-theme code.
+ */
+
+:root {
+	/* ---- Layer 1: palette ------------------------------------------------- */
+	--neutral-0: #fff;
+	--neutral-50: #fafafa;
+	--neutral-100: #f4f4f5;
+	--neutral-150: #ececee;
+	--neutral-200: #e4e4e7;
+	--neutral-300: #d4d4d8;
+	--neutral-400: #a1a1aa;
+	--neutral-500: #71717a;
+	--neutral-600: #52525b;
+	--neutral-700: #3f3f46;
+	--neutral-800: #27272a;
+	--neutral-850: #1f1f23;
+	--neutral-900: #18181b;
+	--neutral-950: #09090b;
+
+	--blue-400: #60a5fa;
+	--blue-500: #3b82f6;
+	--blue-600: #2563eb;
+	--green-400: #4ade80;
+	--green-500: #22c55e;
+	--green-600: #16a34a;
+	--amber-400: #fbbf24;
+	--amber-500: #f59e0b;
+	--amber-600: #d97706;
+	--red-400: #f87171;
+	--red-500: #ef4444;
+	--red-600: #dc2626;
+	--violet-400: #a78bfa;
+	--violet-500: #8b5cf6;
+
+	/* ---- Layer 2: semantic ------------------------------------------------ */
+	color-scheme: light dark;
+
+	--bg: light-dark(var(--neutral-50), var(--neutral-950));
+	--surface: light-dark(var(--neutral-0), var(--neutral-900));
+	--surface-raised: light-dark(var(--neutral-0), var(--neutral-850));
+	--surface-sunken: light-dark(var(--neutral-100), var(--neutral-950));
+	--surface-hover: light-dark(var(--neutral-100), var(--neutral-800));
+	--surface-active: light-dark(var(--neutral-150), var(--neutral-700));
+	--surface-selected: light-dark(var(--neutral-150), var(--neutral-800));
+
+	--border: light-dark(var(--neutral-200), var(--neutral-800));
+	--border-strong: light-dark(var(--neutral-300), var(--neutral-700));
+
+	--text: light-dark(var(--neutral-900), var(--neutral-50));
+	--text-muted: light-dark(var(--neutral-500), var(--neutral-400));
+	--text-subtle: light-dark(var(--neutral-400), var(--neutral-500));
+	--text-inverted: light-dark(var(--neutral-50), var(--neutral-900));
+
+	--accent: light-dark(var(--neutral-900), var(--neutral-50));
+	--accent-hover: light-dark(var(--neutral-700), var(--neutral-200));
+	--accent-fg: light-dark(var(--neutral-50), var(--neutral-900));
+
+	--ring: light-dark(var(--blue-600), var(--blue-400));
+
+	--danger: light-dark(var(--red-600), var(--red-400));
+	--danger-surface: light-dark(#fef2f2, #2a1315);
+	--danger-fg: light-dark(var(--neutral-0), var(--neutral-950));
+	--success: light-dark(var(--green-600), var(--green-400));
+	--success-surface: light-dark(#f0fdf4, #0d2017);
+	--warning: light-dark(var(--amber-600), var(--amber-400));
+	--warning-surface: light-dark(#fffbeb, #271c07);
+	--info: light-dark(var(--blue-600), var(--blue-400));
+	--info-surface: light-dark(#eff6ff, #0d1c33);
+	--highlight: light-dark(var(--violet-500), var(--violet-400));
+
+	/* ---- Typography ------------------------------------------------------- */
+	--font-sans:
+		system-ui, -apple-system, 'Segoe UI', roboto, 'Helvetica Neue', arial, 'Noto Sans', sans-serif,
+		'Apple Color Emoji', 'Segoe UI Emoji';
+	--font-mono:
+		ui-monospace, sfmono-regular, 'SF Mono', menlo, consolas, 'Liberation Mono', monospace;
+
+	--text-xs: 0.6875rem; /* 11px */
+	--text-sm: 0.75rem; /* 12px */
+	--text-base: 0.8125rem; /* 13px */
+	--text-md: 0.875rem; /* 14px */
+	--text-lg: 1rem; /* 16px */
+	--text-xl: 1.25rem; /* 20px */
+	--text-2xl: 1.5rem; /* 24px */
+
+	--leading-tight: 1.25;
+	--leading-normal: 1.5;
+
+	--weight-normal: 400;
+	--weight-medium: 500;
+	--weight-semibold: 600;
+
+	/* ---- Space and shape -------------------------------------------------- */
+	--space-1: 0.25rem;
+	--space-2: 0.5rem;
+	--space-3: 0.75rem;
+	--space-4: 1rem;
+	--space-5: 1.25rem;
+	--space-6: 1.5rem;
+	--space-8: 2rem;
+	--space-10: 2.5rem;
+	--space-12: 3rem;
+
+	--radius-sm: 4px;
+	--radius: 6px;
+	--radius-lg: 8px;
+	--radius-xl: 12px;
+	--radius-full: 999px;
+
+	--shadow-sm: 0 1px 2px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 40%));
+	--shadow-md:
+		0 4px 12px light-dark(rgb(0 0 0 / 8%), rgb(0 0 0 / 50%)),
+		0 1px 3px light-dark(rgb(0 0 0 / 6%), rgb(0 0 0 / 40%));
+	--shadow-lg:
+		0 12px 32px light-dark(rgb(0 0 0 / 12%), rgb(0 0 0 / 60%)),
+		0 2px 8px light-dark(rgb(0 0 0 / 8%), rgb(0 0 0 / 45%));
+
+	/* ---- Sizing ----------------------------------------------------------- */
+	--control-h: 2rem; /* 32px */
+	--control-h-sm: 1.75rem; /* 28px */
+	--control-h-lg: 2.25rem; /* 36px */
+	--row-h: 2.25rem;
+	--sidebar-w: 15rem;
+	--topbar-h: 3rem;
+
+	/* ---- Motion ----------------------------------------------------------- */
+	--duration-fast: 120ms;
+	--duration: 150ms;
+	--ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+	--z-sticky: 10;
+	--z-popup: 50;
+	--z-toast: 60;
+}
+
+/* Explicit theme choice wins over the system preference. */
+:root[data-theme='light'] {
+	color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+	color-scheme: dark;
+}
+
+/* Density affects control sizing only — never colors or spacing tokens. */
+:root[data-density='compact'] {
+	--control-h: 1.75rem;
+	--control-h-sm: 1.5rem;
+	--control-h-lg: 2rem;
+	--row-h: 1.875rem;
+	--text-base: 0.75rem;
+}
+
+/*
+ * Touch: 44px minimum targets (AGENTS.md — Appearance). Applies regardless of
+ * density, because a compact setting must not shrink a target below reach.
+ */
+@media (pointer: coarse) {
+	:root {
+		--control-h: 2.75rem;
+		--control-h-sm: 2.5rem;
+		--control-h-lg: 3rem;
+		--row-h: 2.75rem;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--duration-fast: 0ms;
+		--duration: 0ms;
+	}
+}
