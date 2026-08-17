@@ -14,6 +14,7 @@ import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-qu
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useEffect, useMemo, useRef } from 'react';
 import type { CSSProperties } from 'react';
+import { useLocation } from 'react-router';
 import { useRepository } from '@/data';
 import type { Issue, IssueId, Label, LabelId, Page, User, UserId } from '@/data';
 import { Button } from '@/ds/button';
@@ -59,6 +60,7 @@ export function IssueList({ filters, selectedIds, onToggleSelected, onSelectAll 
 	const repository = useRepository();
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const stacked = useMediaQuery(STACKED_QUERY);
+	const { search } = useLocation();
 
 	const issuesQuery = useInfiniteQuery({
 		// `filters.key` is the whole filter and sort, serialized — the cursor the repository hands
@@ -245,6 +247,7 @@ export function IssueList({ filters, selectedIds, onToggleSelected, onSelectAll 
 								labelsById={labelsById}
 								selected={selectedIds.has(issue.id)}
 								onToggleSelected={onToggleSelected}
+								search={search}
 								position={virtualItem.index + 1}
 								setSize={total ?? -1}
 								rowRef={virtualizer.measureElement}

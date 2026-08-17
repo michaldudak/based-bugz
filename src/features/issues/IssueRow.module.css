@@ -50,10 +50,19 @@
  * Wraps rather than truncates. That is the whole reason rows are variable height, and the reason
  * the virtualizer has to measure instead of trusting the estimate.
  */
+/*
+ * Underlined only on hover: 50 rows of permanently underlined titles is noise, but a title that
+ * opens something has to say so before you click it.
+ */
 .title {
 	font-size: var(--text-base);
 	line-height: var(--leading-normal);
 	overflow-wrap: anywhere;
+	text-decoration: none;
+}
+
+.title:hover {
+	text-decoration: underline;
 }
 
 .labels {

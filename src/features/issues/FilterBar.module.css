@@ -34,6 +34,27 @@
 	min-width: 10rem;
 }
 
+.project {
+	flex: 0 1 12rem;
+	min-width: 8rem;
+}
+
+/*
+ * `ds/select` takes no accessible name of its own — it expects a `<Field>` or an outside label —
+ * so the inline bar keeps a real `<label>` and hides it visually rather than dropping it.
+ */
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
 .end {
 	display: flex;
 	align-items: center;

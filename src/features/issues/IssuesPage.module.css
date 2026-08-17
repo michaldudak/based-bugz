@@ -12,7 +12,16 @@
 }
 
 .header {
+	display: flex;
 	flex-shrink: 0;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--space-3);
+}
+
+.heading {
+	min-width: 0;
 }
 
 .title {

@@ -20,6 +20,7 @@ import type {
 	IssueSort,
 	IssueStatus,
 	LabelId,
+	ProjectId,
 	UserId,
 } from '@/data';
 import { formatSort, parseSort } from './meta';
@@ -33,6 +34,7 @@ export const PARAM_PRIORITY = 'priority';
 export const PARAM_ASSIGNEE = 'assignee';
 export const PARAM_LABELS = 'label';
 export const PARAM_LABEL_MATCH = 'labelMatch';
+export const PARAM_PROJECT = 'project';
 export const PARAM_SORT = 'sort';
 
 /** Every parameter this hook owns. Used to clear filters without disturbing `?theme=` etc. */
@@ -43,6 +45,7 @@ const OWNED_PARAMS = [
 	PARAM_ASSIGNEE,
 	PARAM_LABELS,
 	PARAM_LABEL_MATCH,
+	PARAM_PROJECT,
 ] as const;
 
 const UNASSIGNED_TOKEN = 'none';
@@ -65,6 +68,7 @@ export interface IssueFiltersApi {
 	assignee: AssigneeValue;
 	labelIds: readonly LabelId[];
 	labelMatch: 'any' | 'all';
+	projectId: ProjectId | null;
 
 	/** How many filters are on, for the collapsed "Filters" button on small viewports. */
 	activeCount: number;
@@ -76,6 +80,7 @@ export interface IssueFiltersApi {
 	setAssignee: (assignee: AssigneeValue) => void;
 	setLabelIds: (labelIds: readonly LabelId[]) => void;
 	setLabelMatch: (labelMatch: 'any' | 'all') => void;
+	setProjectId: (projectId: ProjectId | null) => void;
 	setSort: (sort: IssueSort) => void;
 	clear: () => void;
 }
@@ -106,6 +111,7 @@ export function useIssueFilters(): IssueFiltersApi {
 	const assigneeParam = searchParams.get(PARAM_ASSIGNEE) ?? '';
 	const labelsParam = searchParams.get(PARAM_LABELS) ?? '';
 	const labelMatchParam = searchParams.get(PARAM_LABEL_MATCH) ?? '';
+	const projectParam = searchParams.get(PARAM_PROJECT) ?? '';
 	const sortParam = searchParams.get(PARAM_SORT) ?? '';
 
 	const text = textParam.trim();
@@ -133,6 +139,7 @@ export function useIssueFilters(): IssueFiltersApi {
 	}, [assigneeParam]);
 
 	const labelMatch: 'any' | 'all' = labelMatchParam === 'all' ? 'all' : 'any';
+	const projectId: ProjectId | null = projectParam === '' ? null : projectParam;
 
 	const sort = useMemo<IssueSort>(() => parseSort(sortParam) ?? DEFAULT_ISSUE_SORT, [sortParam]);
 
@@ -164,8 +171,12 @@ export function useIssueFilters(): IssueFiltersApi {
 			next.labelMatch = labelMatch;
 		}
 
+		if (projectId !== null) {
+			next.projectIds = [projectId];
+		}
+
 		return next;
-	}, [text, statuses, priorities, assignee, labelIds, labelMatch]);
+	}, [text, statuses, priorities, assignee, labelIds, labelMatch, projectId]);
 
 	const query = useMemo<IssueQuery>(() => ({ filter, sort }), [filter, sort]);
 
@@ -174,7 +185,8 @@ export function useIssueFilters(): IssueFiltersApi {
 		(statuses.length > 0 ? 1 : 0) +
 		(priorities.length > 0 ? 1 : 0) +
 		(assignee === null ? 0 : 1) +
-		(labelIds.length > 0 ? 1 : 0);
+		(labelIds.length > 0 ? 1 : 0) +
+		(projectId === null ? 0 : 1);
 
 	const key = useMemo(
 		() =>
@@ -185,10 +197,11 @@ export function useIssueFilters(): IssueFiltersApi {
 				assigneeParam,
 				labelIds,
 				labelMatch,
+				projectParam,
 				sort.field,
 				sort.direction,
 			]),
-		[text, statuses, priorities, assigneeParam, labelIds, labelMatch, sort],
+		[text, statuses, priorities, assigneeParam, labelIds, labelMatch, projectParam, sort],
 	);
 
 	/**
@@ -269,6 +282,18 @@ export function useIssueFilters(): IssueFiltersApi {
 		[update],
 	);
 
+	const setProjectId = useCallback(
+		(value: ProjectId | null) =>
+			update((next) => {
+				if (value === null) {
+					next.delete(PARAM_PROJECT);
+				} else {
+					next.set(PARAM_PROJECT, value);
+				}
+			}),
+		[update],
+	);
+
 	const setSort = useCallback(
 		(value: IssueSort) =>
 			update((next) => {
@@ -304,6 +329,7 @@ export function useIssueFilters(): IssueFiltersApi {
 		assignee,
 		labelIds,
 		labelMatch,
+		projectId,
 		activeCount,
 		isFiltered: activeCount > 0,
 		setText,
@@ -312,6 +338,7 @@ export function useIssueFilters(): IssueFiltersApi {
 		setAssignee,
 		setLabelIds,
 		setLabelMatch,
+		setProjectId,
 		setSort,
 		clear,
 	};

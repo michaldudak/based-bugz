@@ -1,0 +1,115 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-5);
+	min-width: 0;
+}
+
+/* ---- composer ---------------------------------------------------------- */
+
+.composer {
+	display: flex;
+	gap: var(--space-3);
+	min-width: 0;
+}
+
+.composerBody {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.composerActions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.spacer {
+	flex: 1;
+}
+
+.mentionPopup {
+	width: min(22rem, calc(100vw - var(--space-8)));
+}
+
+.mentionHint {
+	margin-bottom: var(--space-2);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}
+
+/* ---- thread ------------------------------------------------------------ */
+
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	min-width: 0;
+	list-style: none;
+}
+
+.comment {
+	display: flex;
+	gap: var(--space-3);
+	min-width: 0;
+}
+
+.commentBody {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.commentMeta {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: var(--space-2);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}
+
+.author {
+	color: var(--text);
+	font-weight: var(--weight-medium);
+}
+
+/*
+ * `pre-wrap` because bodies carry newlines and code fences, and `break-word` because the seeded
+ * data includes strings with no spaces in them at all.
+ */
+.text {
+	color: var(--text);
+	font-size: var(--text-base);
+	line-height: var(--leading-normal);
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+.mention {
+	border-radius: var(--radius-sm);
+	background: var(--info-surface);
+	color: var(--info);
+	font-weight: var(--weight-medium);
+}
+
+.empty {
+	color: var(--text-muted);
+	font-size: var(--text-base);
+}
+
+.state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--space-2);
+	padding: var(--space-6) 0;
+	color: var(--text-muted);
+	font-size: var(--text-base);
+}

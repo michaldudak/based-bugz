@@ -1,31 +1,24 @@
 /**
  * The selection toolbar.
  *
- * Every action here is a real repository mutation carrying an `actorId`, so the activity log and a
- * later replay see the same events a single-issue edit would produce. Delete goes through an
- * AlertDialog and hands back an undo, because `issues.restore` exists precisely so a destructive
- * bulk action does not have to be final.
+ * Every action here goes through the same hooks the detail page uses (`./mutations`), so a status
+ * change across 40 rows and a status change on one issue produce identical events, identical cache
+ * behaviour, and identical rollback on failure. Delete hands back an undo for the same reason
+ * `issues.restore` exists: a destructive bulk action should not have to be final.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { useCurrentUser } from '@/app/session';
-import { useRepository } from '@/data';
 import type { IssueId, IssuePatch, IssueStatus } from '@/data';
 import { AlertDialog } from '@/ds/alert-dialog';
 import { Button } from '@/ds/button';
 import { IconChevronDown, IconTrash, IconUser } from '@/ds/icons';
 import { Menu } from '@/ds/menu';
 import { Popover } from '@/ds/popover';
-import { useToast } from '@/ds/toast';
 import { AssigneePicker } from './AssigneePicker';
-import { STATUS_LABEL, STATUS_ORDER } from './meta';
+import { STATUS_LABEL, STATUS_ORDER, formatIssueCount } from './meta';
+import { useDeleteIssues, useUpdateIssues } from './mutations';
 import type { AssigneeValue } from './useIssueFilters';
 import styles from './BulkActions.module.css';
-
-function plural(count: number): string {
-	return count === 1 ? '1 issue' : `${count.toLocaleString()} issues`;
-}
 
 export interface BulkActionsProps {
 	selectedIds: readonly IssueId[];
@@ -33,65 +26,24 @@ export interface BulkActionsProps {
 }
 
 export function BulkActions({ selectedIds, onClear }: BulkActionsProps) {
-	const repository = useRepository();
-	const queryClient = useQueryClient();
-	const currentUser = useCurrentUser();
-	const toast = useToast();
 	const [assignOpen, setAssignOpen] = useState(false);
 	const [confirmOpen, setConfirmOpen] = useState(false);
 
 	const count = selectedIds.length;
 
-	function refresh() {
-		void queryClient.invalidateQueries({ queryKey: ['issues'] });
+	const update = useUpdateIssues();
+	const remove = useDeleteIssues({ onDeleted: onClear });
+
+	const busy = update.isPending || remove.isPending;
+
+	/*
+	 * The selection is dropped once the write lands, not when it is fired: a rejected bulk edit
+	 * rolls the rows back, and rolling back into an empty toolbar would leave you with nothing to
+	 * retry against.
+	 */
+	function apply(patch: IssuePatch) {
+		update.mutate({ ids: selectedIds, patch }, { onSuccess: onClear });
 	}
-
-	function reportFailure(action: string) {
-		toast.show({
-			title: `Could not ${action}`,
-			description: 'The repository rejected the write — nothing was changed.',
-			variant: 'error',
-		});
-	}
-
-	const patch = useMutation({
-		mutationFn: (input: { ids: readonly IssueId[]; patch: IssuePatch }) =>
-			repository.issues.bulkUpdate(input.ids, input.patch, { actorId: currentUser.id }),
-		onSuccess: (_updated, input) => {
-			refresh();
-			onClear();
-			toast.show({ title: `Updated ${plural(input.ids.length)}`, variant: 'success' });
-		},
-		onError: () => reportFailure('update those issues'),
-	});
-
-	const remove = useMutation({
-		mutationFn: (ids: readonly IssueId[]) =>
-			Promise.all(ids.map((id) => repository.issues.delete(id, { actorId: currentUser.id }))),
-		onSuccess: (_result, ids) => {
-			refresh();
-			onClear();
-			toast.show({
-				title: `Deleted ${plural(ids.length)}`,
-				variant: 'success',
-				timeout: 8000,
-				action: { label: 'Undo', onClick: () => restore.mutate(ids) },
-			});
-		},
-		onError: () => reportFailure('delete those issues'),
-	});
-
-	const restore = useMutation({
-		mutationFn: (ids: readonly IssueId[]) =>
-			Promise.all(ids.map((id) => repository.issues.restore(id, { actorId: currentUser.id }))),
-		onSuccess: (_result, ids) => {
-			refresh();
-			toast.show({ title: `Restored ${plural(ids.length)}`, variant: 'success' });
-		},
-		onError: () => reportFailure('restore those issues'),
-	});
-
-	const busy = patch.isPending || remove.isPending || restore.isPending;
 
 	function assign(value: AssigneeValue) {
 		setAssignOpen(false);
@@ -100,20 +52,17 @@ export function BulkActions({ selectedIds, onClear }: BulkActionsProps) {
 			return;
 		}
 
-		patch.mutate({
-			ids: selectedIds,
-			patch: { assigneeId: value.kind === 'unassigned' ? null : value.id },
-		});
+		apply({ assigneeId: value.kind === 'unassigned' ? null : value.id });
 	}
 
 	function setStatus(status: IssueStatus) {
-		patch.mutate({ ids: selectedIds, patch: { status } });
+		apply({ status });
 	}
 
 	return (
 		<div className={styles.bar} role="toolbar" aria-label="Bulk actions">
 			<span className={styles.count} aria-live="polite">
-				{plural(count)} selected
+				{formatIssueCount(count)} selected
 			</span>
 
 			<Menu
@@ -143,7 +92,7 @@ export function BulkActions({ selectedIds, onClear }: BulkActionsProps) {
 					</Button>
 				}
 			>
-				<p className={styles.assignHint}>Assign {plural(count)} to…</p>
+				<p className={styles.assignHint}>Assign {formatIssueCount(count)} to…</p>
 				<AssigneePicker
 					value={null}
 					onChange={assign}
@@ -172,11 +121,11 @@ export function BulkActions({ selectedIds, onClear }: BulkActionsProps) {
 				open={confirmOpen}
 				onOpenChange={setConfirmOpen}
 				variant="danger"
-				title={`Delete ${plural(count)}?`}
+				title={`Delete ${formatIssueCount(count)}?`}
 				description="They stop appearing in every list. Undo is offered for a few seconds afterwards."
 				confirmLabel="Delete"
 				loading={remove.isPending}
-				onConfirm={() => remove.mutate(selectedIds)}
+				onConfirm={() => remove.mutate({ ids: selectedIds })}
 			/>
 		</div>
 	);

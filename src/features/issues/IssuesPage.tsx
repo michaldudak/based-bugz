@@ -7,8 +7,13 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
 import type { IssueId } from '@/data';
+import { Button } from '@/ds/button';
+import { IconPlus } from '@/ds/icons';
+import { NEW_ISSUE_PARAM } from '@/features/command-palette';
 import { BulkActions } from './BulkActions';
+import { CreateIssueDialog } from './CreateIssueDialog';
 import { FilterBar } from './FilterBar';
 import { IssueList } from './IssueList';
 import { useIssueFilters } from './useIssueFilters';
@@ -24,7 +29,36 @@ interface Selection {
 
 export function IssuesPage() {
 	const filters = useIssueFilters();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const scope = filters.key;
+
+	/*
+	 * The create dialog is URL state, not component state. The command palette opens it by
+	 * navigating with `?new=1` (`NEW_ISSUE_PARAM`), so there has to be exactly one source of truth
+	 * for whether it is open — and a param means "New issue" is also a link somebody can send.
+	 * `replace` on the way out keeps the back button from stepping through open/closed.
+	 */
+	const createOpen = searchParams.get(NEW_ISSUE_PARAM) !== null;
+
+	const setCreateOpen = useCallback(
+		(open: boolean) => {
+			setSearchParams(
+				(current) => {
+					const next = new URLSearchParams(current);
+
+					if (open) {
+						next.set(NEW_ISSUE_PARAM, '1');
+					} else {
+						next.delete(NEW_ISSUE_PARAM);
+					}
+
+					return next;
+				},
+				{ replace: !open },
+			);
+		},
+		[setSearchParams],
+	);
 	const [selection, setSelection] = useState<Selection>(() => ({ scope, ids: NO_SELECTION }));
 
 	// Derived rather than reset in an effect: a stale selection is never rendered for even one frame.
@@ -75,10 +109,16 @@ export function IssuesPage() {
 	return (
 		<div className={styles.page}>
 			<header className={styles.header}>
-				<h1 className={styles.title}>Issues</h1>
-				<p className={styles.subtitle}>
-					Filters and sorting live in the URL, so any view here is a link somebody else can open.
-				</p>
+				<div className={styles.heading}>
+					<h1 className={styles.title}>Issues</h1>
+					<p className={styles.subtitle}>
+						Filters and sorting live in the URL, so any view here is a link somebody else can open.
+					</p>
+				</div>
+				<Button variant="primary" onClick={() => setCreateOpen(true)}>
+					<IconPlus size={14} />
+					New issue
+				</Button>
 			</header>
 
 			<FilterBar filters={filters} />
@@ -91,6 +131,8 @@ export function IssuesPage() {
 				onToggleSelected={onToggleSelected}
 				onSelectAll={onSelectAll}
 			/>
+
+			<CreateIssueDialog open={createOpen} onOpenChange={setCreateOpen} />
 		</div>
 	);
 }

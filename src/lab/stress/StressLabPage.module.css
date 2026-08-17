@@ -1,0 +1,112 @@
+/*
+ * Sized in rem throughout, and capped by a max-width rather than a fixed one: at 200% browser zoom
+ * every length here halves in CSS pixels, which is the point of the zoom case.
+ */
+
+.page {
+	max-width: 64rem;
+	margin: 0 auto;
+	padding: var(--space-8) var(--space-6) var(--space-12);
+}
+
+.header {
+	margin-bottom: var(--space-6);
+	padding-bottom: var(--space-6);
+	border-bottom: 1px solid var(--border);
+}
+
+.title {
+	font-size: var(--text-xl);
+	letter-spacing: -0.01em;
+}
+
+.subtitle {
+	max-width: 42rem;
+	margin-top: var(--space-2);
+	color: var(--text-muted);
+}
+
+/*
+ * `--text` rather than the surrounding `--text-muted`: muted foreground on `--surface-sunken` is
+ * 4.39:1, which is under the AA minimum for body text, and the axe scan in `tests/a11y.spec.ts`
+ * is right to say so.
+ */
+.subtitle code,
+.caseNote code {
+	padding: 0.1em 0.35em;
+	border-radius: var(--radius-sm);
+	background: var(--surface-sunken);
+	color: var(--text);
+	font-family: var(--font-mono);
+}
+
+.headerControls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-4);
+	margin-top: var(--space-4);
+}
+
+.case {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--space-3);
+}
+
+.caseTitle {
+	font-size: var(--text-md);
+}
+
+.caseBreaks {
+	max-width: 42rem;
+	padding: var(--space-2) var(--space-3);
+	border-inline-start: 2px solid var(--warning);
+	border-radius: var(--radius-sm);
+	background: var(--warning-surface);
+	color: var(--text);
+	font-size: var(--text-sm);
+	line-height: var(--leading-normal);
+}
+
+.caseBreaksLabel {
+	font-weight: var(--weight-semibold);
+}
+
+.caseNote {
+	max-width: 42rem;
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	line-height: var(--leading-normal);
+}
+
+.links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}
+
+.link {
+	color: var(--text);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+.link[aria-current='page'] {
+	color: var(--accent);
+	font-weight: var(--weight-semibold);
+}
+
+/* The popover sizes to its content, and its content is a picker that wants room. */
+.popoverBody {
+	width: min(24rem, calc(100vw - var(--space-8)));
+}
+
+@media (width <= 640px) {
+	.page {
+		padding: var(--space-6) var(--space-4) var(--space-10);
+	}
+}

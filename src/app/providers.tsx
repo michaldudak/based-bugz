@@ -1,3 +1,4 @@
+import { DirectionProvider } from '@base-ui/react/direction-provider';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
@@ -39,16 +40,23 @@ export function Providers({ children }: { children: ReactNode }) {
 		return { active: component, activeName: name, available: IMPL_NAMES };
 	}, [searchParams]);
 
+	// Base UI reads direction from context, not from the DOM. Without this, `?dir=rtl` restyles the
+	// page but every Base UI RTL path — list navigation, positioner alignment, the input's own
+	// caret branch — still runs as LTR, which makes RTL testing worthless.
+	const { dir } = parseUiParams(searchParams);
+
 	return (
 		<QueryClientProvider client={queryClient}>
 			<RepositoryProvider>
 				<SessionProvider>
 					<ThemeProvider>
-						<ComboboxImplProvider registry={registry}>
-							<TooltipProvider>
-								<ToastProvider>{children}</ToastProvider>
-							</TooltipProvider>
-						</ComboboxImplProvider>
+						<DirectionProvider direction={dir}>
+							<ComboboxImplProvider registry={registry}>
+								<TooltipProvider>
+									<ToastProvider>{children}</ToastProvider>
+								</TooltipProvider>
+							</ComboboxImplProvider>
+						</DirectionProvider>
 					</ThemeProvider>
 				</SessionProvider>
 			</RepositoryProvider>

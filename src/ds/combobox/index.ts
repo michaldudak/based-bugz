@@ -1,5 +1,6 @@
 export { Combobox } from './Combobox';
 export { buildRows, estimateRowHeight, rowIndexOfItem } from './rows';
+export type { BuildRowsOptions } from './rows';
 export {
 	ComboboxImplBoundary,
 	ComboboxImplFallback,

@@ -1,0 +1,51 @@
+/* Matches the gap and label weight `ds/field` uses, so a picker and a Select line up in one row. */
+.picker {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.pickerLabel {
+	color: var(--text);
+	font-size: var(--text-base);
+	font-weight: var(--weight-medium);
+	line-height: var(--leading-tight);
+}
+
+.control {
+	width: 100%;
+}
+
+/*
+ * The same dot the list rows use, at select-item scale. Colour comes from `color` so the border
+ * and the fill track one value, which is what makes "low" render as an outline.
+ */
+.priorityDot {
+	display: inline-block;
+	flex-shrink: 0;
+	width: 0.5rem;
+	height: 0.5rem;
+	border: 1px solid currentcolor;
+	border-radius: var(--radius-full);
+	background: currentcolor;
+	color: var(--text-muted);
+}
+
+.priorityDot[data-priority='none'] {
+	background: transparent;
+	color: var(--text-subtle);
+}
+
+.priorityDot[data-priority='low'] {
+	background: transparent;
+}
+
+.priorityDot[data-priority='high'] {
+	color: var(--warning);
+}
+
+.priorityDot[data-priority='urgent'] {
+	color: var(--danger);
+}

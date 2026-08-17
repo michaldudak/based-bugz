@@ -1,0 +1,17 @@
+.form {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	min-width: 0;
+}
+
+/*
+ * `auto-fit` rather than a fixed column count: the same declaration gives two columns in the
+ * dialog, one at 360px, and never a 90px-wide assignee picker in between.
+ */
+.grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+	gap: var(--space-4);
+	min-width: 0;
+}

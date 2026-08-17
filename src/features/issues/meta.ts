@@ -39,6 +39,11 @@ export const STATUS_VARIANT: Record<IssueStatus, BadgeVariant> = {
 	cancelled: 'danger',
 };
 
+/** "1 issue" / "24 issues". Shared by the bulk toolbar and every mutation toast. */
+export function formatIssueCount(count: number): string {
+	return count === 1 ? '1 issue' : `${count.toLocaleString()} issues`;
+}
+
 export const PRIORITY_LABEL: Record<IssuePriority, string> = {
 	none: 'No priority',
 	low: 'Low',

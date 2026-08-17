@@ -16,8 +16,18 @@ export function RequireAuth() {
 	}
 
 	if (status === 'signed-out') {
-		// `from` is what sends you back to the deep link you actually asked for.
-		return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
+		// The search string has to survive the bounce, not just ride along in `state`: the login
+		// screen builds its own repository from the URL, and the session is keyed by seed. Dropping
+		// it authenticates against the default dataset and files the session under a key the
+		// deep-linked dataset will never look up — so sign-in silently fails to survive a reload on
+		// any non-default seed.
+		return (
+			<Navigate
+				to={{ pathname: '/login', search: location.search }}
+				replace
+				state={{ from: location.pathname + location.search }}
+			/>
+		);
 	}
 
 	return <Outlet />;

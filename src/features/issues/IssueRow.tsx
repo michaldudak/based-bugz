@@ -9,6 +9,7 @@
 
 import { memo } from 'react';
 import type { CSSProperties, Ref } from 'react';
+import { Link } from 'react-router';
 import type { Issue, IssueId, Label, LabelId, User, UserId } from '@/data';
 import { Avatar } from '@/ds/avatar';
 import { Badge } from '@/ds/badge';
@@ -21,6 +22,7 @@ import {
 	formatRelativeTime,
 	labelColorStyle,
 } from './meta';
+import { issuePath } from './routes';
 import styles from './IssueRow.module.css';
 
 /** Beyond this the row turns into a wall of chips; the rest collapse into a count. */
@@ -32,6 +34,12 @@ export interface IssueRowProps {
 	labelsById: ReadonlyMap<LabelId, Label>;
 	selected: boolean;
 	onToggleSelected: (id: IssueId, selected: boolean) => void;
+	/**
+	 * The current query string, so the link to the issue carries the run's control surface and the
+	 * filters you came from. One shared string rather than a per-row href, which is what keeps
+	 * `memo` from missing on every render.
+	 */
+	search: string;
 	/** Position in the filtered result, for assistive tech. */
 	position: number;
 	/** `-1` when the repository declined to count the matches — the ARIA value for "unknown". */
@@ -47,6 +55,7 @@ export const IssueRow = memo(function IssueRow({
 	labelsById,
 	selected,
 	onToggleSelected,
+	search,
 	position,
 	setSize,
 	rowRef,
@@ -80,7 +89,10 @@ export const IssueRow = memo(function IssueRow({
 			<span className={styles.key}>{issue.key}</span>
 
 			<span className={styles.main}>
-				<span className={styles.title}>{issue.title}</span>
+				{/* The title is the row's one link: a whole-row anchor would swallow the checkbox. */}
+				<Link className={styles.title} to={issuePath(issue.id, search)}>
+					{issue.title}
+				</Link>
 				{labels.length > 0 && (
 					<span className={styles.labels}>
 						{labels.map((label) => (

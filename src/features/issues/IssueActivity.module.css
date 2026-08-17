@@ -1,0 +1,86 @@
+.root {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	min-width: 0;
+}
+
+/*
+ * The connecting line is a border on the list rather than a pseudo-element per row, so it never
+ * overshoots the last entry and costs nothing to lay out.
+ */
+.list {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	margin-inline-start: var(--space-2);
+	padding-inline-start: var(--space-4);
+	border-inline-start: 1px solid var(--border);
+	list-style: none;
+}
+
+.list:empty {
+	display: none;
+}
+
+.event {
+	position: relative;
+	min-width: 0;
+}
+
+.dot {
+	position: absolute;
+	inset-block-start: 0.45em;
+	inset-inline-start: calc(var(--space-4) * -1 - 3px);
+	width: 5px;
+	height: 5px;
+	border-radius: var(--radius-full);
+	background: var(--border-strong);
+}
+
+/*
+ * Deliberately not a flex row: the sentence mixes prose with badges and label chips, and flexing
+ * it would turn every space between words into a layout gap.
+ */
+.sentence {
+	color: var(--text-muted);
+	font-size: var(--text-base);
+	line-height: var(--leading-normal);
+	overflow-wrap: anywhere;
+}
+
+.actor {
+	color: var(--text);
+	font-weight: var(--weight-medium);
+}
+
+.value {
+	color: var(--text);
+	font-weight: var(--weight-medium);
+}
+
+.time {
+	color: var(--text-subtle);
+	font-size: var(--text-sm);
+	white-space: nowrap;
+}
+
+.label {
+	padding: 0 var(--space-2);
+	border: 1px solid var(--label-color);
+	border-radius: var(--radius-full);
+	background: var(--label-surface);
+	color: var(--label-text);
+	font-size: var(--text-xs);
+	line-height: 1.5;
+}
+
+.state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--space-2);
+	padding: var(--space-6) 0;
+	color: var(--text-muted);
+	font-size: var(--text-base);
+}

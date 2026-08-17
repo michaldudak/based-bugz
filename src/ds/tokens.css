@@ -56,7 +56,12 @@
 	--border-strong: light-dark(var(--neutral-300), var(--neutral-700));
 
 	--text: light-dark(var(--neutral-900), var(--neutral-50));
-	--text-muted: light-dark(var(--neutral-500), var(--neutral-400));
+	/*
+	 * neutral-500 clears AA on --surface (4.83:1) but not on --surface-hover or
+	 * --surface-sunken (4.39:1) — which is exactly where muted text lives, in
+	 * highlighted list rows and badges. neutral-600 clears AA on all three.
+	 */
+	--text-muted: light-dark(var(--neutral-600), var(--neutral-400));
 	--text-subtle: light-dark(var(--neutral-400), var(--neutral-500));
 	--text-inverted: light-dark(var(--neutral-50), var(--neutral-900));
 

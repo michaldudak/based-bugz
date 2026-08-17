@@ -1,12 +1,29 @@
-import type { ComboboxProps, ComboboxRow } from './types';
+import type { ComboboxProps, ComboboxRow, ComboboxStatus } from './types';
+
+/**
+ * Exactly the inputs the row model depends on — narrower than `ComboboxProps` so implementations
+ * can memoize on these fields instead of on the props object, which is a fresh identity every
+ * render and would rebuild the model on every keystroke. `ComboboxProps<T>` satisfies this
+ * structurally, so passing whole props still type-checks.
+ */
+export interface BuildRowsOptions<T> {
+	items: readonly T[];
+	itemKey: (item: T) => string;
+	itemLabel: (item: T) => string;
+	groupOf?: ((item: T) => string | undefined) | undefined;
+	query: string;
+	onCreate?: ((query: string) => void) | undefined;
+	hasMore?: boolean | undefined;
+	status: ComboboxStatus;
+}
 
 /**
  * Builds the flat row model from items. Shared by every implementation on purpose: grouping,
  * create-affordance placement and the trailing loading row are app behaviour, not virtualization
  * strategy, so implementations must not each invent their own (AGENTS.md — evaluation rule 2).
  */
-export function buildRows<T>(props: ComboboxProps<T>): ComboboxRow<T>[] {
-	const { items, itemKey, itemLabel, groupOf, query, onCreate, hasMore, status } = props;
+export function buildRows<T>(options: BuildRowsOptions<T>): ComboboxRow<T>[] {
+	const { items, itemKey, itemLabel, groupOf, query, onCreate, hasMore, status } = options;
 	const rows: ComboboxRow<T>[] = [];
 	let currentGroup: string | undefined;
 
@@ -43,12 +60,15 @@ export function buildRows<T>(props: ComboboxProps<T>): ComboboxRow<T>[] {
 }
 
 /** Height for a row before it is measured. */
-export function estimateRowHeight<T>(row: ComboboxRow<T>, props: ComboboxProps<T>): number {
+export function estimateRowHeight<T>(
+	row: ComboboxRow<T>,
+	options: Pick<ComboboxProps<T>, 'estimateItemHeight' | 'groupHeaderHeight'>,
+): number {
 	switch (row.kind) {
 		case 'item':
-			return props.estimateItemHeight(row.item);
+			return options.estimateItemHeight(row.item);
 		case 'group':
-			return props.groupHeaderHeight ?? 28;
+			return options.groupHeaderHeight ?? 28;
 		case 'create':
 		case 'loading':
 			return 36;

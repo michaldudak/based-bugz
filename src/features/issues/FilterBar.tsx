@@ -15,6 +15,7 @@ import { Menu } from '@/ds/menu';
 import { Popover } from '@/ds/popover';
 import { AssigneePicker } from './AssigneePicker';
 import { LabelPicker } from './LabelPicker';
+import { ProjectPicker } from './ProjectPicker';
 import { useDebouncedTextField, useMediaQuery } from './hooks';
 import {
 	PRIORITY_LABEL,
@@ -159,6 +160,7 @@ function LabelMatchMenu({ filters }: { filters: IssueFiltersApi }) {
 function FilterControls({ filters, stacked }: { filters: IssueFiltersApi; stacked: boolean }) {
 	const assigneeId = useId();
 	const labelId = useId();
+	const projectId = useId();
 
 	return (
 		<div className={stacked ? styles.stack : styles.inline}>
@@ -184,6 +186,23 @@ function FilterControls({ filters, stacked }: { filters: IssueFiltersApi; stacke
 				className={stacked ? styles.stackField : styles.labels}
 				value={filters.labelIds}
 				onChange={filters.setLabelIds}
+			/>
+
+			{/*
+			 * The command palette can navigate here with `?project=`, so the filter needs a control:
+			 * an active filter you cannot see is one you cannot turn off. The label is always
+			 * rendered — `ds/select` has no way to take an accessible name of its own, so a visually
+			 * hidden `<label>` is the only naming path when the bar is not stacked.
+			 */}
+			<label className={stacked ? styles.fieldLabel : styles.srOnly} htmlFor={projectId}>
+				Project
+			</label>
+			<ProjectPicker
+				id={projectId}
+				className={stacked ? styles.stackField : styles.project}
+				value={filters.projectId}
+				onChange={filters.setProjectId}
+				placeholder="Any project"
 			/>
 
 			<div className={stacked ? styles.stackRow : styles.contents}>

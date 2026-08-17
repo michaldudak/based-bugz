@@ -1,0 +1,141 @@
+/*
+ * Above every popup, because the thing worth measuring is usually a popup. Deliberately small and
+ * corner-pinned: an overlay that covers the app is an overlay you turn off, and then you measure
+ * nothing.
+ */
+
+.overlay {
+	display: flex;
+	position: fixed;
+	z-index: calc(var(--z-toast) + 1);
+	inset-block-end: var(--space-4);
+	inset-inline-end: var(--space-4);
+	flex-direction: column;
+	gap: var(--space-3);
+	width: 15rem;
+	padding: var(--space-3);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	background: var(--surface-raised);
+	box-shadow: var(--shadow-lg);
+	font-size: var(--text-xs);
+
+	/* The overlay repaints twice a second; keep it out of the page's layout and paint work. */
+	contain: layout style paint;
+}
+
+.header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-2);
+}
+
+.impl {
+	padding: 0.1em 0.4em;
+	border-radius: var(--radius-sm);
+	background: var(--surface-sunken);
+	color: var(--text);
+	font-family: var(--font-mono);
+	font-size: var(--text-xs);
+}
+
+.actions {
+	display: flex;
+	gap: var(--space-1);
+}
+
+.action {
+	padding: 0.15em 0.4em;
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	background: transparent;
+	color: var(--text-muted);
+	font-size: var(--text-xs);
+	cursor: pointer;
+}
+
+.action:hover {
+	background: var(--surface-hover);
+	color: var(--text);
+}
+
+.group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-1);
+}
+
+.groupTitle {
+	color: var(--text-subtle);
+	font-size: var(--text-xs);
+	font-weight: var(--weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.unsupported {
+	color: var(--warning);
+	font-weight: var(--weight-normal);
+	text-transform: none;
+	letter-spacing: 0;
+}
+
+.live {
+	color: var(--success);
+	font-weight: var(--weight-normal);
+	text-transform: none;
+	letter-spacing: 0;
+}
+
+.metrics {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: var(--space-1) var(--space-2);
+}
+
+.metric {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.metricLabel {
+	color: var(--text-muted);
+}
+
+.metricValue {
+	display: flex;
+	align-items: baseline;
+	gap: 0.25em;
+	min-width: 0;
+	margin: 0;
+	color: var(--text);
+	font-family: var(--font-mono);
+	font-variant-numeric: tabular-nums;
+}
+
+.metricHint {
+	overflow: hidden;
+	max-width: 4.5rem;
+	color: var(--text-subtle);
+	font-family: var(--font-sans);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.pending,
+.footnote {
+	color: var(--text-subtle);
+	line-height: var(--leading-normal);
+}
+
+@media (width <= 640px) {
+	.overlay {
+		inset-block-end: var(--space-2);
+		inset-inline: var(--space-2);
+		width: auto;
+	}
+}

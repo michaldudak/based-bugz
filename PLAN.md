@@ -3,9 +3,14 @@
 Sequence for building Based Bugz. `AGENTS.md` holds the agreements and the reasoning; this file
 holds the order of work and what "done" means at each step. Update it as phases land.
 
-**Current state:** Phases 0–4 landed. The app runs: sign in, browse the generated backlog, switch
-theme/density/direction, tune the dataset, and exercise the combobox at `/lab/combobox` against
-5,000 async users. Phase 5 (issues list) is next.
+**Current state:** Phases 0–8 landed. The app is a working tracker: sign in, browse/filter/sort
+10,000 issues, create, edit inline, comment, delete with undo, ⌘K over everything, plus the design
+system gallery, the combobox lab, the stress lab, a perf overlay and a Playwright parity suite.
+Only Phase 9 (canary implementations) remains, and it is blocked on the PR URLs.
+
+The parity suite is **deliberately red in five places**. Each failure is a reproduced defect, not a
+flaky assertion, and no assertion was softened to make the baseline green — see
+"Known baseline failures" below. That red is the number the three PRs are competing against.
 
 **Strategy:** build the whole app against `impls/baseline` — stable `@base-ui/react` + TanStack
 Virtual, wired as the docs describe. That is the control the three PRs must beat, it needs no canary
@@ -147,6 +152,33 @@ hoist into one shared copy, `impls/pr-a|b|c` scaffolds against the existing cont
 lab routes for rule 12 repros.
 
 ---
+
+## Known baseline failures
+
+`pnpm test:e2e` — 11 pass, 5 fail against `impls/baseline`. All five are defects in the documented
+Base UI + TanStack Virtual pairing, reproduced in the production preview build:
+
+1. **Tab does not dismiss the popup — focus lands inside it.** The documented composition makes the
+   app own the scroll container; that `<div>` is scrollable with no focusable children, so Chrome
+   makes it a tab stop. Focus goes input → scroll div and never leaves, so dismiss-on-focus-out
+   never fires. `tabIndex={-1}` fixes it at the cost of keyboard scrolling — a real API question.
+2. **PageUp/PageDown do nothing.** No handler exists in the combobox path; `PAGE_UP`/`PAGE_DOWN`
+   live only in `internals/composite` (Menu/Select/Toolbar). Home/End correctly drive the caret.
+   3–5. **`aria-hidden-focus` (×3 cases).** With the popup open, Base UI sets `aria-hidden="true"` on
+   the topbar, sidebar and page body but applies `inert` nowhere, leaving ~19 focusable elements
+   reachable inside an aria-hidden subtree.
+
+Also observed and not yet resolved:
+
+- **`flushSync` warning on every arrow key.** Base UI calls `onItemHighlighted` inside a React
+  lifecycle; TanStack Virtual's `scrollToIndex` calls `flushSync` on a sync range change. The most
+  basic keyboard interaction in the documented pairing warns once per keypress.
+- **Single-select echoes its own selection back as a query.** The contract controls `inputValue`,
+  so on close Base UI pushes the selected label through `onInputValueChange` — which arrives as
+  `onQueryChange`, and the app re-queries the server for the thing it just selected. `onQueryChange`
+  drops Base UI's `eventDetails.reason`, so app code cannot tell typing from an echo.
+- **The popup is ~10px narrower than its control**, because `--anchor-width` measures
+  `Combobox.Input` while the visible control is `Combobox.Chips` with border and padding.
 
 ## Things that will be subtle
 

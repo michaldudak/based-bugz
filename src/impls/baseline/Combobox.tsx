@@ -55,6 +55,7 @@ export function BaselineCombobox<T>(props: ComboboxProps<T>) {
 		items,
 		itemKey,
 		itemLabel,
+		groupOf,
 		isItemDisabled,
 		value,
 		onValueChange,
@@ -89,7 +90,13 @@ export function BaselineCombobox<T>(props: ComboboxProps<T>) {
 	 * lets the virtualizer measure.
 	 */
 	const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
-	const rows = useMemo(() => buildRows(props), [props]);
+
+	// Memoized on the fields the row model actually reads, not on `props` — the props object is a
+	// fresh identity every render, so depending on it rebuilds the whole model on every keystroke.
+	const rows = useMemo(
+		() => buildRows({ items, itemKey, itemLabel, groupOf, query, onCreate, hasMore, status }),
+		[items, itemKey, itemLabel, groupOf, query, onCreate, hasMore, status],
+	);
 
 	const virtualizer = useVirtualizer({
 		count: rows.length,
@@ -118,7 +125,11 @@ export function BaselineCombobox<T>(props: ComboboxProps<T>) {
 		(_item: unknown, details: { reason: string; index: number }) => {
 			setHighlightedItemIndex(details.index < 0 ? null : details.index);
 
-			if (details.reason !== 'keyboard' || details.index < 0) {
+			// 'none' means programmatic — which is how opening with a preselected value arrives.
+			// Scrolling only on 'keyboard' leaves a deep selection off-screen with
+			// aria-activedescendant pointing at an element that was never rendered. 'pointer' is
+			// excluded on purpose: hovering must not scroll the list out from under the cursor.
+			if ((details.reason !== 'keyboard' && details.reason !== 'none') || details.index < 0) {
 				return;
 			}
 

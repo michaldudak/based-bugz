@@ -1,0 +1,74 @@
+.picker {
+	max-width: 26rem;
+}
+
+.controls {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-4);
+	margin-bottom: var(--space-3);
+}
+
+/*
+ * `plaintext` takes the paragraph's direction from its first strong character rather than from the
+ * page. Without it, "40 loaded of 500" reorders to "loaded of 500 40" under `?dir=rtl` — the line
+ * is English with digits, and the bidi algorithm has no way to know that unless it is told.
+ */
+.status {
+	margin-top: var(--space-2);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	unicode-bidi: plaintext;
+}
+
+.rowText {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	gap: 1px;
+}
+
+.rowPrimary {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.rowSecondary {
+	overflow: hidden;
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.check {
+	flex-shrink: 0;
+	margin-inline-start: auto;
+	color: var(--text-muted);
+}
+
+/*
+ * The variable-height row. Top-aligned rather than centred, and truncated nowhere: a
+ * 300-character title has to be allowed to become an eight-line row, or the case measures nothing.
+ */
+.issueRow {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-2);
+	width: 100%;
+	min-width: 0;
+}
+
+.issueKey {
+	flex-shrink: 0;
+	margin-top: 1px;
+	font-family: var(--font-mono);
+}
+
+.issueTitle {
+	min-width: 0;
+	line-height: var(--leading-normal);
+	overflow-wrap: anywhere;
+	white-space: normal;
+}

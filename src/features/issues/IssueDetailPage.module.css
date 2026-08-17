@@ -1,0 +1,137 @@
+/*
+ * Unlike the list, this page scrolls with the document: the shell's `.content` already owns a
+ * scroll container, and nothing here is virtualized, so a second one would only trap the wheel.
+ */
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-5);
+	max-width: 60rem;
+	padding: var(--space-6);
+}
+
+.back {
+	display: inline-flex;
+	align-self: flex-start;
+	align-items: center;
+	gap: var(--space-1);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}
+
+.back:hover {
+	color: var(--text);
+}
+
+.header {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.identity {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2) var(--space-3);
+	min-width: 0;
+}
+
+.key {
+	color: var(--text-muted);
+	font-family: var(--font-mono);
+	font-size: var(--text-sm);
+	letter-spacing: 0.02em;
+}
+
+.reported {
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+}
+
+.spacer {
+	flex: 1;
+	min-width: 0;
+}
+
+.saving,
+.stale {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-1);
+	font-size: var(--text-sm);
+}
+
+.saving {
+	color: var(--text-muted);
+}
+
+.stale {
+	color: var(--warning);
+}
+
+/*
+ * The title editor is a textarea, so the display size has to be set on the control itself rather
+ * than inherited from a heading element that is not there.
+ */
+.title textarea {
+	padding-inline: var(--space-2);
+	font-size: var(--text-xl);
+	font-weight: var(--weight-semibold);
+	line-height: var(--leading-tight);
+	letter-spacing: -0.01em;
+}
+
+/* One `auto-fit` track set covers 1280px (five across) and 360px (stacked) without a breakpoint. */
+.fields {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+	gap: var(--space-4);
+	min-width: 0;
+}
+
+.description {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.sectionTitle {
+	color: var(--text);
+	font-size: var(--text-base);
+	font-weight: var(--weight-medium);
+}
+
+.tabs {
+	min-width: 0;
+}
+
+.state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: var(--space-3);
+	padding: var(--space-12) var(--space-4);
+	color: var(--text-muted);
+	font-size: var(--text-base);
+	text-align: center;
+}
+
+.missingTitle {
+	color: var(--text);
+	font-size: var(--text-lg);
+	font-weight: var(--weight-semibold);
+}
+
+@media (width <= 768px) {
+	.page {
+		gap: var(--space-4);
+		padding: var(--space-4);
+	}
+
+	.title textarea {
+		font-size: var(--text-lg);
+	}
+}
