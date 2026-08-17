@@ -9,6 +9,7 @@ import { Dialog } from '@/ds/dialog';
 import { IconMenu, IconMoon, IconSun } from '@/ds/icons';
 import { Menu } from '@/ds/menu';
 import { Tooltip } from '@/ds/tooltip';
+import { CommandPaletteProvider } from '@/features/command-palette';
 import { NavContent } from './NavContent';
 import styles from './AppLayout.module.css';
 
@@ -86,9 +87,11 @@ export function AppLayout() {
 				<NavContent />
 			</aside>
 
-			<main className={styles.content}>
-				<Outlet />
-			</main>
+			<CommandPaletteProvider>
+				<main className={styles.content}>
+					<Outlet />
+				</main>
+			</CommandPaletteProvider>
 
 			<Dialog open={navOpen} onOpenChange={setNavOpen} size="sm">
 				<Dialog.Title>{APP_NAME}</Dialog.Title>

@@ -1,0 +1,120 @@
+/*
+ * Row internals. The row's outer box — padding, radius, highlight and selection background — is
+ * the shared combobox stylesheet's `.item`; everything here lives inside it.
+ */
+
+.row {
+	display: flex;
+	flex: 1;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.lines {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	gap: 1px;
+	min-width: 0;
+}
+
+.single {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	color: var(--text);
+	font-size: var(--text-base);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.name {
+	overflow: hidden;
+	color: var(--text);
+	font-size: var(--text-base);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.meta {
+	overflow: hidden;
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.icon {
+	flex-shrink: 0;
+	color: var(--text-muted);
+}
+
+/* ---- issue ------------------------------------------------------------- */
+
+.titleLine {
+	display: flex;
+	align-items: baseline;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.issueKey {
+	flex-shrink: 0;
+	color: var(--text-subtle);
+	font-family: var(--font-mono);
+	font-size: var(--text-xs);
+}
+
+/*
+ * Two lines, then ellipsis. The seeded data contains a ~300-character title on purpose, and
+ * clamping at two lines is what makes issue rows genuinely variable in height rather than
+ * uniformly tall — the case the estimate/measure path has to survive.
+ */
+.issueTitle {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	overflow: hidden;
+	color: var(--text);
+	font-size: var(--text-base);
+	line-height: var(--leading-tight);
+}
+
+.metaLine {
+	display: flex;
+	align-items: center;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+/* ---- label and project ------------------------------------------------- */
+
+.swatch {
+	flex-shrink: 0;
+	width: 0.75rem;
+	height: 0.75rem;
+	border-radius: var(--radius-full);
+	background: var(--swatch);
+}
+
+.projectKey {
+	flex-shrink: 0;
+	padding: 0 var(--space-1);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-sm);
+	color: var(--text-muted);
+	font-family: var(--font-mono);
+	font-size: var(--text-xs);
+}
+
+/* ---- trailing hints ---------------------------------------------------- */
+
+.trailing {
+	display: flex;
+	flex-shrink: 0;
+	align-items: center;
+	gap: var(--space-1);
+	margin-inline-start: auto;
+	padding-inline-start: var(--space-2);
+}

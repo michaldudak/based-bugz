@@ -1,0 +1,99 @@
+/*
+ * The palette surface.
+ *
+ * `<Combobox>` renders its own control and its own positioned popup, so the dialog is only ever
+ * the search bar: the results panel is anchored under it and belongs to the combobox. Both
+ * selectors below are doubled (`.palette.palette`) on purpose — these rules override the design
+ * system's `.popup` and `.control`, which carry the same specificity, and CSS Module order in the
+ * bundle is import-order dependent. Doubling makes the outcome independent of it.
+ */
+
+.palette.palette {
+	gap: 0;
+	max-width: 36rem;
+	/* Top-aligned rather than centred: a palette that opens over the middle of the page hides the
+	   thing you were looking at when you reached for it. */
+	margin-block: min(12vh, 5rem) auto;
+	padding: 0;
+	overflow: visible;
+}
+
+/*
+ * The combobox control is the search bar. Redefining `--control-h` locally resizes the input with
+ * it, because the shared stylesheet sizes the input from that token rather than a literal.
+ */
+.field.field {
+	--control-h: 3rem;
+
+	padding: 0;
+	border: 0;
+	background: transparent;
+}
+
+/*
+ * Room for the leading icon and the Esc hint has to be made on the input, not on the control:
+ * Base UI anchors the results popup to the input element, so padding the control around it would
+ * indent the whole results panel by exactly that much. The contract has no adornment slot, so a
+ * descendant type selector is the only way to reach the element — no library class name is
+ * involved, and nothing outside this component's own subtree is touched.
+ */
+.field.field input {
+	height: var(--control-h);
+	padding-inline: var(--space-10) 3.25rem;
+}
+
+.searchIcon {
+	display: block;
+	position: absolute;
+	top: calc(1.5rem - 8px);
+	inset-inline-start: var(--space-4);
+	color: var(--text-subtle);
+	pointer-events: none;
+}
+
+.escHint {
+	position: absolute;
+	top: calc(1.5rem - 0.625rem);
+	inset-inline-end: var(--space-3);
+	pointer-events: none;
+}
+
+.srOnly {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* Full-bleed below the design system's bottom-sheet breakpoint. */
+@media (width <= 640px) {
+	.palette.palette {
+		max-width: none;
+		margin-block: 0;
+		/* Zeroing the design system's popup padding also zeroed its safe-area gutter. */
+		padding-bottom: calc(var(--space-1) + env(safe-area-inset-bottom, 0px));
+		border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+	}
+
+	.field.field {
+		--control-h: 2.75rem;
+	}
+
+	/* The Esc hint is gone below this width, so its gutter goes with it. */
+	.field.field input {
+		padding-inline-end: var(--space-4);
+	}
+
+	.searchIcon {
+		top: calc(1.375rem - 8px);
+	}
+
+	.escHint {
+		display: none;
+	}
+}
