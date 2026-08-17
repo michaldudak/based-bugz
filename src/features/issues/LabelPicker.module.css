@@ -1,0 +1,38 @@
+.row {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.row > *:first-child {
+	flex: 1;
+	min-width: 0;
+}
+
+.swatch {
+	flex-shrink: 0;
+	width: 0.625rem;
+	height: 0.625rem;
+	border-radius: var(--radius-full);
+	background: var(--label-color, var(--text-subtle));
+}
+
+.name {
+	flex: 1;
+	overflow: hidden;
+	font-size: var(--text-base);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.check {
+	flex-shrink: 0;
+	color: var(--text-muted);
+}
+
+.pending {
+	margin-top: var(--space-1);
+	color: var(--text-muted);
+	font-size: var(--text-xs);
+}

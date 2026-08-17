@@ -1,0 +1,52 @@
+.row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+.row > *:first-child {
+	flex: 1;
+	min-width: 0;
+}
+
+/* ---- rows in the popup -------------------------------------------------- */
+
+.text {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	min-width: 0;
+	line-height: var(--leading-tight);
+}
+
+.name {
+	overflow: hidden;
+	font-size: var(--text-base);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.meta {
+	overflow: hidden;
+	color: var(--text-muted);
+	font-size: var(--text-xs);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.unassignedIcon {
+	display: grid;
+	flex-shrink: 0;
+	place-items: center;
+	width: 1.5rem;
+	height: 1.5rem;
+	border: 1px dashed var(--border-strong);
+	border-radius: var(--radius-full);
+	color: var(--text-subtle);
+}
+
+.check {
+	flex-shrink: 0;
+	color: var(--text-muted);
+}

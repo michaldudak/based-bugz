@@ -1,0 +1,169 @@
+/*
+ * The row is positioned by the virtualizer through an inline style, so nothing here may set
+ * `position`, `top` or `transform`.
+ */
+
+.row {
+	display: grid;
+	grid-template-areas: 'select key main status priority assignee updated';
+	grid-template-columns: auto 5.5rem minmax(0, 1fr) auto 7rem 1.75rem 6.5rem;
+	align-items: center;
+	gap: var(--space-1) var(--space-3);
+	min-height: var(--row-h);
+	padding: var(--space-2) var(--space-3);
+	border-bottom: 1px solid var(--border);
+}
+
+.row:hover {
+	background: var(--surface-hover);
+}
+
+.row[data-selected] {
+	background: var(--surface-selected);
+}
+
+.select {
+	display: flex;
+	grid-area: select;
+	align-items: center;
+}
+
+.key {
+	grid-area: key;
+	overflow: hidden;
+	color: var(--text-subtle);
+	font-family: var(--font-mono);
+	font-size: var(--text-sm);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.main {
+	display: flex;
+	grid-area: main;
+	flex-direction: column;
+	gap: var(--space-1);
+	min-width: 0;
+}
+
+/*
+ * Wraps rather than truncates. That is the whole reason rows are variable height, and the reason
+ * the virtualizer has to measure instead of trusting the estimate.
+ */
+.title {
+	font-size: var(--text-base);
+	line-height: var(--leading-normal);
+	overflow-wrap: anywhere;
+}
+
+.labels {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-1);
+}
+
+.label {
+	max-width: 12rem;
+	padding: 0 var(--space-2);
+	border-radius: var(--radius-full);
+	background: var(--label-surface);
+	color: var(--label-text);
+	font-size: var(--text-xs);
+	line-height: 1.4rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.moreLabels {
+	align-self: center;
+	color: var(--text-subtle);
+	font-size: var(--text-xs);
+}
+
+.status {
+	grid-area: status;
+	justify-self: start;
+}
+
+.priority {
+	display: flex;
+	grid-area: priority;
+	align-items: center;
+	gap: var(--space-2);
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	white-space: nowrap;
+}
+
+.priorityDot {
+	flex-shrink: 0;
+	width: 0.5rem;
+	height: 0.5rem;
+	border: 1px solid currentcolor;
+	border-radius: var(--radius-full);
+	background: currentcolor;
+}
+
+.priority[data-priority='none'] {
+	color: var(--text-subtle);
+}
+
+.priority[data-priority='none'] .priorityDot {
+	background: transparent;
+}
+
+.priority[data-priority='low'] .priorityDot {
+	background: transparent;
+}
+
+.priority[data-priority='high'] {
+	color: var(--warning);
+}
+
+.priority[data-priority='urgent'] {
+	color: var(--danger);
+}
+
+.assignee {
+	display: flex;
+	grid-area: assignee;
+	justify-content: flex-end;
+}
+
+.unassigned {
+	color: var(--text-subtle);
+	font-size: var(--text-xs);
+}
+
+.updated {
+	grid-area: updated;
+	color: var(--text-muted);
+	font-size: var(--text-sm);
+	text-align: end;
+	white-space: nowrap;
+}
+
+/* Stacked title + meta. Nothing is dropped and nothing scrolls sideways. */
+@media (width <= 900px) {
+	.row {
+		grid-template-areas:
+			'select key key updated'
+			'select main main main'
+			'select status priority assignee';
+		grid-template-columns: auto minmax(0, 1fr) auto auto;
+		align-items: start;
+		gap: var(--space-2);
+		padding: var(--space-3);
+	}
+
+	.select,
+	.assignee {
+		align-items: center;
+	}
+
+	.updated,
+	.priority {
+		font-size: var(--text-xs);
+	}
+}
