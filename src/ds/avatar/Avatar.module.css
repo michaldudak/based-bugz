@@ -14,6 +14,12 @@
 	font-weight: var(--weight-semibold);
 	line-height: 1;
 	text-transform: uppercase;
+	/*
+	 * Two CJK initials are far wider than two Latin ones and will wrap to a second
+	 * line inside the circle unless pinned. Names are generated from every script
+	 * the dataset contains, so this is the common case, not an edge case.
+	 */
+	white-space: nowrap;
 	overflow: hidden;
 	user-select: none;
 }

@@ -1,0 +1,84 @@
+.shell {
+	display: grid;
+	grid-template:
+		'topbar topbar' var(--topbar-h)
+		'sidebar content' minmax(0, 1fr)
+		/ var(--sidebar-w) minmax(0, 1fr);
+	height: 100dvh;
+}
+
+.topbar {
+	display: flex;
+	z-index: var(--z-sticky);
+	grid-area: topbar;
+	align-items: center;
+	gap: var(--space-2);
+	padding: 0 var(--space-3);
+	border-bottom: 1px solid var(--border);
+	background: var(--surface);
+}
+
+.brand {
+	font-size: var(--text-md);
+	font-weight: var(--weight-semibold);
+	letter-spacing: -0.01em;
+}
+
+.topbarEnd {
+	display: flex;
+	align-items: center;
+	gap: var(--space-1);
+	margin-inline-start: auto;
+}
+
+.userButton {
+	gap: var(--space-2);
+	padding-inline: var(--space-1) var(--space-2);
+}
+
+.userName {
+	max-width: 12ch;
+	overflow: hidden;
+	color: var(--text-muted);
+	font-weight: var(--weight-normal);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.navToggle {
+	display: none;
+}
+
+.sidebar {
+	grid-area: sidebar;
+	border-inline-end: 1px solid var(--border);
+	overflow-y: auto;
+	background: var(--surface-sunken);
+}
+
+.content {
+	grid-area: content;
+	min-width: 0;
+	overflow: auto;
+}
+
+@media (width <= 768px) {
+	.shell {
+		grid-template:
+			'topbar' var(--topbar-h)
+			'content' minmax(0, 1fr)
+			/ minmax(0, 1fr);
+	}
+
+	.sidebar {
+		display: none;
+	}
+
+	.navToggle {
+		display: inline-flex;
+	}
+
+	.userName {
+		display: none;
+	}
+}

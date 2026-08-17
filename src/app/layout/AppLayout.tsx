@@ -1,0 +1,99 @@
+import { useEffect, useState } from 'react';
+import { Outlet, useLocation } from 'react-router';
+import { APP_NAME } from '@/app/config';
+import { useSession } from '@/app/session';
+import { useTheme } from '@/app/theme';
+import { Avatar } from '@/ds/avatar';
+import { Button } from '@/ds/button';
+import { Dialog } from '@/ds/dialog';
+import { IconMenu, IconMoon, IconSun } from '@/ds/icons';
+import { Menu } from '@/ds/menu';
+import { Tooltip } from '@/ds/tooltip';
+import { NavContent } from './NavContent';
+import styles from './AppLayout.module.css';
+
+function ThemeToggle() {
+	const { theme, setTheme } = useTheme();
+	const isDark =
+		theme === 'dark' ||
+		(theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+	return (
+		<Tooltip content={isDark ? 'Switch to light' : 'Switch to dark'}>
+			<Button
+				variant="ghost"
+				iconOnly
+				aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+				onClick={() => setTheme(isDark ? 'light' : 'dark')}
+			>
+				{isDark ? <IconSun /> : <IconMoon />}
+			</Button>
+		</Tooltip>
+	);
+}
+
+function UserMenu() {
+	const { user, signOut } = useSession();
+
+	if (!user) {
+		return null;
+	}
+
+	return (
+		<Menu
+			trigger={
+				<Button variant="ghost" className={styles.userButton} aria-label={`Account: ${user.name}`}>
+					<Avatar name={user.name} initials={user.initials} hue={user.avatarHue} size="sm" />
+					<span className={styles.userName}>{user.name}</span>
+				</Button>
+			}
+			align="end"
+		>
+			<Menu.Group label={user.email}>
+				<Menu.Item onClick={signOut}>Sign out</Menu.Item>
+			</Menu.Group>
+		</Menu>
+	);
+}
+
+export function AppLayout() {
+	const [navOpen, setNavOpen] = useState(false);
+	const location = useLocation();
+
+	// A drawer that survives navigation would cover the page you just asked for.
+	useEffect(() => setNavOpen(false), [location.pathname]);
+
+	return (
+		<div className={styles.shell}>
+			<header className={styles.topbar}>
+				<Button
+					variant="ghost"
+					iconOnly
+					className={styles.navToggle}
+					aria-label="Open navigation"
+					onClick={() => setNavOpen(true)}
+				>
+					<IconMenu />
+				</Button>
+				<span className={styles.brand}>{APP_NAME}</span>
+				<div className={styles.topbarEnd}>
+					<ThemeToggle />
+					<UserMenu />
+				</div>
+			</header>
+
+			<aside className={styles.sidebar}>
+				<NavContent />
+			</aside>
+
+			<main className={styles.content}>
+				<Outlet />
+			</main>
+
+			<Dialog open={navOpen} onOpenChange={setNavOpen} size="sm">
+				<Dialog.Title>{APP_NAME}</Dialog.Title>
+				<NavContent onNavigate={() => setNavOpen(false)} />
+			</Dialog>
+		</div>
+	);
+}
