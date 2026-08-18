@@ -21,8 +21,10 @@
 	opacity: 0.5;
 }
 
-.control:focus-within {
+.control:has(.input:focus-visible) {
 	border-color: var(--border-strong);
+	outline: 2px solid var(--ring);
+	outline-offset: 2px;
 }
 
 .input {
@@ -34,6 +36,13 @@
 	background: transparent;
 	color: var(--text);
 	font-size: var(--text-base);
+}
+
+/*
+ * The ring belongs to `.control` — the field's visible boundary — not this borderless inner
+ * input, which would otherwise show its own ring hugging the padding instead of the field edge.
+ */
+.input:focus-visible {
 	outline: none;
 }
 
