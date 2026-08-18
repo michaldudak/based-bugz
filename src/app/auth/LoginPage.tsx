@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import { APP_NAME, APP_TAGLINE } from '@/app/config';
+import { Logo } from '@/app/Logo';
 import { useSession } from '@/app/session';
 import { Button } from '@/ds/button';
 import { Field } from '@/ds/field';
@@ -51,6 +52,7 @@ export function LoginPage() {
 		<main className={styles.page}>
 			<div className={styles.card}>
 				<header className={styles.header}>
+					<Logo size={28} className={styles.logo} />
 					<h1 className={styles.title}>{APP_NAME}</h1>
 					<p className={styles.tagline}>{APP_TAGLINE}</p>
 				</header>

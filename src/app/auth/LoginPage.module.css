@@ -18,6 +18,12 @@
 	margin-bottom: var(--space-6);
 }
 
+.logo {
+	display: block;
+	margin-bottom: var(--space-3);
+	color: var(--text);
+}
+
 .title {
 	font-size: var(--text-2xl);
 	letter-spacing: -0.02em;

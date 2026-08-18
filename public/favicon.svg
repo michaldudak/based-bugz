@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="1 -1.8125 22 22">
+	<!--
+		Squared off for a tab icon. The vertical offset is -1.8125 rather than the
+		geometric -2.5 on purpose: the shell/body gap is 1u, which at a 16px favicon
+		maps to 0.727px. Centred, it straddles the pixel boundary at y=8 and both
+		rows render ~36% grey — a smear instead of a gap. Solving
+		(8.5 - m) * 16/22 = k + 0.5 lands the gap inside a single row (7.136 ->
+		7.864), so it renders as one 73%-white row. Costs 0.6875u of off-centring,
+		biased upward, which reads as optical centring anyway.
+
+		A favicon cannot see the app's [data-theme] attribute or ?theme= param, so
+		it follows the OS preference only.
+	-->
+	<style>
+		path,
+		circle {
+			fill: #09090b;
+		}
+
+		@media (prefers-color-scheme: dark) {
+			path,
+			circle {
+				fill: #fafafa;
+			}
+		}
+	</style>
+	<path d="M7.0154 7.4999C6.9984 7.7755 7.2238 8 7.5 8L23 8C23 3.5817 19.4183 0 15 0C10.7497 0 7.2735 3.3146 7.0154 7.4999Z" />
+	<path d="M9.8 9L23 9C23 13.4183 19.0601 17 14.2 17L1 17C1 12.5817 4.9399 9 9.8 9Z" />
+	<circle cx="2.25" cy="10.25" r="1.25" />
+</svg>

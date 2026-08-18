@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { APP_NAME } from '@/app/config';
+import { Logo } from '@/app/Logo';
 import { useSession } from '@/app/session';
 import { useTheme } from '@/app/theme';
 import { Avatar } from '@/ds/avatar';
@@ -76,7 +77,10 @@ export function AppLayout() {
 				>
 					<IconMenu />
 				</Button>
-				<span className={styles.brand}>{APP_NAME}</span>
+				<span className={styles.brand}>
+					<Logo size={15} />
+					{APP_NAME}
+				</span>
 				<div className={styles.topbarEnd}>
 					<ThemeToggle />
 					<UserMenu />
@@ -94,7 +98,12 @@ export function AppLayout() {
 			</CommandPaletteProvider>
 
 			<Dialog open={navOpen} onOpenChange={setNavOpen} size="sm">
-				<Dialog.Title>{APP_NAME}</Dialog.Title>
+				<Dialog.Title>
+					<span className={styles.brand}>
+						<Logo size={18} />
+						{APP_NAME}
+					</span>
+				</Dialog.Title>
 				<NavContent onNavigate={() => setNavOpen(false)} />
 			</Dialog>
 		</div>
