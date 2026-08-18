@@ -187,6 +187,13 @@ test.describe('combobox parity', () => {
  */
 test.describe('unmet requirements', () => {
 	test('Tab closes the popup and moves focus past it', async ({ page, impl }) => {
+		/*
+		 * Expected to fail — red is the finding (see the describe comment). `test.fail()` keeps CI
+		 * green while the requirement stays unmet; an impl that satisfies it reports "unexpectedly
+		 * passed", which is the signal to scope this marker to the impls that still fail.
+		 */
+		test.fail();
+
 		await gotoStress(page, listUrl(impl));
 		await openPopup(page);
 
@@ -206,6 +213,9 @@ test.describe('unmet requirements', () => {
 	});
 
 	test('PageDown and PageUp move the highlight by more than one row', async ({ page, impl }) => {
+		// Expected to fail — red is the finding; same deal as the Tab test above.
+		test.fail();
+
 		await gotoStress(page, listUrl(impl));
 		await openPopup(page);
 
