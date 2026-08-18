@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
 import { APP_NAME, REPO_URL } from '@/app/config';
+import { IMPL_OPTIONS } from '@/app/impls';
 import { Logo } from '@/app/Logo';
 import { useSession } from '@/app/session';
 import { useTheme } from '@/app/theme';
 import { Avatar } from '@/ds/avatar';
 import { Button, ButtonLink } from '@/ds/button';
 import { Dialog } from '@/ds/dialog';
-import { IconGitHub, IconMenu, IconMoon, IconSun } from '@/ds/icons';
+import { IconFlask, IconGitHub, IconMenu, IconMoon, IconSun } from '@/ds/icons';
 import { Menu } from '@/ds/menu';
 import { useImplRegistry } from '@/ds/registry';
 import { Tooltip } from '@/ds/tooltip';
@@ -33,6 +34,41 @@ function ImplBadge() {
 				{activeName}
 			</span>
 		</Tooltip>
+	);
+}
+
+/**
+ * The user-facing way to switch `?impl=`. The URL stays the source of truth — this menu just
+ * writes it, so a chosen variant is still shareable as a link and survives reload.
+ */
+function ImplSwitcher() {
+	const { activeName } = useImplRegistry();
+	const { setImpl } = useTheme();
+
+	return (
+		<Menu
+			trigger={
+				<Button variant="ghost" iconOnly aria-label="Switch virtualization implementation">
+					<IconFlask />
+				</Button>
+			}
+			align="end"
+		>
+			<Menu.RadioGroup
+				label="Implementation"
+				value={activeName}
+				onValueChange={(value) => setImpl(value as string)}
+			>
+				{IMPL_OPTIONS.map((option) => (
+					<Menu.RadioItem key={option.value} value={option.value} label={option.label}>
+						<span className={styles.implOption}>
+							<span className={styles.implOptionName}>{option.label}</span>
+							<span className={styles.implOptionDescription}>{option.description}</span>
+						</span>
+					</Menu.RadioItem>
+				))}
+			</Menu.RadioGroup>
+		</Menu>
 	);
 }
 
@@ -122,6 +158,7 @@ export function AppLayout() {
 				</span>
 				<ImplBadge />
 				<div className={styles.topbarEnd}>
+					<ImplSwitcher />
 					<RepoLink />
 					<ThemeToggle />
 					<UserMenu />

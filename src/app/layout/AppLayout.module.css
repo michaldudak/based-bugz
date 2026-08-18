@@ -43,6 +43,27 @@
 	white-space: nowrap;
 }
 
+.implOption {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	max-width: 19rem;
+	padding-block: 2px;
+	white-space: normal;
+}
+
+.implOptionName {
+	font-family: var(--font-mono);
+	font-size: var(--text-sm);
+	font-weight: var(--weight-medium);
+}
+
+.implOptionDescription {
+	color: var(--text-muted);
+	font-size: var(--text-xs);
+	line-height: var(--leading-normal);
+}
+
 .topbarEnd {
 	display: flex;
 	align-items: center;

@@ -50,6 +50,33 @@ const IMPLS: Record<string, ImplEntry> = {
 
 export const IMPL_NAMES = Object.keys(IMPLS);
 
+/** One line per candidate, for the switcher menu. Order matches the registry. */
+export const IMPL_OPTIONS: ReadonlyArray<{ value: string; label: string; description: string }> = [
+	{
+		value: 'baseline',
+		label: 'baseline',
+		description: 'Stable Base UI + TanStack Virtual, wired as the docs describe — the control.',
+	},
+	{
+		value: 'pr-5173',
+		label: 'pr-5173',
+		description:
+			'Built-in Combobox.Virtualizer part; issues list falls back to raw @mui/x-virtualizer.',
+	},
+	{
+		value: 'pr-5414',
+		label: 'pr-5414',
+		description:
+			'Standalone ListVirtualizer, context-only — the issues list publishes its own host.',
+	},
+	{
+		value: 'pr-5466',
+		label: 'pr-5466',
+		description:
+			'Dual-mode Virtualizer: context-bound in the combobox, items prop in the issues list.',
+	},
+];
+
 export const DEFAULT_IMPL = 'baseline';
 
 export function resolveImpl(name: string): { name: string; components: ImplEntry } {
