@@ -30,7 +30,8 @@
 .input {
 	flex: 1;
 	min-width: 6rem;
-	height: calc(var(--control-h) - var(--space-2));
+	/* control's height minus its own padding and border, so one line of input matches --control-h. */
+	height: calc(var(--control-h) - 2 * var(--space-1) - 2px);
 	padding: 0 var(--space-2);
 	border: 0;
 	background: transparent;
