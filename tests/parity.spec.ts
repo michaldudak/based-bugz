@@ -100,6 +100,15 @@ test.describe('combobox parity', () => {
 
 		const input = comboboxInput(page);
 		await input.pressSequentially(QUERY, { delay: 25 });
+
+		/*
+		 * Wait for the filtered pages, not just a matching row: the seeded list's own first row
+		 * (Alex Chen) already matches the query, so option text alone passes before the debounced
+		 * filter lands — and a highlight set on seeded rows is cleared when the filtered rows
+		 * replace them, which is how this test flaked on slow machines. A filtered query has no
+		 * cheap count (evaluation rule 4), so `data-total` going empty marks the swap.
+		 */
+		await expect(picker(page)).toHaveAttribute('data-total', '');
 		await expect(page.getByRole('option').first()).toContainText(new RegExp(QUERY, 'i'));
 
 		await input.press('ArrowDown');
