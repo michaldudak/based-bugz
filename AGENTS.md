@@ -97,7 +97,11 @@ Non-negotiable. Each exists to stop a specific way the comparison could quietly 
     ~300-character title. Deterministic seed, hand-rolled generator — faker produces tastefully
     uniform data that flatters everything. The generator is a pure `(seed, index) → entity`
     function; nothing ever materializes the full dataset, so `?scale=100000` is free at startup and
-    pages can be produced on demand.
+    pages can be produced on demand. Non-Latin scripts are a deliberate **minority** — about one
+    name in seven, one title in five — with the bulk being accented, hyphenated and particled Latin
+    from across Europe and beyond. Hostility comes from the awkward cases being reachable on every
+    screenful, not from the dataset reading as an encoding test; a tracker you cannot skim is one
+    you stop dogfooding.
 11. **Instrumentation is off by default.** When the overlay is always on you stop using the app and
     start reading numbers, and the qualitative pain is the part nothing else gives you. It must also
     work in production builds (rule 7 says that's where perf conclusions come from): metrics come
