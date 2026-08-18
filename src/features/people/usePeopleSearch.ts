@@ -6,8 +6,13 @@ import type { ComboboxStatus } from '@/ds/combobox';
 import { usePeopleLoadMode } from './mode';
 import type { PeopleLoadMode } from './mode';
 
-/** Page size while paging on demand. Small enough that a page boundary is felt, not hidden. */
+/** Default page size while paging on demand. Small enough that a page boundary is felt, not hidden. */
 const PAGED_PAGE_SIZE = 40;
+
+export interface PeopleSearchOptions {
+	/** Paged mode only — eager mode always drains at the repository's maximum page size. */
+	pageSize?: number;
+}
 
 /** Only paged mode debounces, and only because it is protecting the network. */
 const PAGED_DEBOUNCE_MS = 200;
@@ -56,9 +61,13 @@ export interface PeopleSearchResult {
  * conditionally — switching mode therefore remounts nothing and the two strategies share the same
  * component tree, which is what makes them comparable.
  */
-export function usePeopleSearch(rawQuery: string): PeopleSearchResult {
+export function usePeopleSearch(
+	rawQuery: string,
+	options: PeopleSearchOptions = {},
+): PeopleSearchResult {
 	const repository = useRepository();
 	const mode = usePeopleLoadMode();
+	const pageSize = options.pageSize ?? PAGED_PAGE_SIZE;
 
 	/*
 	 * Debouncing exists to spare the network, and eager mode has no network left to spare: the list
@@ -72,12 +81,12 @@ export function usePeopleSearch(rawQuery: string): PeopleSearchResult {
 	/* ---- paged: one page at a time, driven by the viewport ---------------------------------- */
 
 	const paged = useInfiniteQuery({
-		queryKey: ['people', 'paged', search],
+		queryKey: ['people', 'paged', search, pageSize],
 		initialPageParam: undefined as string | undefined,
 		queryFn: ({ pageParam, signal }) =>
 			repository.users.search(
 				{ text: search === '' ? undefined : search },
-				{ cursor: pageParam, limit: PAGED_PAGE_SIZE, signal },
+				{ cursor: pageParam, limit: pageSize, signal },
 			),
 		getNextPageParam: (lastPage: Page<User>) => lastPage.nextCursor,
 		enabled: mode === 'paged',
