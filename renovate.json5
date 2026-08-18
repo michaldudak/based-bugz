@@ -1,0 +1,77 @@
+{
+	$schema: 'https://docs.renovatebot.com/renovate-schema.json',
+	extends: ['config:recommended'],
+
+	timezone: 'Europe/Warsaw',
+	// Once a month, any hour of the 1st. A full day means the hosted bot is guaranteed a slot;
+	// a narrow overnight window can be missed entirely and silently skip the month.
+	schedule: ['* * 1 * *'],
+	// Leave open branches alone between runs too, otherwise "monthly" only applies to the
+	// first notification and rebases trickle in all month.
+	updateNotScheduled: false,
+	// Everything not yet PR'd is listed on one issue, so a quiet month costs zero notifications
+	// and nothing is silently dropped.
+	dependencyDashboard: true,
+	// The whole batch has to land inside one window; the default 2 PRs/hour would stall it.
+	prHourlyLimit: 0,
+	prConcurrentLimit: 10,
+	// Bump the range in package.json instead of waiting for a release to escape the caret.
+	// With carets everywhere the default would hide most updates inside the lockfile diff,
+	// and a monthly PR should say plainly which versions moved.
+	rangeStrategy: 'bump',
+	// This repo writes plain sentence commit subjects, not conventional commits.
+	semanticCommits: 'disabled',
+	// Transitive dependencies, same cadence, one lockfile-only PR.
+	lockFileMaintenance: {
+		enabled: true,
+		schedule: ['* * 1 * *'],
+	},
+
+	packageRules: [
+		{
+			// react-dom ships in lockstep with react, and the @types packages describe a specific
+			// runtime version. Splitting these is how a green PR turns the typecheck red.
+			groupName: 'React',
+			matchPackageNames: ['react', 'react-dom', '@types/react', '@types/react-dom'],
+		},
+		{
+			groupName: 'TanStack',
+			matchPackageNames: ['@tanstack/**'],
+		},
+		{
+			groupName: 'Vite',
+			matchPackageNames: ['vite', '@vitejs/**'],
+		},
+		{
+			groupName: 'linting and formatting',
+			matchPackageNames: ['oxlint', 'prettier', 'stylelint', 'stylelint-config-**'],
+		},
+		{
+			// @axe-core/playwright peer-depends on @playwright/test.
+			groupName: 'Playwright',
+			matchPackageNames: ['@playwright/test', '@axe-core/playwright'],
+		},
+		{
+			// Nothing to match yet — there is no CI. Here so the first workflow file doesn't
+			// arrive with one PR per action.
+			groupName: 'GitHub Actions',
+			matchManagers: ['github-actions'],
+		},
+		{
+			// Held at 1.7.0 by a pnpm patch keyed to that exact version
+			// (patches/@base-ui__react@1.7.0.patch, tracked in mui/base-ui#5528). Renovate does not
+			// rewrite pnpm.patchedDependencies, so any bump leaves the patch pointing at a version
+			// that no longer resolves and breaks `pnpm install` in the PR. Re-enable in the same
+			// commit that drops the patch.
+			matchPackageNames: ['@base-ui/react'],
+			enabled: false,
+		},
+		{
+			// The side-by-side canary builds are pinned to specific PR artifacts, and that pin is
+			// the evaluation. Matched by dep name because these are aliased installs, so their
+			// package name is whatever the artifact publishes as.
+			matchDepNames: ['base-ui-*'],
+			enabled: false,
+		},
+	],
+}
