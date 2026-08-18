@@ -8,6 +8,7 @@ import type {
 	MenuRootProps as BaseRootProps,
 } from '@base-ui/react/menu';
 import { IconCheck, IconChevronRight } from '@/ds/icons';
+import { Tooltip } from '@/ds/tooltip';
 import { cx } from '@/ds/utils';
 import styles from './Menu.module.css';
 
@@ -270,6 +271,12 @@ export interface MenuProps {
 	 * the portal, so it cannot travel with the items as a child.
 	 */
 	trigger: ReactElement;
+	/**
+	 * Tooltip for the trigger. A targeted prop rather than something callers compose from
+	 * outside, because it cannot be: the menu's and the tooltip's trigger props must merge onto
+	 * the same element, and only this component holds both render chains.
+	 */
+	tooltip?: ReactNode;
 	open?: boolean;
 	defaultOpen?: boolean;
 	onOpenChange?: BaseRootProps['onOpenChange'];
@@ -291,6 +298,7 @@ export interface MenuProps {
  */
 function MenuRoot({
 	trigger,
+	tooltip,
 	open,
 	defaultOpen,
 	onOpenChange,
@@ -311,7 +319,13 @@ function MenuRoot({
 			modal={modal}
 			disabled={disabled}
 		>
-			<BaseMenu.Trigger render={trigger} />
+			{tooltip === undefined ? (
+				<BaseMenu.Trigger render={trigger} />
+			) : (
+				<Tooltip content={tooltip}>
+					<BaseMenu.Trigger render={trigger} />
+				</Tooltip>
+			)}
 			<BaseMenu.Portal>
 				<BaseMenu.Positioner
 					className={styles.positioner}

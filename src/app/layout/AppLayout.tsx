@@ -52,6 +52,7 @@ function ImplSwitcher() {
 					<IconFlask />
 				</Button>
 			}
+			tooltip="Switch implementation"
 			align="end"
 		>
 			<Menu.RadioGroup
