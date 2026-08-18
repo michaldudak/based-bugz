@@ -35,8 +35,8 @@ export function UserPickerLab() {
 				5,000 generated users through the repository, with simulated latency. Implementation:{' '}
 				<code>{activeName}</code>, loading: <code>{people.mode}</code>
 				{people.mode === 'eager' &&
-					(people.draining
-						? ` — draining, ${people.loadedCount.toLocaleString()} in memory so far`
+					(people.loadingAll
+						? ' — loading everyone in one request…'
 						: ` — all ${people.loadedCount.toLocaleString()} in memory`)}
 				.
 			</Page.Description>

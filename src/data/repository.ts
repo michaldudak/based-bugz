@@ -187,6 +187,15 @@ export interface UsersRepository {
 	search(query: UserQuery, page: PageRequest): Promise<Page<User>>;
 	/** Found users in the order requested. Unknown ids are dropped, never thrown on. */
 	byIds(ids: readonly UserId[], options?: ReadOptions): Promise<User[]>;
+	/**
+	 * Every user, in one simulated round-trip. Exists for the eager loading strategy
+	 * (`?people=eager`): still async, abortable and failure-injected like every read, but
+	 * deliberately not paginated — the strategy's subject is a complete local array, and draining
+	 * it page by page would measure the fake network instead of the virtualization the strategy
+	 * exists to isolate. An `HttpRepository` would serve this from a bulk endpoint, which is what
+	 * real apps that ship eager pickers actually do.
+	 */
+	all(options?: ReadOptions): Promise<readonly User[]>;
 }
 
 export interface LabelsRepository {

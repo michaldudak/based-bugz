@@ -78,9 +78,11 @@ Non-negotiable. Each exists to stop a specific way the comparison could quietly 
    canary Root would fail to connect — or worse, half-work.
 3. **Every repository read is async, abortable, and cursor-paginated**, even though the data is an
    in-memory array. The moment one picker gets a synchronous array, that picker stops testing
-   anything. `?people=eager` does **not** weaken this: the repository stays async and paged, and
-   eager loading is built on top of it by draining every page once. The picker ends up holding a
-   complete local array — which is a loading strategy, not a shortcut through the repository.
+   anything. `?people=eager` does **not** weaken this: eager loading goes through `users.all()`,
+   the repository's one deliberate bulk read — still async, abortable and failure-injected, one
+   simulated round-trip. It is not a shortcut but the endpoint shape real apps ship for eager
+   pickers; draining the paged API instead would spend seconds of simulated latency measuring the
+   fake network rather than the virtualization the strategy exists to isolate.
 4. **`Page.total` is optional.** Whether an API demands a known item count upfront is a primary
    differentiator; making the count optional forces the question instead of hiding it.
 5. **No React Compiler.** It rewrites memoization, which is the axis under comparison.
@@ -122,7 +124,7 @@ apps ship:
 
 - **`paged`** (default) — a page at a time, more requested as the viewport nears the end. Asks
   whether an API copes with a list that grows underneath it and a count it may never learn.
-- **`eager`** — every person drained once into memory, then filtered locally. Asks whether it copes
+- **`eager`** — everyone fetched in one bulk request, then filtered locally. Asks whether it copes
   with a large static array whose result set changes wholesale on every keystroke, with no async
   boundary to hide behind.
 

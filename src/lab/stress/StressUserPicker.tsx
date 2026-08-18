@@ -42,7 +42,7 @@ export function StressUserPicker({
 	const [preselectSettled, setPreselectSettled] = useState(preselectIndex === undefined);
 
 	const people = usePeopleSearch(query, { pageSize });
-	const { items, hasMore, fetchMore, draining } = people;
+	const { items, hasMore, fetchMore, loadingAll } = people;
 
 	/*
 	 * Walk to the preselected row. Paged mode pages forward until it exists; eager mode just waits
@@ -67,8 +67,8 @@ export function StressUserPicker({
 			return;
 		}
 
-		if (draining) {
-			// Eager mode is still pulling pages; the items array will grow on its own.
+		if (loadingAll) {
+			// Eager mode's single bulk request is still in flight; items arrive all at once.
 			return;
 		}
 
@@ -80,7 +80,7 @@ export function StressUserPicker({
 			setSelected([last]);
 			setPreselectSettled(true);
 		}
-	}, [preselectIndex, preselectSettled, items, hasMore, fetchMore, draining]);
+	}, [preselectIndex, preselectSettled, items, hasMore, fetchMore, loadingAll]);
 
 	return (
 		<div
@@ -127,7 +127,7 @@ export function StressUserPicker({
 			<p className={styles.status}>
 				{items.length.toLocaleString()} loaded
 				{people.total === undefined ? '' : ` of ${people.total.toLocaleString()}`}
-				{people.mode === 'eager' ? (draining ? ' · draining…' : ' · all in memory') : ''}
+				{people.mode === 'eager' ? (loadingAll ? ' · loading everyone…' : ' · all in memory') : ''}
 				{preselectIndex === undefined
 					? ''
 					: ` · preselected #${preselectIndex.toLocaleString()}: ${

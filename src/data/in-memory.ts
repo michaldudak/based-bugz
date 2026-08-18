@@ -365,6 +365,7 @@ export class InMemoryRepository implements Repository {
 				this.read(readOptions?.signal, () =>
 					ids.map((id) => this.userById(id)).filter((user): user is User => user !== null),
 				),
+			all: (readOptions) => this.read(readOptions?.signal, () => this.allUsersSync()),
 		};
 
 		this.labels = {
@@ -761,6 +762,16 @@ export class InMemoryRepository implements Repository {
 		}
 
 		return result;
+	}
+
+	private allUsersSync(): readonly User[] {
+		const items: User[] = [];
+
+		for (let index = 0; index < this.shape.users; index += 1) {
+			items.push(this.generator.user(index));
+		}
+
+		return items;
 	}
 
 	private searchUsersSync(query: UserQuery, page: PageRequest): Page<User> {
