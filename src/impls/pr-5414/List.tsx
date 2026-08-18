@@ -67,6 +67,7 @@ interface VirtualRowProps<T> {
 	threshold: number;
 	render: (item: T, index: number, rowProps: ListRowProps) => ReactNode;
 	onNearEnd?: (() => void) | undefined;
+	onEndInView: (inView: boolean) => void;
 }
 
 /**
@@ -86,6 +87,7 @@ function VirtualRow<T>({
 	threshold,
 	render,
 	onNearEnd,
+	onEndInView,
 }: VirtualRowProps<T>) {
 	const metadata = use(VirtualItemContext);
 	const registerItem = metadata?.registerItem;
@@ -99,6 +101,26 @@ function VirtualRow<T>({
 			onNearEnd();
 		}
 	}, [onNearEnd, index, itemCount, threshold]);
+
+	/*
+	 * The last row doubles as the `trailing` gate. The contract wants trailing inside the scroll
+	 * container, after the rows — a sentinel you scroll to. This virtualizer owns every child of
+	 * its scroll element, so trailing lives outside it, and rendered unconditionally it becomes a
+	 * permanently visible bar (with a cursor-paged repository, "has more" is almost always true).
+	 * Mount state of the last row is the closest observable stand-in for "the end of the content
+	 * is on screen": it includes overscan, exactly like the baseline's in-scroller sentinel, and
+	 * when a new page lands this row stops being last and the cleanup hides the bar again.
+	 */
+	const isLast = index === itemCount - 1;
+
+	useEffect(() => {
+		if (!isLast) {
+			return undefined;
+		}
+
+		onEndInView(true);
+		return () => onEndInView(false);
+	}, [isLast, onEndInView]);
 
 	/*
 	 * `data-index` and the aria pair come from the virtualizer; `role` does not. The virtualizer's
@@ -159,6 +181,8 @@ export function Pr5414List<T>(props: ListProps<T>) {
 		host.registry.virtualizer?.resetScroll();
 	}, [resetKey, host]);
 
+	const [endInView, setEndInView] = useState(false);
+
 	const renderRow = useCallback(
 		(item: T, index: number) => (
 			<VirtualRow
@@ -168,6 +192,7 @@ export function Pr5414List<T>(props: ListProps<T>) {
 				threshold={endReachedThreshold}
 				render={renderItem}
 				onNearEnd={onEndReached}
+				onEndInView={setEndInView}
 			/>
 		),
 		[items.length, endReachedThreshold, renderItem, onEndReached],
@@ -206,7 +231,7 @@ export function Pr5414List<T>(props: ListProps<T>) {
 					</ListVirtualizer>
 				</ListVirtualizationListStateContext>
 			</ListVirtualizationHostContext>
-			{trailing}
+			{endInView ? trailing : null}
 		</div>
 	);
 }
