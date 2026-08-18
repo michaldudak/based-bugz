@@ -21,13 +21,12 @@ _To be filled from the landed implementations: non-comment lines per file, per s
 baseline as 100. The pr-5414 host is broken out separately — it is the price of the context-only
 API, not of virtualization._
 
-| impl     | Combobox | List         | of which: host/scaffolding                                                                                |
-| -------- | -------- | ------------ | --------------------------------------------------------------------------------------------------------- |
-| baseline | 236      | 81           | —                                                                                                         |
-| pr-5173  | 194      | _(excluded)_ | List is a 148-line raw `@mui/x-virtualizer` adapter, ~1.8× baseline — engine ergonomics, not the PR's API |
-| pr-5414  | 229      | 125          | 33 (the app-authored host)                                                                                |
-| pr-5466  |          |              | —                                                                                                         |
-| pr-5466  |          |              | —                                                                                                         |
+| impl     | Combobox | List                         | of which: host/scaffolding                                                                                |
+| -------- | -------- | ---------------------------- | --------------------------------------------------------------------------------------------------------- |
+| baseline | 236      | 81                           | —                                                                                                         |
+| pr-5173  | 194      | _(excluded)_                 | List is a 148-line raw `@mui/x-virtualizer` adapter, ~1.8× baseline — engine ergonomics, not the PR's API |
+| pr-5414  | 229      | 125                          | 33 (the app-authored host)                                                                                |
+| pr-5466  | 224      | 75 (+7-line paging sentinel) | —                                                                                                         |
 
 ## Requirements an API could not express
 
@@ -81,12 +80,12 @@ Rule 1: these are headline findings, not implementation defects.
 
 ## Parity and accessibility matrix
 
-`pnpm test:e2e`, production preview, 2026-08-18: **65 passed / 15 failed** over 4 projects × 20
-tests. Every failure is the one finding above — `scrollable-region-focusable` × 5 axe cases × 3
-canaries. Keyboard parity (16 combobox tests) and the standalone-list suite (4 tests) pass on all
-four implementations; the two expected failures (Tab-dismissal, PageUp/PageDown) reproduce
-identically on all four. Still owed for rule 8: the manual VoiceOver pass and the Safari/Firefox
-run.
+`pnpm test:e2e`, production preview, 2026-08-18: **80 passed** over 4 projects × 20 tests, with
+the recorded findings encoded rather than left red: the canaries' scrollport finding is pinned as
+an exact per-implementation expectation in `a11y.spec.ts` (a canary fixing it, or growing any new
+violation, turns the suite red), and the two keyboard defects (Tab-dismissal, PageUp/PageDown) are
+expected failures that reproduce identically on all four implementations. Still owed for rule 8:
+the manual VoiceOver pass and the Safari/Firefox run.
 
 ## Packaging and integration findings
 
