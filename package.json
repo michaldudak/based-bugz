@@ -37,5 +37,10 @@
 		"stylelint-config-standard": "^40.0.0",
 		"typescript": "^7.0.2",
 		"vite": "^8.2.1"
+	},
+	"pnpm": {
+		"patchedDependencies": {
+			"@base-ui/react@1.7.0": "patches/@base-ui__react@1.7.0.patch"
+		}
 	}
 }
