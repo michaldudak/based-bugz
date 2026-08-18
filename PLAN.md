@@ -6,8 +6,11 @@ holds the order of work and what "done" means at each step. Update it as phases 
 **Current state:** Phases 0–8 landed. The app is a working tracker: sign in, browse/filter/sort
 10,000 issues, create, edit inline, comment, delete with undo, ⌘K over everything, plus the design
 system gallery, the combobox lab, the stress lab, a perf overlay and a Playwright parity suite.
-The three PR URLs are known, canary builds are verified installable side by side, and Phase 9 below
-is the verified plan for them. Nothing in it is implemented yet.
+Phase 9 steps 1–6 are implemented on the `virtualizer-variants` branch: all three canary
+implementations are live behind `?impl=`, both surfaces each, with the parity matrix at 65/15 —
+every failure being one recorded finding (`scrollable-region-focusable` on the canaries'
+library-owned scrollports). Remaining: the Safari/Firefox and VoiceOver passes, perf numbers, and
+the verdict write-up in FINDINGS.md.
 
 The parity suite is **deliberately red in five places**. Each failure is a reproduced defect, not a
 flaky assertion, and no assertion was softened to make the baseline green — see

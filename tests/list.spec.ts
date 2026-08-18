@@ -80,7 +80,7 @@ test.describe('standalone list', () => {
 		await list.hover();
 		await page.mouse.wheel(0, 6_000);
 
-		await page.getByRole('textbox', { name: /search/i }).fill('popup');
+		await page.getByRole('searchbox', { name: /search/i }).fill('popup');
 
 		// New result set: the first mounted row is the first row of it.
 		await expect(async () => {

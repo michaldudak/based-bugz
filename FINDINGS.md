@@ -33,15 +33,15 @@ API, not of virtualization._
 
 Rule 1: these are headline findings, not implementation defects.
 
-| Requirement (contract)                           | baseline | pr-5173                                                                        | pr-5414                                            | pr-5466 |
-| ------------------------------------------------ | -------- | ------------------------------------------------------------------------------ | -------------------------------------------------- | ------- |
-| Grouped rows (`groupOf`)                         | ✓        | ✗ unexpressible — flat only, warns                                             | ◐ header folded into its item's row; never sticky  |         |
-| Create-row / loading-row (non-item rows)         | ✓        | ✗ pushed outside the scrollport                                                | ◐ outside the scroll container                     |         |
-| Unknown `total` (`aria-setsize` without a count) | ✓        | ◐ part injects loaded count; override relies on prop-merge order               | ✓                                                  |         |
-| Variable measured heights                        | ✓        | ◐ measured, but keyboard scroll-into-view uses stale estimates (see Behaviour) | ✓                                                  |         |
-| `onEndReached` (list)                            | ✓        | ✗ no signal; hand-written onScroll math                                        | ◐ observable only from inside a mounted row        |         |
-| Scroll reset on result-set change (list)         | ✓        | ✓                                                                              | ✓                                                  |         |
-| `measureVersion` (drop caches on breakpoint)     | ✓        | ✓                                                                              | ✗ only `key=` remount, which loses scroll position |         |
+| Requirement (contract)                           | baseline | pr-5173                                                                        | pr-5414                                            | pr-5466                                                                              |
+| ------------------------------------------------ | -------- | ------------------------------------------------------------------------------ | -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Grouped rows (`groupOf`)                         | ✓        | ✗ unexpressible — flat only, warns                                             | ◐ header folded into its item's row; never sticky  | ◐ header folded into its item's row; never sticky                                    |
+| Create-row / loading-row (non-item rows)         | ✓        | ✗ pushed outside the scrollport                                                | ◐ outside the scroll container                     | ◐ create pinned below the list; loading folded into the last row so it still scrolls |
+| Unknown `total` (`aria-setsize` without a count) | ✓        | ◐ part injects loaded count; override relies on prop-merge order               | ✓                                                  | ◐ injects loaded count; one-line override                                            |
+| Variable measured heights                        | ✓        | ◐ measured, but keyboard scroll-into-view uses stale estimates (see Behaviour) | ✓                                                  | ✓                                                                                    |
+| `onEndReached` (list)                            | ✓        | ✗ no signal; hand-written onScroll math                                        | ◐ observable only from inside a mounted row        | ◐ sentinel component smuggled into the renderer                                      |
+| Scroll reset on result-set change (list)         | ✓        | ✓                                                                              | ✓                                                  | ✓                                                                                    |
+| `measureVersion` (drop caches on breakpoint)     | ✓        | ✓                                                                              | ✗ only `key=` remount, which loses scroll position | ✗ only `key=` remount, which loses scroll position                                   |
 
 ## Behaviour findings
 
@@ -63,11 +63,30 @@ Rule 1: these are headline findings, not implementation defects.
   scroll-to-selected on open. The baseline needs `onItemHighlighted` → `rowIndexOfItem` →
   `scrollToIndex` for the same behaviour.
 
+- **All three canaries: the library-owned scrollport is not keyboard-reachable.**
+  `scrollable-region-focusable [serious]` on the list scroller in every axe case (open popup,
+  highlighted row, variable heights, RTL, in-dialog) for 5173, 5414 and 5466 — and not for the
+  baseline, where the app owns that element. The mirror image of the baseline's Tab-trap: one side
+  makes the scroller a tab stop and breaks Tab-dismissal, the other removes it from the tab order
+  and leaves keyboard users unable to scroll except by moving the highlight. Neither default is
+  right; the API needs to take a position.
+- **pr-5466: the two modes need different sizing.** In the popup, `flex: 1` lets the scrollport
+  size from the rows it rendered — a feedback loop resolved by `height: var(--total-size)` per the
+  PR docs; the issues list needs nothing because its container height is definite. Same component,
+  same props, two sizing stories the app has to know.
+- **pr-5414/5466: the baseline's per-arrow-key `flushSync` warning is gone** — the virtualizer
+  scrolls itself, so no `scrollToIndex` runs inside a React lifecycle.
+- **None of the three PRs changes Tab-dismissal or PageDown/PageUp** — the canaries fail the same
+  two expected-failure tests as the baseline.
+
 ## Parity and accessibility matrix
 
-_From `pnpm test:e2e` (all projects) plus the manual VoiceOver pass and the Safari/Firefox run
-(rule 8). Baseline's two expected failures — Tab-dismissal and PageUp/PageDown — are the numbers to
-beat._
+`pnpm test:e2e`, production preview, 2026-08-18: **65 passed / 15 failed** over 4 projects × 20
+tests. Every failure is the one finding above — `scrollable-region-focusable` × 5 axe cases × 3
+canaries. Keyboard parity (16 combobox tests) and the standalone-list suite (4 tests) pass on all
+four implementations; the two expected failures (Tab-dismissal, PageUp/PageDown) reproduce
+identically on all four. Still owed for rule 8: the manual VoiceOver pass and the Safari/Firefox
+run.
 
 ## Packaging and integration findings
 
