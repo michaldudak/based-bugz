@@ -7,20 +7,18 @@
  * flat item list is heterogeneous in both shape and height.
  */
 
-import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { useRepository } from '@/data';
-import type { Page, User, UserId } from '@/data';
+import type { User, UserId } from '@/data';
 import { Avatar } from '@/ds/avatar';
 import { Button } from '@/ds/button';
 import { Combobox } from '@/ds/combobox';
 import type { ComboboxStatus } from '@/ds/combobox';
 import { IconCheck, IconClose, IconUser } from '@/ds/icons';
+import { usePeopleSearch } from '@/features/people';
 import type { AssigneeValue } from './useIssueFilters';
-import { useDebouncedValue } from './hooks';
 import styles from './AssigneePicker.module.css';
-
-const PAGE_SIZE = 40;
 
 /** A person row is two lines plus an avatar; the synthetic row is one line. */
 const USER_ROW_HEIGHT = 52;
@@ -102,43 +100,29 @@ export function AssigneePicker({
 	 */
 	const selectedLabel = comboValue[0] === undefined ? null : optionLabel(comboValue[0]);
 	const typed = query.trim() === '' || query === selectedLabel ? '' : query.trim();
-	const search = useDebouncedValue(typed);
 
-	const users = useInfiniteQuery({
-		queryKey: ['users', 'search', search],
-		initialPageParam: undefined as string | undefined,
-		queryFn: ({ pageParam, signal }) =>
-			repository.users.search(
-				{ text: search === '' ? undefined : search },
-				{ cursor: pageParam, limit: PAGE_SIZE, signal },
-			),
-		getNextPageParam: (lastPage: Page<User>) => lastPage.nextCursor,
-	});
+	// Debouncing is the hook's business now: it only makes sense when a network is involved, and
+	// whether one is involved is exactly what the loading mode decides.
+	const people = usePeopleSearch(typed);
+	const search = people.query;
 
 	const showUnassigned =
 		allowUnassigned &&
 		(search === '' || UNASSIGNED_LABEL.toLowerCase().includes(search.toLowerCase()));
 
 	const items = useMemo<readonly AssigneeOption[]>(() => {
-		const rows = (users.data?.pages ?? []).flatMap((page) =>
-			page.items.map((user): AssigneeOption => ({ kind: 'user', user })),
-		);
+		const rows = people.items.map((user): AssigneeOption => ({ kind: 'user', user }));
 
 		return showUnassigned ? [UNASSIGNED, ...rows] : rows;
-	}, [users.data, showUnassigned]);
+	}, [people.items, showUnassigned]);
 
-	const status: ComboboxStatus = users.isPending
-		? 'loading'
-		: users.isError
-			? 'error'
-			: users.isFetchingNextPage
-				? 'loading-more'
-				: 'idle';
+	const status: ComboboxStatus = people.status;
 
 	// `total` is the server's count, but the list also carries a row the server has never heard of —
 	// so the number the contract passes to `aria-setsize` has to be adjusted by hand.
-	const serverTotal = users.data?.pages[0]?.total;
-	const total = serverTotal === undefined ? undefined : serverTotal + (showUnassigned ? 1 : 0);
+	// Still adjusted by hand for the synthetic row. In eager mode the count is always known; in
+	// paged mode it is whatever the repository chose to reveal.
+	const total = people.total === undefined ? undefined : people.total + (showUnassigned ? 1 : 0);
 
 	return (
 		<div className={className}>
@@ -162,9 +146,9 @@ export function AssigneePicker({
 					query={query}
 					onQueryChange={setQuery}
 					status={status}
-					hasMore={users.hasNextPage}
-					onEndReached={() => void users.fetchNextPage()}
-					onRetry={() => void users.refetch()}
+					hasMore={people.hasMore}
+					onEndReached={people.fetchMore}
+					onRetry={people.retry}
 					total={total}
 					estimateItemHeight={(option) =>
 						option.kind === 'user' ? USER_ROW_HEIGHT : PLAIN_ROW_HEIGHT

@@ -153,6 +153,12 @@ lab routes for rule 12 repros.
 
 ---
 
+## Loading strategies
+
+`?people=paged` (default) and `?people=eager` are both wired through `features/people`, switchable
+from Settings without a reload. See AGENTS.md — "Loading strategy is a second axis" for what each
+one stresses and the measured cost of both.
+
 ## Known baseline failures
 
 `pnpm test:e2e` — 11 pass, 5 fail against `impls/baseline`. All five are defects in the documented

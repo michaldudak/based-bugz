@@ -7,6 +7,7 @@ import { Field } from '@/ds/field';
 import { Input } from '@/ds/input';
 import { Select } from '@/ds/select';
 import { Separator } from '@/ds/separator';
+import { PEOPLE_MODE_PARAM, parsePeopleMode } from '@/features/people';
 import styles from './SettingsPage.module.css';
 
 const THEMES = [
@@ -25,20 +26,26 @@ const DIRECTIONS = [
 	{ value: 'rtl', label: 'Right to left' },
 ] as const;
 
+const PEOPLE_MODES = [
+	{ value: 'paged', label: 'Page on demand' },
+	{ value: 'eager', label: 'Load everyone up front' },
+] as const;
+
 /**
  * The URL control surface, as UI. Appearance applies instantly; dataset params rebuild the
  * generated world, so they apply on reload — which is also what you want before a perf run.
  */
 export function SettingsPage() {
 	const { theme, density, dir, setTheme, setDensity, setDirection } = useTheme();
-	const [searchParams] = useSearchParams();
+	const [searchParams, setSearchParams] = useSearchParams();
 	const [data, setData] = useState(() => parseDataParams(searchParams.toString()));
+	const peopleMode = parsePeopleMode(searchParams);
 
 	function applyDataParams(options: { fresh?: boolean } = {}) {
 		const next = dataParamsToSearch(data);
 
-		// Appearance is UI state and must survive a dataset reload.
-		for (const key of ['theme', 'density', 'dir', 'impl'] as const) {
+		// UI and picker state must survive a dataset reload — only the generated world is rebuilt.
+		for (const key of ['theme', 'density', 'dir', 'impl', PEOPLE_MODE_PARAM] as const) {
 			const value = searchParams.get(key);
 
 			if (value !== null) {
@@ -90,6 +97,49 @@ export function SettingsPage() {
 							items={DIRECTIONS}
 							value={dir}
 							onValueChange={(value) => value !== null && setDirection(value)}
+						/>
+					</Field>
+				</div>
+			</section>
+
+			<Separator />
+
+			<section className={styles.section}>
+				<h2 className={styles.sectionTitle}>Pickers</h2>
+				<p className={styles.sectionNote}>
+					How person pickers get their rows. This is the second axis of the combobox evaluation, so
+					it applies immediately rather than on reload — switch it with a picker open and watch what
+					changes.
+				</p>
+				<div className={styles.grid}>
+					<Field
+						label="People loading"
+						nativeLabel={false}
+						description="Paged asks the repository for more as you scroll. Eager loads all 5,000 once, then filters locally."
+					>
+						<Select
+							items={PEOPLE_MODES}
+							value={peopleMode}
+							onValueChange={(value) => {
+								if (value === null) {
+									return;
+								}
+
+								setSearchParams(
+									(current) => {
+										const next = new URLSearchParams(current);
+
+										if (value === 'paged') {
+											next.delete(PEOPLE_MODE_PARAM);
+										} else {
+											next.set(PEOPLE_MODE_PARAM, value);
+										}
+
+										return next;
+									},
+									{ replace: true },
+								);
+							}}
 						/>
 					</Field>
 				</div>

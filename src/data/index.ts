@@ -99,3 +99,16 @@ export { DATA_EPOCH, datasetShape } from './generate';
 
 export type { RepositoryProviderProps } from './provider';
 export { RepositoryProvider, useRepository } from './provider';
+
+/**
+ * Text matching, shared with eager-loading pickers.
+ *
+ * A picker that holds the whole people list locally has to filter it itself, and it must fold and
+ * match exactly the way the repository does or the paged and eager modes stop returning the same
+ * rows — which would make any comparison between them meaningless. Exporting the predicate is what
+ * keeps the two honest.
+ *
+ * Worth recording: a real `HttpRepository` could not offer this. Eager loading against a server
+ * means reimplementing its matching semantics on the client, where any divergence is silent.
+ */
+export { foldText, matchesUserText } from './in-memory';

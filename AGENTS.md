@@ -77,7 +77,9 @@ Non-negotiable. Each exists to stop a specific way the comparison could quietly 
    canary Root would fail to connect — or worse, half-work.
 3. **Every repository read is async, abortable, and cursor-paginated**, even though the data is an
    in-memory array. The moment one picker gets a synchronous array, that picker stops testing
-   anything.
+   anything. `?people=eager` does **not** weaken this: the repository stays async and paged, and
+   eager loading is built on top of it by draining every page once. The picker ends up holding a
+   complete local array — which is a loading strategy, not a shortcut through the repository.
 4. **`Page.total` is optional.** Whether an API demands a known item count upfront is a primary
    differentiator; making the count optional forces the question instead of hiding it.
 5. **No React Compiler.** It rewrites memoization, which is the axis under comparison.
@@ -107,6 +109,26 @@ Non-negotiable. Each exists to stop a specific way the comparison could quietly 
     package boundary, so the aliasing itself can manufacture bugs. Before recording one as a
     finding, reproduce it in a lab route where the surrounding components come from the same canary
     build.
+
+### Loading strategy is a second axis
+
+`?people=` switches how person pickers get their rows, and both settings are real strategies real
+apps ship:
+
+- **`paged`** (default) — a page at a time, more requested as the viewport nears the end. Asks
+  whether an API copes with a list that grows underneath it and a count it may never learn.
+- **`eager`** — every person drained once into memory, then filtered locally. Asks whether it copes
+  with a large static array whose result set changes wholesale on every keystroke, with no async
+  boundary to hide behind.
+
+Debouncing applies to `paged` only. Eager mode has no network left to protect, and a delay there
+would only hide the cost the mode exists to expose — so every keystroke scans the whole array and
+rebuilds the row model synchronously, with rule 6 forbidding anything that would soften it.
+
+Measured on the production preview: 5,000 people cost 10–18ms a keystroke with no long animation
+frames; 50,000 cost 41–51ms, which is where it starts to be felt. That is the range in which an
+API's own filtering would begin to matter, and therefore where the three PRs are most likely to
+diverge.
 
 ### The baseline is the defending champion
 
@@ -242,6 +264,7 @@ impls. Verify with `pnpm why` after any install.
 
 **URL parameters** are the app's control surface, so any run is reproducible from a link:
 `?impl=` `?seed=` `?scale=` `?latency=` `?errorRate=` `?density=` `?theme=` `?dir=` `?fresh=`
+`?people=`
 
 **Mutations** append to an event log, which serves undo-via-Toast now and replay-to-server later.
 The log persists to `localStorage`, keyed by `(seed, scale)`, and replays over freshly generated

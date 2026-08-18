@@ -1,71 +1,43 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
-import { useRepository } from '@/data';
-import type { Page, User } from '@/data';
+import { useMemo, useState } from 'react';
+import type { User } from '@/data';
 import { Avatar } from '@/ds/avatar';
 import { Checkbox } from '@/ds/checkbox';
 import { Combobox, useComboboxImpl } from '@/ds/combobox';
 import { IconCheck } from '@/ds/icons';
+import { usePeopleSearch } from '@/features/people';
 import styles from './UserPickerLab.module.css';
-
-const PAGE_SIZE = 40;
 
 /** Two-line rows are genuinely variable in height once names wrap — that is the point. */
 const ESTIMATED_ROW_HEIGHT = 48;
 
-function useDebounced(value: string, delay = 200): string {
-	const [debounced, setDebounced] = useState(value);
-
-	useEffect(() => {
-		const timer = window.setTimeout(() => setDebounced(value), delay);
-		return () => window.clearTimeout(timer);
-	}, [value, delay]);
-
-	return debounced;
-}
-
 export function UserPickerLab() {
-	const repository = useRepository();
 	const { activeName } = useComboboxImpl();
 	const [query, setQuery] = useState('');
 	const [selected, setSelected] = useState<readonly User[]>([]);
 	const [multiple, setMultiple] = useState(false);
 	const [grouped, setGrouped] = useState(false);
-	const debouncedQuery = useDebounced(query);
 
-	const search = useInfiniteQuery({
-		queryKey: ['lab', 'users', debouncedQuery],
-		initialPageParam: undefined as string | undefined,
-		queryFn: ({ pageParam, signal }) =>
-			repository.users.search(
-				{ text: debouncedQuery === '' ? undefined : debouncedQuery },
-				{ cursor: pageParam, limit: PAGE_SIZE, signal },
-			),
-		getNextPageParam: (lastPage: Page<User>) => lastPage.nextCursor,
-	});
+	const people = usePeopleSearch(query);
 
 	const items = useMemo(() => {
-		const flat = (search.data?.pages ?? []).flatMap((page) => page.items);
+		const flat = people.items;
 		// Grouping requires items to arrive grouped; the server does not sort by team, so the lab
 		// sorts what it has loaded. Rows genuinely reshuffle as pages arrive — a good stress case.
 		return grouped ? flat.toSorted((a, b) => a.team.localeCompare(b.team)) : flat;
-	}, [search.data, grouped]);
-
-	const status = search.isPending
-		? 'loading'
-		: search.isError
-			? 'error'
-			: search.isFetchingNextPage
-				? 'loading-more'
-				: 'idle';
+	}, [people.items, grouped]);
 
 	return (
 		<section className={styles.lab}>
 			<header className={styles.header}>
 				<h2 className={styles.title}>Assignee picker</h2>
 				<p className={styles.note}>
-					5,000 generated users, paged {PAGE_SIZE} at a time through the repository with simulated
-					latency. Implementation: <code>{activeName}</code>.
+					5,000 generated users through the repository, with simulated latency. Implementation:{' '}
+					<code>{activeName}</code>, loading: <code>{people.mode}</code>
+					{people.mode === 'eager' &&
+						(people.draining
+							? ` — draining, ${people.loadedCount.toLocaleString()} in memory so far`
+							: ` — all ${people.loadedCount.toLocaleString()} in memory`)}
+					.
 				</p>
 			</header>
 
@@ -92,11 +64,11 @@ export function UserPickerLab() {
 					multiple={multiple}
 					query={query}
 					onQueryChange={setQuery}
-					status={status}
-					hasMore={search.hasNextPage}
-					onEndReached={() => void search.fetchNextPage()}
-					onRetry={() => void search.refetch()}
-					total={search.data?.pages[0]?.total}
+					status={people.status}
+					hasMore={people.hasMore}
+					onEndReached={people.fetchMore}
+					onRetry={people.retry}
+					total={people.total}
 					estimateItemHeight={() => ESTIMATED_ROW_HEIGHT}
 					placeholder="Search 5,000 people…"
 					label="Assignee"

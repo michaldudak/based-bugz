@@ -103,7 +103,7 @@ export function foldText(text: string): string {
 	return text.normalize('NFKD').replace(COMBINING_MARKS, '').toLowerCase();
 }
 
-function matchesUserText(user: User, needle: string): boolean {
+export function matchesUserText(user: User, needle: string): boolean {
 	return (
 		foldText(user.name).includes(needle) ||
 		foldText(user.email).includes(needle) ||
