@@ -64,12 +64,17 @@
 	font-size: var(--text-xs);
 }
 
-/** The scroll container the virtualizer measures. */
+/**
+ * The scroll container the virtualizer measures. A stable gutter is not only cosmetic here: without
+ * it the content width changes the moment the list becomes long enough to scroll, which changes
+ * where rows wrap, which changes the heights the virtualizer just measured.
+ */
 .scroller {
 	flex: 1;
 	min-height: 0;
 	overflow-anchor: none;
 	overflow-y: auto;
+	scrollbar-gutter: stable;
 }
 
 .rows {

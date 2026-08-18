@@ -56,13 +56,21 @@
 	grid-area: sidebar;
 	border-inline-end: 1px solid var(--border);
 	overflow-y: auto;
+	scrollbar-gutter: stable;
 	background: var(--surface-sunken);
 }
 
+/*
+ * The shell owns the page scroll, so this is the gutter that matters: without a stable one a route
+ * whose content outgrows the viewport takes the scrollbar's width out of the content area, and a
+ * centred page slides sideways the moment it gets long enough. Reserving it always means the width
+ * is the same on every route and does not change as content loads.
+ */
 .content {
 	grid-area: content;
 	min-width: 0;
 	overflow: auto;
+	scrollbar-gutter: stable;
 }
 
 @media (width <= 768px) {

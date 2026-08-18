@@ -156,14 +156,22 @@ function LabelMatchMenu({ filters }: { filters: IssueFiltersApi }) {
 	);
 }
 
-/** The controls that collapse. Rendered inline on a wide viewport, in a popover on a narrow one. */
-function FilterControls({ filters, stacked }: { filters: IssueFiltersApi; stacked: boolean }) {
+interface ControlsProps {
+	filters: IssueFiltersApi;
+	stacked: boolean;
+}
+
+/**
+ * The three pickers. Inline they are grid cells and size themselves from the track; stacked they
+ * are full-width rows under their own labels.
+ */
+function FilterFields({ filters, stacked }: ControlsProps) {
 	const assigneeId = useId();
 	const labelId = useId();
 	const projectId = useId();
 
 	return (
-		<div className={stacked ? styles.stack : styles.inline}>
+		<>
 			{stacked && (
 				<label className={styles.fieldLabel} htmlFor={assigneeId}>
 					Assignee
@@ -171,7 +179,7 @@ function FilterControls({ filters, stacked }: { filters: IssueFiltersApi; stacke
 			)}
 			<AssigneePicker
 				id={assigneeId}
-				className={stacked ? styles.stackField : styles.assignee}
+				className={stacked ? styles.stackField : styles.field}
 				value={filters.assignee}
 				onChange={filters.setAssignee}
 			/>
@@ -183,7 +191,7 @@ function FilterControls({ filters, stacked }: { filters: IssueFiltersApi; stacke
 			)}
 			<LabelPicker
 				id={labelId}
-				className={stacked ? styles.stackField : styles.labels}
+				className={stacked ? styles.stackField : styles.field}
 				value={filters.labelIds}
 				onChange={filters.setLabelIds}
 			/>
@@ -199,29 +207,34 @@ function FilterControls({ filters, stacked }: { filters: IssueFiltersApi; stacke
 			</label>
 			<ProjectPicker
 				id={projectId}
-				className={stacked ? styles.stackField : styles.project}
+				className={stacked ? styles.stackField : styles.field}
 				value={filters.projectId}
 				onChange={filters.setProjectId}
 				placeholder="Any project"
 			/>
+		</>
+	);
+}
 
-			<div className={stacked ? styles.stackRow : styles.contents}>
-				<CheckboxMenu
-					name="Status"
-					options={STATUS_ORDER}
-					labelOf={STATUS_LABEL}
-					value={filters.statuses}
-					onChange={filters.setStatuses}
-				/>
-				<CheckboxMenu
-					name="Priority"
-					options={PRIORITY_ORDER}
-					labelOf={PRIORITY_LABEL}
-					value={filters.priorities}
-					onChange={filters.setPriorities}
-				/>
-				{filters.labelIds.length > 1 && <LabelMatchMenu filters={filters} />}
-			</div>
+/** The menu-shaped filters. Content-sized in both layouts. */
+function FilterMenus({ filters, stacked }: ControlsProps) {
+	return (
+		<div className={stacked ? styles.stackRow : styles.menus}>
+			<CheckboxMenu
+				name="Status"
+				options={STATUS_ORDER}
+				labelOf={STATUS_LABEL}
+				value={filters.statuses}
+				onChange={filters.setStatuses}
+			/>
+			<CheckboxMenu
+				name="Priority"
+				options={PRIORITY_ORDER}
+				labelOf={PRIORITY_LABEL}
+				value={filters.priorities}
+				onChange={filters.setPriorities}
+			/>
+			{filters.labelIds.length > 1 && <LabelMatchMenu filters={filters} />}
 		</div>
 	);
 }
@@ -234,19 +247,32 @@ export function FilterBar({ filters }: FilterBarProps) {
 	const compact = useMediaQuery(COMPACT_QUERY);
 	const search = useDebouncedTextField(filters.text, filters.setText);
 
-	return (
-		<div className={styles.bar}>
-			<Input
-				className={styles.search}
-				type="search"
-				value={search.value}
-				onValueChange={search.onChange}
-				placeholder="Search issues…"
-				aria-label="Search issues"
-				leadingIcon={<IconSearch size={14} />}
-			/>
+	const searchInput = (
+		<Input
+			type="search"
+			value={search.value}
+			onValueChange={search.onChange}
+			placeholder="Search issues…"
+			aria-label="Search issues"
+			leadingIcon={<IconSearch size={14} />}
+		/>
+	);
 
-			{compact ? (
+	const end = (
+		<div className={styles.end}>
+			<SortMenu filters={filters} />
+			{filters.isFiltered && (
+				<Button variant="ghost" onClick={filters.clear}>
+					Clear
+				</Button>
+			)}
+		</div>
+	);
+
+	if (compact) {
+		return (
+			<div className={styles.compactBar}>
+				<div className={styles.search}>{searchInput}</div>
 				<Popover
 					align="start"
 					className={styles.filterPopup}
@@ -260,19 +286,30 @@ export function FilterBar({ filters }: FilterBarProps) {
 						</Button>
 					}
 				>
-					<FilterControls filters={filters} stacked />
+					<div className={styles.stack}>
+						<FilterFields filters={filters} stacked />
+						<FilterMenus filters={filters} stacked />
+					</div>
 				</Popover>
-			) : (
-				<FilterControls filters={filters} stacked={false} />
-			)}
+				{end}
+			</div>
+		);
+	}
 
-			<div className={styles.end}>
-				<SortMenu filters={filters} />
-				{filters.isFiltered && (
-					<Button variant="ghost" onClick={filters.clear}>
-						Clear
-					</Button>
-				)}
+	/*
+	 * Two deliberate rows rather than one wrapping one. The fields used to be flex items with four
+	 * different fixed widths, so where a row broke depended on the viewport: the last control on a
+	 * line stopped wherever it happened to end, leaving a ragged edge against the list below.
+	 */
+	return (
+		<div className={styles.bar}>
+			<div className={styles.fields}>
+				{searchInput}
+				<FilterFields filters={filters} stacked={false} />
+			</div>
+			<div className={styles.menuRow}>
+				<FilterMenus filters={filters} stacked={false} />
+				{end}
 			</div>
 		</div>
 	);
