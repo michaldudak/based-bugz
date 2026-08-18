@@ -26,6 +26,11 @@ Useful URL parameters once it runs: `?impl=` picks the virtualization implementa
 `?scale=` control the generated data, `?latency=` and `?errorRate=` shape the fake network,
 `?theme=` `?density=` `?dir=` cover appearance. Any run is reproducible from its link.
 
+## Deployment
+
+Cloudflare Pages deploys `master` and every pull request automatically. The live site is at
+[based-bugz.pages.dev](https://based-bugz.pages.dev/).
+
 ## Documentation
 
 - **`AGENTS.md`** — architecture, evaluation rules, and the reasoning behind them. Read before
