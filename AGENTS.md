@@ -288,6 +288,23 @@ base-ui-5414's exports map so the app can publish the virtualization host its `L
 binds to. A plain `pnpm install` must always leave node_modules in the state the evaluation
 assumes — never patch node_modules by hand.
 
+**Adding a variant** touches exactly these places, and nothing else:
+
+1. `src/impls/<name>/Combobox.tsx` and `List.tsx` — the implementation itself.
+2. The registry entry in `src/app/impls.ts` — the parity suite discovers implementations from this
+   literal (`tests/impls.ts` parses it and throws if the shape changes), so tests need no edit.
+3. `IMPL_OPTIONS` in the same file — the topbar switcher menu. This list is hand-maintained on
+   purpose (a menu needs prose the registry doesn't have): a variant registered without an entry
+   here is reachable by URL but invisible in the menu, which is drift, not a feature.
+4. A `SURROUNDS` entry in `src/lab/pure/PureLabPage.tsx` — rule 12's pure-canary route. Missing
+   entries silently fall back to stable surroundings, which quietly turns a pure repro into a
+   mixed one; treat the fallback as a bug whenever a canary impl exists.
+5. For a canary build: the sha-pinned dependency alias, and `scripts/patch-canaries.mjs` +
+   `.pnpmfile.cjs` if the new build needs the same identity/exports/utils treatment.
+
+If adding a variant seems to require touching anything not on this list, that is either drift to
+fix or a real seam change worth writing down here first.
+
 **URL parameters** are the app's control surface, so any run is reproducible from a link:
 `?impl=` `?seed=` `?scale=` `?latency=` `?errorRate=` `?density=` `?theme=` `?dir=` `?fresh=`
 `?people=`
