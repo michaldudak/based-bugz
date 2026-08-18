@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router';
-import { APP_NAME } from '@/app/config';
+import { APP_NAME, REPO_URL } from '@/app/config';
 import { Logo } from '@/app/Logo';
 import { useSession } from '@/app/session';
 import { useTheme } from '@/app/theme';
 import { Avatar } from '@/ds/avatar';
-import { Button } from '@/ds/button';
+import { Button, ButtonLink } from '@/ds/button';
 import { Dialog } from '@/ds/dialog';
-import { IconMenu, IconMoon, IconSun } from '@/ds/icons';
+import { IconGitHub, IconMenu, IconMoon, IconSun } from '@/ds/icons';
 import { Menu } from '@/ds/menu';
 import { Tooltip } from '@/ds/tooltip';
 import { CommandPaletteProvider } from '@/features/command-palette';
@@ -30,6 +30,23 @@ function ThemeToggle() {
 			>
 				{isDark ? <IconSun /> : <IconMoon />}
 			</Button>
+		</Tooltip>
+	);
+}
+
+function RepoLink() {
+	return (
+		<Tooltip content="Source on GitHub">
+			<ButtonLink
+				href={REPO_URL}
+				variant="ghost"
+				iconOnly
+				target="_blank"
+				rel="noreferrer"
+				aria-label={`${APP_NAME} source on GitHub (opens in a new tab)`}
+			>
+				<IconGitHub />
+			</ButtonLink>
 		</Tooltip>
 	);
 }
@@ -82,6 +99,7 @@ export function AppLayout() {
 					{APP_NAME}
 				</span>
 				<div className={styles.topbarEnd}>
+					<RepoLink />
 					<ThemeToggle />
 					<UserMenu />
 				</div>

@@ -12,3 +12,6 @@ export const DEFAULT_SCALE = {
 	issues: 10_000,
 	labels: 200,
 } as const;
+
+/** Public source of this app; linked from the sign-in screen and the top bar. */
+export const REPO_URL = 'https://github.com/michaldudak/based-bugz';

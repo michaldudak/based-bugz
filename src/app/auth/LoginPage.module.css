@@ -1,6 +1,14 @@
+/*
+ * `align-content` is doing real work here, not tidying: with a single auto row the default
+ * stretch centred the card for free, but a second row splits the free space between them and
+ * the card drifts into the top half. Centring the rows as a group keeps card and footer
+ * together in the middle.
+ */
 .page {
 	display: grid;
 	place-items: center;
+	align-content: center;
+	gap: var(--space-5);
 	min-height: 100dvh;
 	padding: var(--space-6);
 }
@@ -62,6 +70,13 @@
 	color: var(--text-muted);
 	font-size: var(--text-sm);
 	line-height: var(--leading-normal);
+}
+
+.footer {
+	display: flex;
+	justify-content: center;
+	/* Matches the card so the ghost hover never reaches wider than the form above it. */
+	width: min(24rem, 100%);
 }
 
 @media (width <= 480px) {

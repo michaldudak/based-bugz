@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import { APP_NAME, APP_TAGLINE } from '@/app/config';
+import { APP_NAME, APP_TAGLINE, REPO_URL } from '@/app/config';
 import { Logo } from '@/app/Logo';
 import { useSession } from '@/app/session';
-import { Button } from '@/ds/button';
+import { Button, ButtonLink } from '@/ds/button';
 import { Field } from '@/ds/field';
+import { IconGitHub } from '@/ds/icons';
 import { Input } from '@/ds/input';
 import styles from './LoginPage.module.css';
 
@@ -106,6 +107,22 @@ export function LoginPage() {
 					you never have to look an address up.
 				</p>
 			</div>
+
+			<footer className={styles.footer}>
+				<ButtonLink
+					href={REPO_URL}
+					variant="ghost"
+					size="sm"
+					target="_blank"
+					rel="noreferrer"
+					// Repeats the visible text so the new tab is announced without changing what the
+					// link is called — voice control still matches the words on screen.
+					aria-label={`${APP_NAME} on GitHub (opens in a new tab)`}
+				>
+					<IconGitHub />
+					{APP_NAME} on GitHub
+				</ButtonLink>
+			</footer>
 		</main>
 	);
 }
