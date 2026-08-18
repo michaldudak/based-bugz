@@ -8,6 +8,7 @@ import { Providers } from '@/app/providers';
 import { IssueDetailPage } from '@/features/issues';
 import { ComboboxLabPage } from '@/lab/combobox/ComboboxLabPage';
 import { DsGalleryPage } from '@/lab/ds/DsGalleryPage';
+import { PureLabPage } from '@/lab/pure/PureLabPage';
 import { StressLabPage } from '@/lab/stress/StressLabPage';
 
 export function App() {
@@ -26,6 +27,7 @@ export function App() {
 							<Route path="lab/ds" element={<DsGalleryPage />} />
 							<Route path="lab/combobox" element={<ComboboxLabPage />} />
 							<Route path="lab/stress" element={<StressLabPage />} />
+							<Route path="lab/pure" element={<PureLabPage />} />
 						</Route>
 					</Route>
 					<Route path="*" element={<Navigate to="/issues" replace />} />
