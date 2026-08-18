@@ -254,6 +254,14 @@ enforced.
 **Scripts**: `lint` (oxlint + stylelint), `format`, `typecheck` (`tsc --noEmit`), `test:e2e`
 (Playwright). No pre-commit hooks until git exists, and no CI until there's something to protect.
 
+**Renovate** (`renovate.json5`) opens dependency PRs on the 1st of each month and only then —
+related packages are grouped so a month costs a handful of PRs, not a dozen, and anything not yet
+PR'd sits on the dependency dashboard issue rather than in your inbox. Two things are deliberately
+excluded: `@base-ui/react`, because the pnpm patch is keyed to the exact version and Renovate does
+not rewrite `pnpm.patchedDependencies`, and the aliased canary builds, whose pinned PR artifacts are
+the evaluation. Never add `pnpmDedupe` to `postUpdateOptions` — deduping is precisely what must not
+happen to the canaries' internal siblings.
+
 ---
 
 ## Conventions
