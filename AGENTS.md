@@ -291,7 +291,10 @@ is a reproducible finding rather than an impression.
 
 ## Open items
 
-- The three PR URLs are still unknown (GitHub outage on 2026-08-17). `ds/combobox` contracts and
-  `impls/baseline` do not depend on them.
+- The three PRs are known and verified installable (2026-08-18): mui/base-ui #5173 (built-in
+  `Combobox.Virtualizer`), #5414 (context-only `ListVirtualizer`), #5466 (`Virtualizer` with
+  context + props). See PLAN.md Phase 9 for the verified plan, the type-identity hazard and its
+  postinstall fix, and the issues-list scope change (it becomes the standalone-virtualizer
+  evaluation surface; `@mui/x-virtualizer` is an approved dependency for that purpose).
 
 See `PLAN.md` for the implementation sequence.

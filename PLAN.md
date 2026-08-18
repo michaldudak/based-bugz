@@ -6,7 +6,8 @@ holds the order of work and what "done" means at each step. Update it as phases 
 **Current state:** Phases 0–8 landed. The app is a working tracker: sign in, browse/filter/sort
 10,000 issues, create, edit inline, comment, delete with undo, ⌘K over everything, plus the design
 system gallery, the combobox lab, the stress lab, a perf overlay and a Playwright parity suite.
-Only Phase 9 (canary implementations) remains, and it is blocked on the PR URLs.
+The three PR URLs are known, canary builds are verified installable side by side, and Phase 9 below
+is the verified plan for them. Nothing in it is implemented yet.
 
 The parity suite is **deliberately red in five places**. Each failure is a reproduced defect, not a
 flaky assertion, and no assertion was softened to make the baseline green — see
@@ -116,7 +117,9 @@ chunk per impl.
 selects, text search), sorting, row selection, bulk actions menu, empty/loading/error states.
 
 The issue list uses TanStack Virtual permanently and is **not** part of the evaluation — only the
-combobox is. Do not wire it to `impls/`.
+combobox is. Do not wire it to `impls/`. _(Superseded in Phase 9: the issues list becomes the
+standalone-virtualizer surface, and the baseline List keeps this exact TanStack code as the
+control.)_
 
 **Done when:** 10k issues scroll smoothly in a production build; filters compose and round-trip
 through the URL; sorting works with cursor pagination; bulk actions apply to a selection.
@@ -145,11 +148,103 @@ Playwright keyboard-parity spec parameterized over `?impl=`, axe scan per impl r
 **Done when:** the parity spec passes against `?impl=baseline` and produces a readable per-impl
 report — that report is the template the canaries get judged in.
 
-### Phase 9 — Canary readiness · S · blocked on GitHub
+### Phase 9 — The three candidates · XL · verified feasible, not started
 
-Three aliased installs, `pnpm why` verification that react dedupes and Base UI internals do not
-hoist into one shared copy, `impls/pr-a|b|c` scaffolds against the existing contract, and pure-canary
-lab routes for rule 12 repros.
+The PRs under evaluation, all in `mui/base-ui`, all alive as of 2026-08-18:
+
+| PR                                                           | API shape                                                                                         | Combobox story                              | Standalone story                                                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [#5173](https://github.com/mui/base-ui/pull/5173) `91e45e1a` | `<Combobox.Virtualizer>` part backed by `@mui/x-virtualizer`                                      | built-in part                               | **none** — fall back to `@mui/x-virtualizer` directly                                           |
+| [#5414](https://github.com/mui/base-ui/pull/5414) `0181d7b8` | standalone `<ListVirtualizer>` component, **context-only** (throws outside a virtualization host) | drop into `Combobox.List`                   | **none in practice** — no Base UI host exists around the issues list, so same fallback as #5173 |
+| [#5466](https://github.com/mui/base-ui/pull/5466) `a873cbc2` | `<Virtualizer>`, context **and** props API                                                        | drop into `Combobox.List` (context binding) | native: `items` prop + 3-arg renderer                                                           |
+
+Lineage matters for the diff evidence: #5414 contains #5173's engine unchanged, #5466 contains
+#5414. The windowing engine is identical in all three; the public API is the axis. All three canary
+builds also depend on `@mui/x-virtualizer ^0.6.0`, so the built-ins and our direct fallback run the
+same engine version (0.6.3) from one shared copy — which is what a real install would produce.
+
+**Scope change from the original plan:** the issues list joins the evaluation as the _standalone_
+surface (it was previously "TanStack Virtual permanently"). Each implementation now provides two
+components — Combobox and List. The registry becomes `{ Combobox, List }` per impl, `?impl=`
+switches both, and the baseline keeps its current TanStack code for both surfaces as the control.
+
+| `?impl=`   | Combobox                              | Issues list                                                                             |
+| ---------- | ------------------------------------- | --------------------------------------------------------------------------------------- |
+| `baseline` | stable + TanStack Virtual (unchanged) | TanStack Virtual (extracted from `IssueList`, unchanged behaviour)                      |
+| `pr-5173`  | canary `<Combobox.Virtualizer>`       | shared `@mui/x-virtualizer` adapter                                                     |
+| `pr-5414`  | canary `<ListVirtualizer>`            | shared `@mui/x-virtualizer` adapter _(public API cannot express it — recorded finding)_ |
+| `pr-5466`  | canary `<Virtualizer>` (context)      | canary `<Virtualizer items>` (props)                                                    |
+
+The x-virtualizer fallback lives once, in `impls/mui-x-list/`, registered as the List for both
+pr-5173 and pr-5414 by the app-level registry. That respects the no-cross-impl-imports rule (the
+registry composes; impls never import each other) and keeps the List diff honest: baseline
+TanStack vs raw x-virtualizer vs #5466's `Virtualizer`. Note the fallback is scaffolding to keep
+the app usable under those impls — it is not "what #5173's API makes you write", and the verdict
+must not count it as such.
+
+#### Verified in a scratch install (2026-08-18)
+
+- `pkg.pr.new` canaries exist for all three PRs; `base-ui-5173|5414|5466` URL aliases install side
+  by side with stable, one `react@19.2.8`, four distinct `@base-ui/react` instances, one
+  `@mui/x-virtualizer@0.6.3`, one `@base-ui/utils@0.3.2` shared by all four (canaries pin the
+  published 0.3.2 — matches a real install; parts contexts live in `@base-ui/react`, not utils).
+- Type-check smoke test passes against all four instances simultaneously: `Combobox.Virtualizer`
+  on 5173, `ListVirtualizer` generics on 5414, `Virtualizer` context and standalone forms on 5466,
+  `useVirtualizer` types from x-virtualizer.
+- **Type-identity hazard, found and solved:** all four packages declare `@base-ui/react@1.7.0`, and
+  TypeScript dedupes declarations by `name@version` — so every alias silently resolved to stable's
+  types and canary-only APIs "didn't exist". Mitigation, verified working: a postinstall script
+  rewrites each alias's `package.json` version to `1.7.0-pr<N>`. Runtime is untouched (version
+  string only). Corollary: TS will never catch cross-package part mixing (parts accept `ReactNode`
+  children), so the oxlint no-stable-imports rule in `impls/pr-*` is the only guard — already in
+  place.
+- Canary URLs will be pinned by commit sha (`pkg.pr.new/mui/base-ui/@base-ui/react@<sha>`), not PR
+  number: `@5173`-style refs float to the latest push, and a comparison whose subject can change
+  under it overnight is not a comparison. Bumping the sha is a deliberate, recorded act.
+
+#### Known constraints going in (from the PR descriptions — findings templates, not blockers)
+
+- **#5173:** requires `items` on Root; flat collections only — **no grouping** (our contract has
+  `groupOf`, so the grouped parity tests will fail against it: that is rule 1 working, not a bug in
+  the harness); virtualizer must be the sole item-rendering child of `List`; each renderer returns
+  exactly one `Combobox.Item` (our create-row and loading-row are not Items — adapter friction to
+  measure, possibly synthetic entries in `items`).
+- **#5414:** same engine; public surface is `children`, `getItemKey`, `estimatedItemHeight`,
+  `overscanPx`, `enabled`, `actionsRef`. Throws outside a host.
+- **#5466:** adds `items` + `activeIndex` + 3-arg renderer (`aria-posinset`/`aria-setsize`/
+  `data-index` for hostless rows). Standalone mode leaves filtering, keyboard nav, selection, and
+  `activeIndex` clamping to the consumer — and has no end-reached callback, so infinite paging in
+  the issues list is driven by observing the max mounted index from the renderer.
+
+#### Steps
+
+1. **Dependencies + guards · S** — add the three sha-pinned aliases and `@mui/x-virtualizer`;
+   postinstall version-splitting script; `pnpm why` assertions recorded in PLAN; extend
+   `.oxlintrc.json` so `impls/mui-x-list` gets the same restrictions as `impls/pr-*` minus the
+   Base UI ban (it imports no Base UI at all — enforce that too).
+2. **List seam · M** — `ds/list/` contract (`items`, `itemKey`, `renderItem`,
+   `estimateItemHeight`, `onEndReached`, `aria` pass-through; impls own scroll container,
+   measurement, index math — mirroring the combobox rules); registry becomes `{ Combobox, List }`;
+   extract baseline TanStack list from `features/issues/IssueList.tsx` into `impls/baseline/List.tsx`
+   (generic over `T`). **Gate:** app behaves identically, parity suite still 11/5.
+3. **pr-5173 Combobox · L** — the most constrained API first, so contract violations surface
+   earliest. Pure-canary lab route (rule 12) in the same step.
+4. **mui-x-list · M** — the shared standalone fallback, referenced against #5173's internal
+   adapter for wiring patterns (its params are grid-shaped: `RowEntry[]`, dimensions, layout).
+   Registered for pr-5173; pr-5414 reuses it in step 5.
+5. **pr-5414 Combobox · M** — mostly #5173's integration with the part swapped for the component.
+6. **pr-5466 Combobox + List · L** — both surfaces native; the standalone List is the first real
+   test of the props API.
+7. **Parity + a11y matrix · M** — the suite already parameterizes over registered impls; add a
+   small standalone-list spec (scroll, paging, no layout thrash). Full matrix in Chrome, then the
+   Safari/Firefox pass that feeds the verdict (rule 8).
+8. **Verdict scaffolding · S** — `FINDINGS.md`: per-impl app-code diff stats, parity/a11y results,
+   the constraint list above filled in with what actually happened, frame timings as supporting
+   evidence.
+
+Docs to update when step 1 lands: AGENTS.md stack table (`@mui/x-virtualizer` allowed), Import
+rules (`impls/mui-x-list`), the Phase 5 note that the issues list is now an evaluation surface, and
+the Conventions section (sha pinning, postinstall script).
 
 ---
 
