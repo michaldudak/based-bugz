@@ -12,7 +12,11 @@
 	background: var(--surface);
 	color: var(--text);
 	font-size: var(--text-base);
-	line-height: 1;
+	/*
+	 * Not 1 — `.text` inherits this while truncating with `overflow: hidden`, and a
+	 * line box exactly one em tall clips descenders that a real font renders past it.
+	 */
+	line-height: var(--leading-tight);
 	text-align: start;
 	cursor: pointer;
 	user-select: none;
