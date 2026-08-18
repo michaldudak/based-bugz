@@ -12,17 +12,18 @@ Base UI components too, so **nothing may be named or structured around virtualiz
 
 ## Stack
 
-| Concern                   | Choice                                                                                                   |
-| ------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Build                     | Vite 8                                                                                                   |
-| UI                        | React 19.2 (no React Compiler — see Evaluation rules)                                                    |
-| Language                  | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
-| Components                | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react`                        |
-| Styling                   | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library.              |
-| Data                      | TanStack Query 5 over a repository interface                                                             |
-| Virtualization (baseline) | TanStack Virtual 3                                                                                       |
-| Routing                   | React Router 8, declarative                                                                              |
-| Package manager           | pnpm                                                                                                     |
+| Concern                       | Choice                                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Build                         | Vite 8                                                                                                   |
+| UI                            | React 19.2 (no React Compiler — see Evaluation rules)                                                    |
+| Language                      | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
+| Components                    | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react`                        |
+| Styling                       | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library.              |
+| Data                          | TanStack Query 5 over a repository interface                                                             |
+| Virtualization (baseline)     | TanStack Virtual 3                                                                                       |
+| Virtualization (pr-5173 List) | `@mui/x-virtualizer` — approved for exactly that one use                                                 |
+| Routing                       | React Router 8, declarative                                                                              |
+| Package manager               | pnpm                                                                                                     |
 
 Do not add dependencies beyond this list without asking. Every extra library is a confounder in a
 comparison whose whole point is how much code an API makes you write.
@@ -77,9 +78,11 @@ Non-negotiable. Each exists to stop a specific way the comparison could quietly 
    canary Root would fail to connect — or worse, half-work.
 3. **Every repository read is async, abortable, and cursor-paginated**, even though the data is an
    in-memory array. The moment one picker gets a synchronous array, that picker stops testing
-   anything. `?people=eager` does **not** weaken this: the repository stays async and paged, and
-   eager loading is built on top of it by draining every page once. The picker ends up holding a
-   complete local array — which is a loading strategy, not a shortcut through the repository.
+   anything. `?people=eager` does **not** weaken this: eager loading goes through `users.all()`,
+   the repository's one deliberate bulk read — still async, abortable and failure-injected, one
+   simulated round-trip. It is not a shortcut but the endpoint shape real apps ship for eager
+   pickers; draining the paged API instead would spend seconds of simulated latency measuring the
+   fake network rather than the virtualization the strategy exists to isolate.
 4. **`Page.total` is optional.** Whether an API demands a known item count upfront is a primary
    differentiator; making the count optional forces the question instead of hiding it.
 5. **No React Compiler.** It rewrites memoization, which is the axis under comparison.
@@ -121,7 +124,7 @@ apps ship:
 
 - **`paged`** (default) — a page at a time, more requested as the viewport nears the end. Asks
   whether an API copes with a list that grows underneath it and a count it may never learn.
-- **`eager`** — every person drained once into memory, then filtered locally. Asks whether it copes
+- **`eager`** — everyone fetched in one bulk request, then filtered locally. Asks whether it copes
   with a large static array whose result set changes wholesale on every keystroke, with no async
   boundary to hide behind.
 
@@ -279,7 +282,30 @@ per-impl bundle size falls out of the build. Switching is a runtime `?impl=` par
 subtree — no restart, no cross-contaminated state. Canary builds install side by side under distinct
 dependency names (`base-ui-a`, `base-ui-b`, `base-ui-c`); `react` and `react-dom` must dedupe to a
 single copy, and `@base-ui/react`'s internal siblings must **not** hoist into one shared copy across
-impls. Verify with `pnpm why` after any install.
+impls. Verify with `pnpm why` after any install. Canary URLs are pinned by commit sha, never by PR
+number — `@5173`-style refs float to the latest push. Bumping a sha is a deliberate, recorded act.
+`scripts/patch-canaries.mjs` runs from the root `postinstall` hook: it splits the canaries' package
+versions (`1.7.0-pr<N>`) so TypeScript does not collapse their types into stable's, and widens
+base-ui-5414's exports map so the app can publish the virtualization host its `ListVirtualizer`
+binds to. A plain `pnpm install` must always leave node_modules in the state the evaluation
+assumes — never patch node_modules by hand.
+
+**Adding a variant** touches exactly these places, and nothing else:
+
+1. `src/impls/<name>/Combobox.tsx` and `List.tsx` — the implementation itself.
+2. The registry entry in `src/app/impls.ts` — the parity suite discovers implementations from this
+   literal (`tests/impls.ts` parses it and throws if the shape changes), so tests need no edit.
+3. `IMPL_OPTIONS` in the same file — the topbar switcher menu. This list is hand-maintained on
+   purpose (a menu needs prose the registry doesn't have): a variant registered without an entry
+   here is reachable by URL but invisible in the menu, which is drift, not a feature.
+4. A `SURROUNDS` entry in `src/lab/pure/PureLabPage.tsx` — rule 12's pure-canary route. Missing
+   entries silently fall back to stable surroundings, which quietly turns a pure repro into a
+   mixed one; treat the fallback as a bug whenever a canary impl exists.
+5. For a canary build: the sha-pinned dependency alias, and `scripts/patch-canaries.mjs` +
+   `.pnpmfile.cjs` if the new build needs the same identity/exports/utils treatment.
+
+If adding a variant seems to require touching anything not on this list, that is either drift to
+fix or a real seam change worth writing down here first.
 
 **URL parameters** are the app's control surface, so any run is reproducible from a link:
 `?impl=` `?seed=` `?scale=` `?latency=` `?errorRate=` `?density=` `?theme=` `?dir=` `?fresh=`

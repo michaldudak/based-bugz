@@ -206,6 +206,13 @@ export const IconCircleSlash = (p: IconProps) => (
 	</Icon>
 );
 
+export const IconFlask = (p: IconProps) => (
+	<Icon {...p}>
+		<path d="M6.25 2h3.5M6.75 2.25v4.1l-3.6 6.1a1 1 0 0 0 .86 1.55h8a1 1 0 0 0 .86-1.55l-3.6-6.1v-4.1" />
+		<path d="M4.75 10.5h6.5" />
+	</Icon>
+);
+
 export const IconInbox = (p: IconProps) => (
 	<Icon {...p}>
 		<path d="M2 9.5h3l1 2h4l1-2h3" />

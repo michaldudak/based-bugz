@@ -1,11 +1,9 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
-import { useRepository } from '@/data';
-import type { Page, User } from '@/data';
+import { useEffect, useState } from 'react';
+import type { User } from '@/data';
 import { Avatar } from '@/ds/avatar';
 import { Combobox } from '@/ds/combobox';
 import { IconCheck } from '@/ds/icons';
-import { useDebounced } from './hooks';
+import { usePeopleSearch } from '@/features/people';
 import styles from './StressPickers.module.css';
 
 /** Two lines with an avatar. Tall enough that a wrong estimate is visible, not subtle. */
@@ -28,42 +26,29 @@ export interface StressUserPickerProps {
 
 /**
  * The workhorse of the stress routes: a real `<Combobox>` over the real repository, so every case
- * exercises whichever implementation `?impl=` resolved.
+ * exercises whichever implementation `?impl=` resolved — under whichever loading strategy
+ * `?people=` selects, which is what lets the lab isolate virtualization from loading.
  */
 export function StressUserPicker({
 	testId,
 	label,
 	placeholder = 'Search people…',
-	pageSize = 40,
+	pageSize,
 	multiple = false,
 	preselectIndex,
 }: StressUserPickerProps) {
-	const repository = useRepository();
 	const [query, setQuery] = useState('');
 	const [selected, setSelected] = useState<readonly User[]>([]);
 	const [preselectSettled, setPreselectSettled] = useState(preselectIndex === undefined);
-	const debouncedQuery = useDebounced(query);
 
-	const search = useInfiniteQuery({
-		queryKey: ['stress', 'users', debouncedQuery, pageSize],
-		initialPageParam: undefined as string | undefined,
-		queryFn: ({ pageParam, signal }) =>
-			repository.users.search(
-				{ text: debouncedQuery === '' ? undefined : debouncedQuery },
-				{ cursor: pageParam, limit: pageSize, signal },
-			),
-		getNextPageParam: (lastPage: Page<User>) => lastPage.nextCursor,
-	});
+	const people = usePeopleSearch(query, { pageSize });
+	const { items, hasMore, fetchMore, loadingAll } = people;
 
-	const items = useMemo(
-		() => (search.data?.pages ?? []).flatMap((page) => page.items),
-		[search.data],
-	);
-
-	const { hasNextPage, isFetchingNextPage, fetchNextPage } = search;
-
-	// Page forward until the preselected row exists. Nothing here reaches past the repository into
-	// the generator: the deep item is whatever the paged reads eventually hand back.
+	/*
+	 * Walk to the preselected row. Paged mode pages forward until it exists; eager mode just waits
+	 * for the drain to reach it. Nothing here reaches past the repository into the generator: the
+	 * deep item is whatever the loading strategy eventually hands back.
+	 */
 	useEffect(() => {
 		if (preselectIndex === undefined || preselectSettled) {
 			return;
@@ -77,11 +62,13 @@ export function StressUserPicker({
 			return;
 		}
 
-		if (hasNextPage === true) {
-			if (!isFetchingNextPage) {
-				void fetchNextPage();
-			}
+		if (hasMore && fetchMore !== undefined) {
+			fetchMore();
+			return;
+		}
 
+		if (loadingAll) {
+			// Eager mode's single bulk request is still in flight; items arrive all at once.
 			return;
 		}
 
@@ -93,24 +80,15 @@ export function StressUserPicker({
 			setSelected([last]);
 			setPreselectSettled(true);
 		}
-	}, [preselectIndex, preselectSettled, items, hasNextPage, isFetchingNextPage, fetchNextPage]);
-
-	const status = search.isPending
-		? 'loading'
-		: search.isError
-			? 'error'
-			: search.isFetchingNextPage
-				? 'loading-more'
-				: 'idle';
-
-	const total = search.data?.pages[0]?.total;
+	}, [preselectIndex, preselectSettled, items, hasMore, fetchMore, loadingAll]);
 
 	return (
 		<div
 			className={styles.picker}
 			data-testid={testId}
 			data-loaded={items.length}
-			data-total={total ?? ''}
+			data-total={people.total ?? ''}
+			data-people-mode={people.mode}
 			data-preselected={selected.length > 0 ? 'true' : 'false'}
 			data-preselect-settled={preselectSettled ? 'true' : 'false'}
 		>
@@ -123,11 +101,11 @@ export function StressUserPicker({
 				multiple={multiple}
 				query={query}
 				onQueryChange={setQuery}
-				status={status}
-				hasMore={search.hasNextPage}
-				onEndReached={() => void search.fetchNextPage()}
-				onRetry={() => void search.refetch()}
-				total={total}
+				status={people.status}
+				hasMore={people.hasMore}
+				onEndReached={people.fetchMore}
+				onRetry={people.retry}
+				total={people.total}
 				estimateItemHeight={() => ROW_HEIGHT}
 				placeholder={placeholder}
 				label={label}
@@ -148,7 +126,8 @@ export function StressUserPicker({
 
 			<p className={styles.status}>
 				{items.length.toLocaleString()} loaded
-				{total === undefined ? '' : ` of ${total.toLocaleString()}`}
+				{people.total === undefined ? '' : ` of ${people.total.toLocaleString()}`}
+				{people.mode === 'eager' ? (loadingAll ? ' · loading everyone…' : ' · all in memory') : ''}
 				{preselectIndex === undefined
 					? ''
 					: ` · preselected #${preselectIndex.toLocaleString()}: ${

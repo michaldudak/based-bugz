@@ -28,6 +28,30 @@ const CASE_BODY = '[data-testid="stress-case"]';
 /** The popup portals to the body, so it has to be included by role rather than by ancestry. */
 const POPUP = '[role="listbox"]';
 
+/**
+ * Findings already recorded in FINDINGS.md, pinned as exact expectations. A run is green when
+ * reality matches the findings; it goes red either when a canary fixes one (the finding must then
+ * be retired here and there) or when anything new appears. Nothing is softened: the expected list
+ * is per-implementation, empty for the baseline, and an unknown implementation expects a clean
+ * scan.
+ *
+ * The one pinned finding: the canaries' library-owned scrollport is not keyboard-reachable
+ * (`scrollable-region-focusable`). The selector suffix is a hashed CSS-module class, so the match
+ * stops before it.
+ */
+const SCROLLPORT_FINDING = /^scrollable-region-focusable \[serious\] ×1 — /;
+
+const KNOWN_POPUP_VIOLATIONS: Record<string, readonly RegExp[]> = {
+	baseline: [],
+	'pr-5173': [SCROLLPORT_FINDING],
+	'pr-5414': [SCROLLPORT_FINDING],
+	'pr-5466': [SCROLLPORT_FINDING],
+};
+
+function expectedPopupViolations(impl: string): unknown[] {
+	return (KNOWN_POPUP_VIOLATIONS[impl] ?? []).map((pattern) => expect.stringMatching(pattern));
+}
+
 function scan(page: Page, ...regions: string[]) {
 	const builder = new AxeBuilder({ page }).withTags(STANDARDS);
 
@@ -61,11 +85,13 @@ test.describe('accessibility', () => {
 		expect(summarize(await scan(page, CASE_BODY).analyze())).toEqual([]);
 	});
 
-	test('the open popup has no violations', async ({ page, impl }) => {
+	test('the open popup has no violations beyond the pinned findings', async ({ page, impl }) => {
 		await gotoStress(page, stressUrl(impl, { case: 'scale', scale: SCALE }));
 		await openPopup(page);
 
-		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual([]);
+		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual(
+			expectedPopupViolations(impl),
+		);
 	});
 
 	test('the open popup has no violations with a row highlighted', async ({ page, impl }) => {
@@ -74,21 +100,31 @@ test.describe('accessibility', () => {
 		await page.getByRole('combobox').press('ArrowDown');
 		await expect(page.locator('[data-highlighted]').first()).toBeVisible();
 
-		expect(summarize(await scan(page, POPUP).analyze())).toEqual([]);
+		expect(summarize(await scan(page, POPUP).analyze())).toEqual(expectedPopupViolations(impl));
 	});
 
-	test('variable-height rows have no violations', async ({ page, impl }) => {
+	test('variable-height rows have no violations beyond the pinned findings', async ({
+		page,
+		impl,
+	}) => {
 		await gotoStress(page, stressUrl(impl, { case: 'variable', scale: SCALE }));
 		await openPopup(page);
 
-		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual([]);
+		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual(
+			expectedPopupViolations(impl),
+		);
 	});
 
-	test('the open popup has no violations in RTL', async ({ page, impl }) => {
+	test('the open popup has no violations in RTL beyond the pinned findings', async ({
+		page,
+		impl,
+	}) => {
 		await gotoStress(page, stressUrl(impl, { case: 'rtl', scale: SCALE, dir: 'rtl' }));
 		await openPopup(page);
 
-		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual([]);
+		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual(
+			expectedPopupViolations(impl),
+		);
 	});
 
 	test('the popup inside a modal dialog has no violations', async ({ page, impl }) => {
@@ -98,6 +134,8 @@ test.describe('accessibility', () => {
 		await expect(picker(page)).toBeVisible();
 		await openPopup(page);
 
-		expect(summarize(await scan(page, '[role="dialog"]', POPUP).analyze())).toEqual([]);
+		expect(summarize(await scan(page, '[role="dialog"]', POPUP).analyze())).toEqual(
+			expectedPopupViolations(impl),
+		);
 	});
 });

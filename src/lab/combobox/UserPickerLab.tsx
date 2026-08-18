@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import type { User } from '@/data';
 import { Avatar } from '@/ds/avatar';
 import { Checkbox } from '@/ds/checkbox';
-import { Combobox, useComboboxImpl } from '@/ds/combobox';
+import { Combobox } from '@/ds/combobox';
+import { useImplRegistry } from '@/ds/registry';
 import { IconCheck } from '@/ds/icons';
 import { Page } from '@/ds/page';
 import { usePeopleSearch } from '@/features/people';
@@ -12,7 +13,7 @@ import styles from './UserPickerLab.module.css';
 const ESTIMATED_ROW_HEIGHT = 48;
 
 export function UserPickerLab() {
-	const { activeName } = useComboboxImpl();
+	const { activeName } = useImplRegistry();
 	const [query, setQuery] = useState('');
 	const [selected, setSelected] = useState<readonly User[]>([]);
 	const [multiple, setMultiple] = useState(false);
@@ -34,8 +35,8 @@ export function UserPickerLab() {
 				5,000 generated users through the repository, with simulated latency. Implementation:{' '}
 				<code>{activeName}</code>, loading: <code>{people.mode}</code>
 				{people.mode === 'eager' &&
-					(people.draining
-						? ` — draining, ${people.loadedCount.toLocaleString()} in memory so far`
+					(people.loadingAll
+						? ' — loading everyone in one request…'
 						: ` — all ${people.loadedCount.toLocaleString()} in memory`)}
 				.
 			</Page.Description>

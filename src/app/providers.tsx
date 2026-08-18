@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
 import { RepositoryProvider } from '@/data';
-import { ComboboxImplProvider } from '@/ds/combobox';
+import { ImplProvider } from '@/ds/registry';
 import { ToastProvider } from '@/ds/toast';
 import { TooltipProvider } from '@/ds/tooltip';
 import { IMPL_NAMES, resolveImpl } from './impls';
@@ -36,8 +36,13 @@ export function Providers({ children }: { children: ReactNode }) {
 
 	const registry = useMemo(() => {
 		const { impl } = parseUiParams(searchParams);
-		const { name, component } = resolveImpl(impl);
-		return { active: component, activeName: name, available: IMPL_NAMES };
+		const { name, components } = resolveImpl(impl);
+		return {
+			activeName: name,
+			available: IMPL_NAMES,
+			Combobox: components.Combobox,
+			List: components.List,
+		};
 	}, [searchParams]);
 
 	// Base UI reads direction from context, not from the DOM. Without this, `?dir=rtl` restyles the
@@ -51,11 +56,11 @@ export function Providers({ children }: { children: ReactNode }) {
 				<SessionProvider>
 					<ThemeProvider>
 						<DirectionProvider direction={dir}>
-							<ComboboxImplProvider registry={registry}>
+							<ImplProvider registry={registry}>
 								<TooltipProvider>
 									<ToastProvider>{children}</ToastProvider>
 								</TooltipProvider>
-							</ComboboxImplProvider>
+							</ImplProvider>
 						</DirectionProvider>
 					</ThemeProvider>
 				</SessionProvider>

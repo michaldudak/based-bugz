@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router';
-import { IconInbox, IconSearch, IconSettings, IconTag } from '@/ds/icons';
+import { IconInbox, IconSearch, IconSettings, IconTag, IconWarning } from '@/ds/icons';
 import { cx } from '@/ds/utils';
 import styles from './NavContent.module.css';
 
@@ -8,6 +8,7 @@ const LINKS = [
 	{ to: '/settings', label: 'Settings', icon: IconSettings },
 	{ to: '/lab/ds', label: 'Design system', icon: IconTag },
 	{ to: '/lab/combobox', label: 'Combobox lab', icon: IconSearch },
+	{ to: '/lab/stress', label: 'Stress lab', icon: IconWarning },
 ] as const;
 
 export function NavContent({ onNavigate }: { onNavigate?: () => void }) {

@@ -8,7 +8,7 @@
  */
 
 import { memo } from 'react';
-import type { CSSProperties, Ref } from 'react';
+import type { ListRowProps } from '@/ds/list';
 import { Link } from 'react-router';
 import type { Issue, IssueId, Label, LabelId, User, UserId } from '@/data';
 import { Avatar } from '@/ds/avatar';
@@ -44,9 +44,8 @@ export interface IssueRowProps {
 	position: number;
 	/** `-1` when the repository declined to count the matches — the ARIA value for "unknown". */
 	setSize: number;
-	rowRef: Ref<HTMLLIElement>;
-	index: number;
-	style: CSSProperties;
+	/** From the active List implementation; spread blindly, never inspected (ds/list contract). */
+	rowProps: ListRowProps;
 }
 
 export const IssueRow = memo(function IssueRow({
@@ -58,9 +57,7 @@ export const IssueRow = memo(function IssueRow({
 	search,
 	position,
 	setSize,
-	rowRef,
-	index,
-	style,
+	rowProps,
 }: IssueRowProps) {
 	const assignee = issue.assigneeId === null ? undefined : usersById.get(issue.assigneeId);
 	const labels = issue.labelIds
@@ -70,9 +67,7 @@ export const IssueRow = memo(function IssueRow({
 
 	return (
 		<li
-			ref={rowRef}
-			data-index={index}
-			style={style}
+			{...(rowProps as object)}
 			className={styles.row}
 			data-selected={selected || undefined}
 			aria-posinset={position}

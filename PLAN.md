@@ -6,12 +6,17 @@ holds the order of work and what "done" means at each step. Update it as phases 
 **Current state:** Phases 0–8 landed. The app is a working tracker: sign in, browse/filter/sort
 10,000 issues, create, edit inline, comment, delete with undo, ⌘K over everything, plus the design
 system gallery, the combobox lab, the stress lab, a perf overlay and a Playwright parity suite.
-The three PR URLs are known, canary builds are verified installable side by side, and Phase 9 below
-is the verified plan for them. Nothing in it is implemented yet.
+Phase 9 steps 1–6 are implemented on the `virtualizer-variants` branch: all three canary
+implementations are live behind `?impl=`, both surfaces each. The parity matrix is green at 80/80
+with every recorded finding encoded in the suite — the canaries' scrollport finding pinned as an
+exact expectation, the two keyboard defects as expected failures — so CI goes red exactly when
+reality stops matching FINDINGS.md, in either direction. Remaining: the Safari/Firefox and
+VoiceOver passes, perf numbers, and the verdict write-up in FINDINGS.md.
 
-The parity suite is **deliberately red in five places**. Each failure is a reproduced defect, not a
-flaky assertion, and no assertion was softened to make the baseline green — see
-"Known baseline failures" below. That red is the number the three PRs are competing against.
+No assertion in the parity suite was softened to make anything green. Defects and findings are
+encoded — expected failures for the baseline's two keyboard defects, pinned per-implementation
+expectations for the canaries' scrollport finding — so the suite is green exactly while reality
+matches the findings, and red the moment either side moves.
 
 **Strategy:** build the whole app against `impls/baseline` — stable `@base-ui/react` + TanStack
 Virtual, wired as the docs describe. That is the control the three PRs must beat, it needs no canary
@@ -116,10 +121,9 @@ chunk per impl.
 `features/issues/`: virtualized list, filter bar (AssigneePicker, LabelPicker, status and priority
 selects, text search), sorting, row selection, bulk actions menu, empty/loading/error states.
 
-The issue list uses TanStack Virtual permanently and is **not** part of the evaluation — only the
-combobox is. Do not wire it to `impls/`. _(Superseded in Phase 9: the issues list becomes the
-standalone-virtualizer surface, and the baseline List keeps this exact TanStack code as the
-control.)_
+_(Superseded in Phase 9: the issues list is now the standalone-virtualizer evaluation surface,
+reached through the `ds/list` seam. The baseline List keeps the original TanStack code, unchanged,
+as the control.)_
 
 **Done when:** 10k issues scroll smoothly in a production build; filters compose and round-trip
 through the URL; sorting works with cursor pagination; bulk actions apply to a selection.

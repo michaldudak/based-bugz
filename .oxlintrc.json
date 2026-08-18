@@ -1,22 +1,43 @@
 {
 	"$schema": "./node_modules/oxlint/configuration_schema.json",
-	"env": { "browser": true, "es2024": true },
+	"env": {
+		"browser": true,
+		"es2024": true
+	},
 	"plugins": ["react", "typescript", "jsx-a11y", "import", "unicorn"],
 	"categories": {
 		"correctness": "error",
 		"suspicious": "error"
 	},
 	"settings": {
-		"react": { "runtime": "automatic" }
+		"react": {
+			"runtime": "automatic"
+		}
 	},
 	"rules": {
 		"react-hooks/exhaustive-deps": "error",
 		"react-hooks/rules-of-hooks": "error",
-		"eqeqeq": ["error", "always", { "null": "ignore" }],
-		"no-console": ["warn", { "allow": ["warn", "error"] }],
+		"eqeqeq": [
+			"error",
+			"always",
+			{
+				"null": "ignore"
+			}
+		],
+		"no-console": [
+			"warn",
+			{
+				"allow": ["warn", "error"]
+			}
+		],
 		"unicorn/prefer-node-protocol": "error",
 		"react/react-in-jsx-scope": "off",
-		"import/no-unassigned-import": ["error", { "allow": ["**/*.css"] }]
+		"import/no-unassigned-import": [
+			"error",
+			{
+				"allow": ["**/*.css"]
+			}
+		]
 	},
 	"ignorePatterns": ["dist/**", "node_modules/**", "playwright-report/**", "test-results/**"],
 	"overrides": [
@@ -42,14 +63,14 @@
 									"**/impls/**",
 									"**/app/**"
 								],
-								"message": "ds/ is app-agnostic: no domain, data, app or impl imports (AGENTS.md — Import rules)"
+								"message": "ds/ is app-agnostic: no domain, data, app or impl imports (AGENTS.md \u2014 Import rules)"
 							}
 						],
 						"paths": [
 							{
 								"name": "react",
 								"importNames": ["useDeferredValue", "startTransition"],
-								"message": "Evaluation rule 6: no deferred rendering in the filter path — it papers over a slow list"
+								"message": "Evaluation rule 6: no deferred rendering in the filter path \u2014 it papers over a slow list"
 							}
 						]
 					}
@@ -78,7 +99,7 @@
 									"**/impls/**",
 									"**/app/**"
 								],
-								"message": "data/ is the bottom layer: it imports nothing from the UI (AGENTS.md — Import rules)"
+								"message": "data/ is the bottom layer: it imports nothing from the UI (AGENTS.md \u2014 Import rules)"
 							}
 						]
 					}
@@ -94,14 +115,14 @@
 						"patterns": [
 							{
 								"group": ["@/impls", "@/impls/**", "**/impls/**"],
-								"message": "features/ reaches virtualization only through ds/combobox (AGENTS.md — Import rules)"
+								"message": "features/ reaches virtualization only through ds/combobox (AGENTS.md \u2014 Import rules)"
 							}
 						],
 						"paths": [
 							{
 								"name": "react",
 								"importNames": ["useDeferredValue", "startTransition"],
-								"message": "Evaluation rule 6: no deferred rendering in the filter path — it papers over a slow list"
+								"message": "Evaluation rule 6: no deferred rendering in the filter path \u2014 it papers over a slow list"
 							}
 						]
 					}
@@ -126,7 +147,7 @@
 									"@/impls/**",
 									"../**"
 								],
-								"message": "impls/ are generic over T: no domain, data or sibling-impl imports; use @/ds/* aliases (AGENTS.md — Import rules)"
+								"message": "impls/ are generic over T: no domain, data or sibling-impl imports; use @/ds/* aliases (AGENTS.md \u2014 Import rules)"
 							}
 						]
 					}
@@ -142,7 +163,7 @@
 						"patterns": [
 							{
 								"group": ["@base-ui/react", "@base-ui/react/**"],
-								"message": "Canary impls must import their own aliased build (base-ui-a|b|c), never stable @base-ui/react — importing stable here silently benchmarks the wrong package"
+								"message": "Canary impls must import their own aliased build (base-ui-a|b|c), never stable @base-ui/react \u2014 importing stable here silently benchmarks the wrong package"
 							},
 							{
 								"group": [
@@ -155,11 +176,17 @@
 									"@/impls/**",
 									"../**"
 								],
-								"message": "impls/ are generic over T: no domain, data or sibling-impl imports; use @/ds/* aliases (AGENTS.md — Import rules)"
+								"message": "impls/ are generic over T: no domain, data or sibling-impl imports; use @/ds/* aliases (AGENTS.md \u2014 Import rules)"
 							}
 						]
 					}
 				]
+			}
+		},
+		{
+			"files": ["scripts/**"],
+			"rules": {
+				"no-console": "off"
 			}
 		}
 	]
