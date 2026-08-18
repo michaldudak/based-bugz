@@ -1,5 +1,5 @@
+import { Page } from '@/ds/page';
 import { UserPickerLab } from './UserPickerLab';
-import styles from './ComboboxLabPage.module.css';
 
 /**
  * Where combobox implementations are exercised against the real repository. Switch
@@ -7,15 +7,15 @@ import styles from './ComboboxLabPage.module.css';
  */
 export function ComboboxLabPage() {
 	return (
-		<div className={styles.page}>
-			<header className={styles.header}>
-				<h1 className={styles.title}>Combobox lab</h1>
-				<p className={styles.subtitle}>
+		<Page>
+			<Page.Header>
+				<Page.Title>Combobox lab</Page.Title>
+				<Page.Subtitle>
 					Async paging, variable-height rows, grouping, multi-select and keyboard navigation over a
 					list nobody wants to render all of.
-				</p>
-			</header>
+				</Page.Subtitle>
+			</Page.Header>
 			<UserPickerLab />
-		</div>
+		</Page>
 	);
 }

@@ -1,47 +1,4 @@
-.root {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-10);
-	max-width: 64rem;
-	margin: 0 auto;
-	padding: var(--space-6) var(--space-4) var(--space-12);
-}
-
-.header {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-2);
-}
-
-.title {
-	font-size: var(--text-2xl);
-}
-
-.subtitle {
-	max-width: 42rem;
-	color: var(--text-muted);
-	font-size: var(--text-md);
-}
-
-.subtitle code {
-	padding: 0 var(--space-1);
-	border-radius: var(--radius-sm);
-	background: var(--surface-sunken);
-	font-family: var(--font-mono);
-	font-size: 0.9em;
-}
-
-.section {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-4);
-}
-
-.heading {
-	padding-bottom: var(--space-2);
-	border-bottom: 1px solid var(--border);
-	font-size: var(--text-lg);
-}
+/* The page frame, section headings and gutters come from `@/ds/page`; only demo layout is local. */
 
 /* One column at 360px, more only when a 14rem column actually fits. */
 .grid {

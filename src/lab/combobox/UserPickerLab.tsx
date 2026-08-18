@@ -4,6 +4,7 @@ import { Avatar } from '@/ds/avatar';
 import { Checkbox } from '@/ds/checkbox';
 import { Combobox, useComboboxImpl } from '@/ds/combobox';
 import { IconCheck } from '@/ds/icons';
+import { Page } from '@/ds/page';
 import { usePeopleSearch } from '@/features/people';
 import styles from './UserPickerLab.module.css';
 
@@ -27,19 +28,17 @@ export function UserPickerLab() {
 	}, [people.items, grouped]);
 
 	return (
-		<section className={styles.lab}>
-			<header className={styles.header}>
-				<h2 className={styles.title}>Assignee picker</h2>
-				<p className={styles.note}>
-					5,000 generated users through the repository, with simulated latency. Implementation:{' '}
-					<code>{activeName}</code>, loading: <code>{people.mode}</code>
-					{people.mode === 'eager' &&
-						(people.draining
-							? ` — draining, ${people.loadedCount.toLocaleString()} in memory so far`
-							: ` — all ${people.loadedCount.toLocaleString()} in memory`)}
-					.
-				</p>
-			</header>
+		<Page.Section className={styles.lab}>
+			<Page.SectionTitle>Assignee picker</Page.SectionTitle>
+			<Page.Description>
+				5,000 generated users through the repository, with simulated latency. Implementation:{' '}
+				<code>{activeName}</code>, loading: <code>{people.mode}</code>
+				{people.mode === 'eager' &&
+					(people.draining
+						? ` — draining, ${people.loadedCount.toLocaleString()} in memory so far`
+						: ` — all ${people.loadedCount.toLocaleString()} in memory`)}
+				.
+			</Page.Description>
 
 			<div className={styles.controls}>
 				<Checkbox
@@ -93,6 +92,6 @@ export function UserPickerLab() {
 					? 'Nothing selected.'
 					: `Selected: ${selected.map((user) => user.name).join(', ')}`}
 			</p>
-		</section>
+		</Page.Section>
 	);
 }

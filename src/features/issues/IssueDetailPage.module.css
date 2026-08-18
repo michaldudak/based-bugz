@@ -1,15 +1,8 @@
 /*
- * Unlike the list, this page scrolls with the document: the shell's `.content` already owns a
- * scroll container, and nothing here is virtualized, so a second one would only trap the wheel.
+ * The page frame comes from `@/ds/page`. Unlike the list this page scrolls with the document: the
+ * shell's `.content` already owns a scroll container, and nothing here is virtualized, so a second
+ * one would only trap the wheel.
  */
-.page {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-5);
-	max-width: 60rem;
-	padding: var(--space-6);
-}
-
 .back {
 	display: inline-flex;
 	align-self: flex-start;
@@ -72,12 +65,12 @@
 }
 
 /*
- * The title editor is a textarea, so the display size has to be set on the control itself rather
- * than inherited from a heading element that is not there.
+ * The title editor is a textarea, so the page-title size has to be set on the control itself
+ * rather than inherited from a heading element that is not there.
  */
 .title textarea {
 	padding-inline: var(--space-2);
-	font-size: var(--text-xl);
+	font-size: var(--text-page-title);
 	font-weight: var(--weight-semibold);
 	line-height: var(--leading-tight);
 	letter-spacing: -0.01em;
@@ -89,19 +82,6 @@
 	grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 	gap: var(--space-4);
 	min-width: 0;
-}
-
-.description {
-	display: flex;
-	flex-direction: column;
-	gap: var(--space-2);
-	min-width: 0;
-}
-
-.sectionTitle {
-	color: var(--text);
-	font-size: var(--text-base);
-	font-weight: var(--weight-medium);
 }
 
 .tabs {
@@ -117,21 +97,4 @@
 	color: var(--text-muted);
 	font-size: var(--text-base);
 	text-align: center;
-}
-
-.missingTitle {
-	color: var(--text);
-	font-size: var(--text-lg);
-	font-weight: var(--weight-semibold);
-}
-
-@media (width <= 768px) {
-	.page {
-		gap: var(--space-4);
-		padding: var(--space-4);
-	}
-
-	.title textarea {
-		font-size: var(--text-lg);
-	}
 }

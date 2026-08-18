@@ -5,6 +5,7 @@ import { dataParamsToSearch, parseDataParams } from '@/data';
 import { Button } from '@/ds/button';
 import { Field } from '@/ds/field';
 import { Input } from '@/ds/input';
+import { Page } from '@/ds/page';
 import { Select } from '@/ds/select';
 import { Separator } from '@/ds/separator';
 import { PEOPLE_MODE_PARAM, parsePeopleMode } from '@/features/people';
@@ -62,16 +63,16 @@ export function SettingsPage() {
 	}
 
 	return (
-		<div className={styles.page}>
-			<header className={styles.header}>
-				<h1 className={styles.title}>Settings</h1>
-				<p className={styles.subtitle}>
+		<Page>
+			<Page.Header>
+				<Page.Title>Settings</Page.Title>
+				<Page.Subtitle>
 					Every setting here is a URL parameter, so any configuration is reproducible from its link.
-				</p>
-			</header>
+				</Page.Subtitle>
+			</Page.Header>
 
-			<section className={styles.section}>
-				<h2 className={styles.sectionTitle}>Appearance</h2>
+			<Page.Section>
+				<Page.SectionTitle>Appearance</Page.SectionTitle>
 				<div className={styles.grid}>
 					<Field label="Theme" nativeLabel={false}>
 						{/* Base UI's onValueChange is nullable for clearable selects; ours never clear. */}
@@ -100,17 +101,17 @@ export function SettingsPage() {
 						/>
 					</Field>
 				</div>
-			</section>
+			</Page.Section>
 
 			<Separator />
 
-			<section className={styles.section}>
-				<h2 className={styles.sectionTitle}>Pickers</h2>
-				<p className={styles.sectionNote}>
+			<Page.Section>
+				<Page.SectionTitle>Pickers</Page.SectionTitle>
+				<Page.Description>
 					How person pickers get their rows. This is the second axis of the combobox evaluation, so
 					it applies immediately rather than on reload — switch it with a picker open and watch what
 					changes.
-				</p>
+				</Page.Description>
 				<div className={styles.grid}>
 					<Field
 						label="People loading"
@@ -143,15 +144,15 @@ export function SettingsPage() {
 						/>
 					</Field>
 				</div>
-			</section>
+			</Page.Section>
 
 			<Separator />
 
-			<section className={styles.section}>
-				<h2 className={styles.sectionTitle}>Dataset</h2>
-				<p className={styles.sectionNote}>
+			<Page.Section>
+				<Page.SectionTitle>Dataset</Page.SectionTitle>
+				<Page.Description>
 					The generated world. Changing any of these rebuilds it, so they apply on reload.
-				</p>
+				</Page.Description>
 				<div className={styles.grid}>
 					<Field label="Seed" description="Same seed, identical data.">
 						<Input
@@ -203,7 +204,7 @@ export function SettingsPage() {
 						Discard my edits
 					</Button>
 				</div>
-			</section>
-		</div>
+			</Page.Section>
+		</Page>
 	);
 }

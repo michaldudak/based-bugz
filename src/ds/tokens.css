@@ -104,6 +104,16 @@
 	--text-xl: 1.25rem; /* 20px */
 	--text-2xl: 1.5rem; /* 24px */
 
+	/*
+	 * Type roles. Page and section chrome sizes itself from these, never from the raw scale —
+	 * that is what keeps a heading the same size on every route instead of whatever each page's
+	 * CSS module happened to pick.
+	 */
+	--text-page-title: var(--text-xl);
+	--text-page-subtitle: var(--text-md);
+	--text-section-title: var(--text-lg);
+	--text-subsection-title: var(--text-md);
+
 	--leading-tight: 1.25;
 	--leading-normal: 1.5;
 
@@ -143,6 +153,12 @@
 	--row-h: 2.25rem;
 	--sidebar-w: 15rem;
 	--topbar-h: 3rem;
+
+	/*
+	 * The one content width. Routes pick "contained" or "full" and nothing else; a page that
+	 * invents its own max-width is how four screens end up four different widths.
+	 */
+	--page-max: 64rem;
 
 	/* ---- Motion ----------------------------------------------------------- */
 	--duration-fast: 120ms;

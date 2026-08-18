@@ -14,6 +14,7 @@ import {
 } from '@/ds/icons';
 import { Input } from '@/ds/input';
 import { Kbd } from '@/ds/kbd';
+import { Page } from '@/ds/page';
 import { ScrollArea } from '@/ds/scroll-area';
 import { Select } from '@/ds/select';
 import { Separator } from '@/ds/separator';
@@ -40,10 +41,10 @@ const PEOPLE = ['Ada Lovelace', 'Grace Hopper', '田中 太郎', 'Barbara Liskov
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
-		<section className={styles.section}>
-			<h2 className={styles.heading}>{title}</h2>
+		<Page.Subsection>
+			<Page.SubsectionTitle>{title}</Page.SubsectionTitle>
 			{children}
-		</section>
+		</Page.Subsection>
 	);
 }
 
@@ -62,14 +63,12 @@ export function ControlsGallery() {
 	const [selected, setSelected] = useState(false);
 
 	return (
-		<div className={styles.root}>
-			<header className={styles.header}>
-				<h1 className={styles.title}>Controls</h1>
-				<p className={styles.subtitle}>
-					Every form control and layout primitive in <code>src/ds</code>, in each state it ships
-					with. Check it at 360px and in both themes.
-				</p>
-			</header>
+		<Page.Section>
+			<Page.SectionTitle>Controls</Page.SectionTitle>
+			<Page.Description>
+				Every form control and layout primitive in <code>src/ds</code>, in each state it ships with.
+				Check it at 360px and in both themes.
+			</Page.Description>
 
 			<Section title="Input">
 				<div className={styles.grid}>
@@ -327,6 +326,6 @@ export function ControlsGallery() {
 					</Demo>
 				</div>
 			</Section>
-		</div>
+		</Page.Section>
 	);
 }

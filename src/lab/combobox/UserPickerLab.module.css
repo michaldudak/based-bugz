@@ -1,33 +1,12 @@
+/* Section heading and description come from `@/ds/page`; the picker's own width does not. */
 .lab {
 	max-width: 32rem;
-}
-
-.header {
-	margin-bottom: var(--space-4);
-}
-
-.title {
-	font-size: var(--text-md);
-}
-
-.note {
-	margin-top: var(--space-1);
-	color: var(--text-muted);
-	font-size: var(--text-sm);
-}
-
-.note code {
-	padding: 0.1em 0.35em;
-	border-radius: var(--radius-sm);
-	background: var(--surface-sunken);
-	font-family: var(--font-mono);
 }
 
 .controls {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--space-4);
-	margin-bottom: var(--space-3);
 }
 
 .field {
@@ -62,7 +41,6 @@
 }
 
 .selection {
-	margin-top: var(--space-3);
 	color: var(--text-muted);
 	font-size: var(--text-sm);
 }

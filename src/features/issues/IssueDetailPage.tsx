@@ -18,6 +18,7 @@ import type { Issue, IssuePatch } from '@/data';
 import { AlertDialog } from '@/ds/alert-dialog';
 import { Button } from '@/ds/button';
 import { IconChevronLeft, IconInbox, IconTrash, IconWarning } from '@/ds/icons';
+import { Page } from '@/ds/page';
 import { Spinner } from '@/ds/spinner';
 import { Tabs } from '@/ds/tabs';
 import {
@@ -82,12 +83,12 @@ export function IssueDetailPage() {
 
 	if (issueQuery.isPending && issueId !== '') {
 		return (
-			<div className={styles.page}>
+			<Page>
 				<BackLink search={location.search} />
 				<div className={styles.state}>
 					<Spinner size={20} label="Loading issue" />
 				</div>
-			</div>
+			</Page>
 		);
 	}
 
@@ -95,24 +96,24 @@ export function IssueDetailPage() {
 	// is reported inline further down instead of replacing what you were looking at.
 	if (issueQuery.isError && issue === null) {
 		return (
-			<div className={styles.page}>
+			<Page>
 				<BackLink search={location.search} />
 				<div className={styles.state}>
 					<IconWarning />
 					<p>Could not load this issue.</p>
 					<Button onClick={() => void issueQuery.refetch()}>Try again</Button>
 				</div>
-			</div>
+			</Page>
 		);
 	}
 
 	if (issue === null) {
 		return (
-			<div className={styles.page}>
+			<Page>
 				<BackLink search={location.search} />
 				<div className={styles.state}>
 					<IconInbox />
-					<h1 className={styles.missingTitle}>No such issue</h1>
+					<Page.Title>No such issue</Page.Title>
 					<p>
 						{issueId === ''
 							? 'That link is missing an issue id.'
@@ -120,12 +121,12 @@ export function IssueDetailPage() {
 					</p>
 					<Button onClick={() => navigate(issuesPath(location.search))}>Back to issues</Button>
 				</div>
-			</div>
+			</Page>
 		);
 	}
 
 	return (
-		<div className={styles.page}>
+		<Page>
 			<BackLink search={location.search} />
 
 			<header className={styles.header}>
@@ -185,8 +186,8 @@ export function IssueDetailPage() {
 				<LabelsField value={issue.labelIds} onChange={(labelIds) => save({ labelIds })} />
 			</div>
 
-			<section className={styles.description}>
-				<h2 className={styles.sectionTitle}>Description</h2>
+			<Page.Section>
+				<Page.SectionTitle>Description</Page.SectionTitle>
 				<InlineText
 					multiline
 					value={issue.description}
@@ -196,7 +197,7 @@ export function IssueDetailPage() {
 					maxRows={20}
 					placeholder="No description yet."
 				/>
-			</section>
+			</Page.Section>
 
 			<Tabs defaultValue="comments" className={styles.tabs}>
 				<Tabs.List>
@@ -218,7 +219,7 @@ export function IssueDetailPage() {
 				loading={remove.isPending}
 				onConfirm={() => remove.mutate({ ids: [issue.id] })}
 			/>
-		</div>
+		</Page>
 	);
 }
 

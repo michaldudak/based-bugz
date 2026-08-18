@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router';
 import { useComboboxImpl } from '@/ds/combobox';
+import { Page } from '@/ds/page';
 import { Tabs } from '@/ds/tabs';
 import { PerfOverlay, PerfToggle } from '@/lab/perf';
 import { STRESS_CASES, findStressCase } from './cases';
@@ -31,16 +32,13 @@ export function StressLabPage() {
 	}
 
 	return (
-		<div className={styles.page}>
-			<header className={styles.header}>
-				<h1 className={styles.title}>Stress lab</h1>
-				<p className={styles.subtitle}>
+		<Page>
+			<Page.Header actions={<PerfToggle />}>
+				<Page.Title>Stress lab</Page.Title>
+				<Page.Subtitle>
 					One picker, seven ways to break it. Implementation: <code>{activeName}</code>.
-				</p>
-				<div className={styles.headerControls}>
-					<PerfToggle />
-				</div>
-			</header>
+				</Page.Subtitle>
+			</Page.Header>
 
 			<Tabs value={active.id} onValueChange={(value) => selectCase(String(value))}>
 				<Tabs.List>
@@ -57,8 +55,9 @@ export function StressLabPage() {
 				 * numbers of the one you meant to measure.
 				 */}
 				<Tabs.Panel value={active.id}>
+					{/* A plain section, not `Page.Section`: the parity suite hooks onto these data attributes. */}
 					<section className={styles.case} data-testid="stress-case" data-case={active.id}>
-						<h2 className={styles.caseTitle}>{active.title}</h2>
+						<Page.SectionTitle>{active.title}</Page.SectionTitle>
 						<p className={styles.caseBreaks} data-testid="stress-case-breaks">
 							<span className={styles.caseBreaksLabel}>Breaks like this:</span> {active.breaks}
 						</p>
@@ -68,6 +67,6 @@ export function StressLabPage() {
 			</Tabs>
 
 			<PerfOverlay />
-		</div>
+		</Page>
 	);
 }

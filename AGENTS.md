@@ -181,6 +181,13 @@ compete with the evaluation for attention.
   foreground for secondary text, compact type scale (13–14px base), whitespace over divider lines.
   The accent is near-neutral (dark-on-light / light-on-dark, zinc-style); saturated color is
   reserved for meaning — status, priority, focus, destructive — never decoration.
+- **One page frame.** Every route renders `ds/page`, which owns the gutters, the `--page-max`
+  content width and the `<h1>`/`<h2>`/`<h3>` sizes. A route picks `contained` or `full` and nothing
+  else — four screens each choosing their own max-width and heading size is how a testbed starts
+  looking like four testbeds.
+- **Heading sizes come from type-role tokens** (`--text-page-title`, `--text-page-subtitle`,
+  `--text-section-title`, `--text-subsection-title`), never from the raw `--text-*` scale. A page
+  reaching for `--text-xl` directly is the drift, not the fix.
 - **Focus is always visible**: `:focus-visible` ring driven by `--ring` on every interactive
   element.
 - **Responsive down to 360px.** Not "doesn't break" — genuinely usable. The sidebar collapses to a

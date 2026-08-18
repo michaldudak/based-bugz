@@ -1,0 +1,130 @@
+/*
+ * One frame for every route. Routes choose a width and whether they own their own scroll
+ * container; everything else — padding, gutters, heading sizes — is settled here, so two screens
+ * cannot drift apart by each picking their own numbers.
+ */
+.page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-6);
+	width: 100%;
+	padding: var(--space-6);
+}
+
+.contained {
+	max-width: var(--page-max);
+	margin-inline: auto;
+}
+
+/* A page that scrolls with the document wants room under its last section. */
+.scrolls {
+	padding-bottom: var(--space-12);
+}
+
+/*
+ * A filling page is exactly as tall as the shell's content area, so a child can own the scroll —
+ * which a virtualizer needs. It gets no trailing padding (the child ends at the page edge) and a
+ * tighter rhythm, because every gap here is height the list does not get.
+ */
+.fill {
+	gap: var(--space-4);
+	height: 100%;
+	min-height: 0;
+}
+
+.header {
+	display: flex;
+	flex-shrink: 0;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: var(--space-3);
+}
+
+.heading {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-2);
+	min-width: 0;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: var(--space-2);
+}
+
+.title {
+	font-size: var(--text-page-title);
+	letter-spacing: -0.01em;
+}
+
+.subtitle {
+	max-width: 68ch;
+	color: var(--text-muted);
+	font-size: var(--text-page-subtitle);
+}
+
+.section {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-4);
+	min-width: 0;
+}
+
+.subsection {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-3);
+	min-width: 0;
+}
+
+.sectionTitle {
+	font-size: var(--text-section-title);
+	letter-spacing: -0.01em;
+}
+
+.subsectionTitle {
+	font-size: var(--text-subsection-title);
+}
+
+.description {
+	max-width: 68ch;
+	color: var(--text-muted);
+	line-height: var(--leading-normal);
+}
+
+/*
+ * `--text` rather than the surrounding `--text-muted`: muted foreground on `--surface-sunken` is
+ * 4.39:1, under the AA minimum for body text, and the axe scan in `tests/a11y.spec.ts` is right
+ * to say so.
+ */
+.subtitle code,
+.description code {
+	padding: 0.1em 0.35em;
+	border-radius: var(--radius-sm);
+	background: var(--surface-sunken);
+	color: var(--text);
+	font-family: var(--font-mono);
+	font-size: 0.9em;
+}
+
+@media (width <= 768px) {
+	.page {
+		gap: var(--space-4);
+		padding: var(--space-4);
+	}
+
+	.scrolls {
+		padding-bottom: var(--space-10);
+	}
+
+	/*
+	 * A scrolling page can afford a lede on a phone; a filling one cannot — the whole point of it
+	 * is the scroll container underneath, and three lines of prose is a visible slice of it.
+	 */
+	.fill .subtitle {
+		display: none;
+	}
+}

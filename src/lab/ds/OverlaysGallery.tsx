@@ -14,17 +14,18 @@ import {
 	IconUser,
 } from '@/ds/icons';
 import { Menu } from '@/ds/menu';
+import { Page } from '@/ds/page';
 import { Popover } from '@/ds/popover';
-import { ToastProvider, useToast } from '@/ds/toast';
-import { Tooltip, TooltipProvider } from '@/ds/tooltip';
+import { useToast } from '@/ds/toast';
+import { Tooltip } from '@/ds/tooltip';
 import styles from './OverlaysGallery.module.css';
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
 	return (
-		<section className={styles.section}>
-			<h2 className={styles.heading}>{title}</h2>
+		<Page.Subsection>
+			<Page.SubsectionTitle>{title}</Page.SubsectionTitle>
 			<div className={styles.row}>{children}</div>
-		</section>
+		</Page.Subsection>
 	);
 }
 
@@ -370,20 +371,17 @@ function Toasts() {
 }
 
 /**
- * Every overlay in `ds/`, in the variants worth eyeballing. Renders standalone — the
- * providers it needs are wrapped by `OverlaysGalleryPage` below, and the app root mounts
- * the same two providers once.
+ * Every overlay in `ds/`, in the variants worth eyeballing. The tooltip and toast providers it
+ * needs are mounted once by the app root, so this renders as a section of the gallery page.
  */
 export function OverlaysGallery() {
 	return (
-		<div className={styles.root}>
-			<header className={styles.header}>
-				<h1 className={styles.title}>Overlays</h1>
-				<p className={styles.muted}>
-					Dialog, alert dialog, popover, menu, tooltip and toast. Check this at 360×640 and in both
-					themes before calling any of them done.
-				</p>
-			</header>
+		<Page.Section>
+			<Page.SectionTitle>Overlays</Page.SectionTitle>
+			<Page.Description>
+				Dialog, alert dialog, popover, menu, tooltip and toast. Check this at 360×640 and in both
+				themes before calling any of them done.
+			</Page.Description>
 
 			<Section title="Dialog">
 				<DialogSizes />
@@ -409,17 +407,6 @@ export function OverlaysGallery() {
 			<Section title="Toast">
 				<Toasts />
 			</Section>
-		</div>
-	);
-}
-
-/** The gallery with its providers, for mounting the route directly. */
-export function OverlaysGalleryPage() {
-	return (
-		<TooltipProvider>
-			<ToastProvider>
-				<OverlaysGallery />
-			</ToastProvider>
-		</TooltipProvider>
+		</Page.Section>
 	);
 }
