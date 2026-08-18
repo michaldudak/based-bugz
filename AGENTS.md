@@ -295,6 +295,7 @@ is a reproducible finding rather than an impression.
   `Combobox.Virtualizer`), #5414 (context-only `ListVirtualizer`), #5466 (`Virtualizer` with
   context + props). See PLAN.md Phase 9 for the verified plan, the type-identity hazard and its
   postinstall fix, and the issues-list scope change (it becomes the standalone-virtualizer
-  evaluation surface; `@mui/x-virtualizer` is an approved dependency for that purpose).
+  evaluation surface; `@mui/x-virtualizer` is an approved dependency, used only by pr-5173's
+  List, the one variant with no standalone story of its own).
 
 See `PLAN.md` for the implementation sequence.

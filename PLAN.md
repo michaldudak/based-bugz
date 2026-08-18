@@ -152,11 +152,11 @@ report — that report is the template the canaries get judged in.
 
 The PRs under evaluation, all in `mui/base-ui`, all alive as of 2026-08-18:
 
-| PR                                                           | API shape                                                                                         | Combobox story                              | Standalone story                                                                                |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [#5173](https://github.com/mui/base-ui/pull/5173) `91e45e1a` | `<Combobox.Virtualizer>` part backed by `@mui/x-virtualizer`                                      | built-in part                               | **none** — fall back to `@mui/x-virtualizer` directly                                           |
-| [#5414](https://github.com/mui/base-ui/pull/5414) `0181d7b8` | standalone `<ListVirtualizer>` component, **context-only** (throws outside a virtualization host) | drop into `Combobox.List`                   | **none in practice** — no Base UI host exists around the issues list, so same fallback as #5173 |
-| [#5466](https://github.com/mui/base-ui/pull/5466) `a873cbc2` | `<Virtualizer>`, context **and** props API                                                        | drop into `Combobox.List` (context binding) | native: `items` prop + 3-arg renderer                                                           |
+| PR                                                           | API shape                                                                                         | Combobox story                              | Standalone story                                                                                       |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [#5173](https://github.com/mui/base-ui/pull/5173) `91e45e1a` | `<Combobox.Virtualizer>` part backed by `@mui/x-virtualizer`                                      | built-in part                               | **none** — fall back to `@mui/x-virtualizer` directly                                                  |
+| [#5414](https://github.com/mui/base-ui/pull/5414) `0181d7b8` | standalone `<ListVirtualizer>` component, **context-only** (throws outside a virtualization host) | drop into `Combobox.List`                   | possible, the hard way: the app publishes its own virtualization host for `ListVirtualizer` to bind to |
+| [#5466](https://github.com/mui/base-ui/pull/5466) `a873cbc2` | `<Virtualizer>`, context **and** props API                                                        | drop into `Combobox.List` (context binding) | native: `items` prop + 3-arg renderer                                                                  |
 
 Lineage matters for the diff evidence: #5414 contains #5173's engine unchanged, #5466 contains
 #5414. The windowing engine is identical in all three; the public API is the axis. All three canary
@@ -168,19 +168,32 @@ surface (it was previously "TanStack Virtual permanently"). Each implementation 
 components — Combobox and List. The registry becomes `{ Combobox, List }` per impl, `?impl=`
 switches both, and the baseline keeps its current TanStack code for both surfaces as the control.
 
-| `?impl=`   | Combobox                              | Issues list                                                                             |
-| ---------- | ------------------------------------- | --------------------------------------------------------------------------------------- |
-| `baseline` | stable + TanStack Virtual (unchanged) | TanStack Virtual (extracted from `IssueList`, unchanged behaviour)                      |
-| `pr-5173`  | canary `<Combobox.Virtualizer>`       | shared `@mui/x-virtualizer` adapter                                                     |
-| `pr-5414`  | canary `<ListVirtualizer>`            | shared `@mui/x-virtualizer` adapter _(public API cannot express it — recorded finding)_ |
-| `pr-5466`  | canary `<Virtualizer>` (context)      | canary `<Virtualizer items>` (props)                                                    |
+| `?impl=`   | Combobox                              | Issues list                                                                           |
+| ---------- | ------------------------------------- | ------------------------------------------------------------------------------------- |
+| `baseline` | stable + TanStack Virtual (unchanged) | TanStack Virtual (extracted from `IssueList`, unchanged behaviour)                    |
+| `pr-5173`  | canary `<Combobox.Virtualizer>`       | shared `@mui/x-virtualizer` adapter                                                   |
+| `pr-5414`  | canary `<ListVirtualizer>`            | custom host + `<ListVirtualizer>` — the host the app must write is itself the finding |
+| `pr-5466`  | canary `<Virtualizer>` (context)      | canary `<Virtualizer items>` (props)                                                  |
 
-The x-virtualizer fallback lives once, in `impls/mui-x-list/`, registered as the List for both
-pr-5173 and pr-5414 by the app-level registry. That respects the no-cross-impl-imports rule (the
-registry composes; impls never import each other) and keeps the List diff honest: baseline
-TanStack vs raw x-virtualizer vs #5466's `Virtualizer`. Note the fallback is scaffolding to keep
-the app usable under those impls — it is not "what #5173's API makes you write", and the verdict
-must not count it as such.
+The x-virtualizer fallback is needed only by pr-5173 and lives in `impls/pr-5173/List.tsx`. It is
+scaffolding to keep the app usable under that impl — not "what #5173's API makes you write" — and
+the verdict must not count it as such. The List diff is then genuinely four approaches: TanStack
+(baseline), raw x-virtualizer (5173), custom-host + `ListVirtualizer` (5414), `Virtualizer items`
+(5466).
+
+**The 5414 standalone path, verified against the canary build:** `ListVirtualizer` binds to two
+contexts. A host is a stable object — `componentName`, a registry from
+`createListVirtualizationRegistry()`, a consumer-owned `virtualItemContext` its rows read
+`data-index`/aria props from — and a reactive `ListVirtualizationListState`:
+`{ activeIndex, items, renderAllRows, renderAllRowsRestoreVersion, scrollActiveIntoView }`. A
+plain list supplies `activeIndex: null`, `renderAllRows: false`, `scrollActiveIntoView: false` —
+three combobox-flavoured fields it must still provide, which is the "not as easy as #5466" cost in
+concrete form. **Catch:** these primitives ship in the tarball under `internals/virtualization/`
+but the exports map does not cover that path (`ERR_PACKAGE_PATH_NOT_EXPORTED`). The postinstall
+script therefore widens `base-ui-5414`'s exports map alongside the version rewrite — same specifier
+root as `ListVirtualizer`'s own imports, so context identity is preserved by construction (no Vite
+alias tricks). Recorded as a finding either way: standalone use today requires primitives the
+package does not export.
 
 #### Verified in a scratch install (2026-08-18)
 
@@ -219,9 +232,8 @@ must not count it as such.
 #### Steps
 
 1. **Dependencies + guards · S** — add the three sha-pinned aliases and `@mui/x-virtualizer`;
-   postinstall version-splitting script; `pnpm why` assertions recorded in PLAN; extend
-   `.oxlintrc.json` so `impls/mui-x-list` gets the same restrictions as `impls/pr-*` minus the
-   Base UI ban (it imports no Base UI at all — enforce that too).
+   postinstall script does the version splitting for all three aliases plus the exports-map
+   widening for `base-ui-5414`; `pnpm why` assertions recorded in PLAN.
 2. **List seam · M** — `ds/list/` contract (`items`, `itemKey`, `renderItem`,
    `estimateItemHeight`, `onEndReached`, `aria` pass-through; impls own scroll container,
    measurement, index math — mirroring the combobox rules); registry becomes `{ Combobox, List }`;
@@ -229,10 +241,11 @@ must not count it as such.
    (generic over `T`). **Gate:** app behaves identically, parity suite still 11/5.
 3. **pr-5173 Combobox · L** — the most constrained API first, so contract violations surface
    earliest. Pure-canary lab route (rule 12) in the same step.
-4. **mui-x-list · M** — the shared standalone fallback, referenced against #5173's internal
-   adapter for wiring patterns (its params are grid-shaped: `RowEntry[]`, dimensions, layout).
-   Registered for pr-5173; pr-5414 reuses it in step 5.
-5. **pr-5414 Combobox · M** — mostly #5173's integration with the part swapped for the component.
+4. **pr-5173 List · M** — the x-virtualizer fallback, referenced against #5173's internal adapter
+   for wiring patterns (its params are grid-shaped: `RowEntry[]`, dimensions, layout).
+5. **pr-5414 Combobox + List · L** — the Combobox is mostly #5173's integration with the part
+   swapped for the component; the List means writing the virtualization host (registry, two
+   context providers, an item context of our own), which is the PR's headline standalone finding.
 6. **pr-5466 Combobox + List · L** — both surfaces native; the standalone List is the first real
    test of the props API.
 7. **Parity + a11y matrix · M** — the suite already parameterizes over registered impls; add a
@@ -242,9 +255,9 @@ must not count it as such.
    the constraint list above filled in with what actually happened, frame timings as supporting
    evidence.
 
-Docs to update when step 1 lands: AGENTS.md stack table (`@mui/x-virtualizer` allowed), Import
-rules (`impls/mui-x-list`), the Phase 5 note that the issues list is now an evaluation surface, and
-the Conventions section (sha pinning, postinstall script).
+Docs to update when step 1 lands: AGENTS.md stack table (`@mui/x-virtualizer` allowed), the
+Phase 5 note that the issues list is now an evaluation surface, and the Conventions section
+(sha pinning, postinstall script — version splitting plus the 5414 exports-map widening).
 
 ---
 
