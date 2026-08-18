@@ -9,10 +9,32 @@ import { Button, ButtonLink } from '@/ds/button';
 import { Dialog } from '@/ds/dialog';
 import { IconGitHub, IconMenu, IconMoon, IconSun } from '@/ds/icons';
 import { Menu } from '@/ds/menu';
+import { useImplRegistry } from '@/ds/registry';
 import { Tooltip } from '@/ds/tooltip';
 import { CommandPaletteProvider } from '@/features/command-palette';
 import { NavContent } from './NavContent';
 import styles from './AppLayout.module.css';
+
+/**
+ * Which virtualization implementation this run uses — worn on the topbar, because a comparison
+ * where you can forget which candidate you are currently judging produces impressions attributed
+ * to the wrong API. Baseline is the quiet default and shows nothing.
+ */
+function ImplBadge() {
+	const { activeName } = useImplRegistry();
+
+	if (activeName === 'baseline') {
+		return null;
+	}
+
+	return (
+		<Tooltip content="Combobox and issues-list virtualization come from this implementation. Switch with ?impl=">
+			<span className={styles.implBadge} data-testid="active-impl">
+				{activeName}
+			</span>
+		</Tooltip>
+	);
+}
 
 function ThemeToggle() {
 	const { theme, setTheme } = useTheme();
@@ -98,6 +120,7 @@ export function AppLayout() {
 					<Logo size={15} />
 					{APP_NAME}
 				</span>
+				<ImplBadge />
 				<div className={styles.topbarEnd}>
 					<RepoLink />
 					<ThemeToggle />
