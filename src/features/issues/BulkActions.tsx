@@ -102,13 +102,7 @@ export function BulkActions({ selectedIds, onClear }: BulkActionsProps) {
 				/>
 			</Popover>
 
-			<Button
-				size="sm"
-				variant="danger"
-				disabled={busy}
-				onClick={() => setConfirmOpen(true)}
-				className={styles.delete}
-			>
+			<Button size="sm" variant="danger" disabled={busy} onClick={() => setConfirmOpen(true)}>
 				<IconTrash size={14} />
 				Delete
 			</Button>

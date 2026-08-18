@@ -1,5 +1,6 @@
 .list {
 	display: flex;
+	position: relative;
 	flex: 1;
 	flex-direction: column;
 	min-height: 0;
@@ -7,6 +8,29 @@
 	border-radius: var(--radius-lg);
 	background: var(--surface);
 	overflow: hidden;
+}
+
+/*
+ * The layer the selection toolbar floats in. `pointer-events: none` so the empty space either side
+ * of the toolbar still belongs to the rows underneath — a transparent strip that swallowed clicks
+ * across the bottom of the list would be worse than the shift it replaces.
+ */
+.selectionLayer {
+	display: flex;
+	position: absolute;
+	bottom: var(--space-3);
+	z-index: var(--z-sticky);
+	justify-content: center;
+	inset-inline: var(--space-3);
+	pointer-events: none;
+	animation: selection-in var(--duration) var(--ease);
+}
+
+@keyframes selection-in {
+	from {
+		transform: translateY(var(--space-2));
+		opacity: 0;
+	}
 }
 
 .header {

@@ -1,13 +1,19 @@
+/*
+ * A floating bar over the bottom of the list (`IssueList.module.css` owns the layer). It takes its
+ * own pointer events back from that layer, and only as much width as it needs.
+ */
 .bar {
 	display: flex;
 	flex-wrap: wrap;
 	align-items: center;
 	gap: var(--space-2);
+	max-width: 100%;
 	padding: var(--space-2) var(--space-3);
 	border: 1px solid var(--border-strong);
-	border-radius: var(--radius);
+	border-radius: var(--radius-lg);
 	background: var(--surface-raised);
-	box-shadow: var(--shadow-sm);
+	box-shadow: var(--shadow-lg);
+	pointer-events: auto;
 }
 
 .count {
@@ -15,10 +21,6 @@
 	font-size: var(--text-sm);
 	font-weight: var(--weight-medium);
 	font-variant-numeric: tabular-nums;
-}
-
-.delete {
-	margin-inline-start: auto;
 }
 
 .assignPopup {
@@ -31,13 +33,16 @@
 	font-size: var(--text-sm);
 }
 
+/*
+ * Narrow: the bar is content-sized and centred, so the count no longer needs a line of its own —
+ * it wraps with everything else, which costs one line instead of two.
+ */
 @media (width <= 640px) {
-	.count {
-		flex: 1 0 100%;
-		margin-inline-end: 0;
+	.bar {
+		justify-content: center;
 	}
 
-	.delete {
-		margin-inline-start: 0;
+	.count {
+		margin-inline-end: 0;
 	}
 }

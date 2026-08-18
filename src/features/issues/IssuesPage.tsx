@@ -6,14 +6,13 @@
  * to another — you would be bulk-editing issues you can no longer see.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import type { IssueId } from '@/data';
 import { Button } from '@/ds/button';
 import { IconPlus } from '@/ds/icons';
 import { Page } from '@/ds/page';
 import { NEW_ISSUE_PARAM } from '@/features/command-palette';
-import { BulkActions } from './BulkActions';
 import { CreateIssueDialog } from './CreateIssueDialog';
 import { FilterBar } from './FilterBar';
 import { IssueList } from './IssueList';
@@ -104,8 +103,6 @@ export function IssuesPage() {
 
 	const onClear = useCallback(() => apply((ids) => ids.clear()), [apply]);
 
-	const selectedList = useMemo(() => [...selectedIds], [selectedIds]);
-
 	return (
 		/* Full width and filling: the list is the page, and it owns the scroll the virtualizer needs. */
 		<Page width="full" fill>
@@ -125,13 +122,12 @@ export function IssuesPage() {
 
 			<FilterBar filters={filters} />
 
-			{selectedList.length > 0 && <BulkActions selectedIds={selectedList} onClear={onClear} />}
-
 			<IssueList
 				filters={filters}
 				selectedIds={selectedIds}
 				onToggleSelected={onToggleSelected}
 				onSelectAll={onSelectAll}
+				onClearSelection={onClear}
 			/>
 
 			<CreateIssueDialog open={createOpen} onOpenChange={setCreateOpen} />

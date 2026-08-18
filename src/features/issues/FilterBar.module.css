@@ -10,16 +10,15 @@
 	min-width: 10rem;
 }
 
-/* Wide viewport: every control side by side. */
-.inline {
-	display: flex;
-	flex: 1 1 auto;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--space-2);
-	min-width: 0;
-}
-
+/*
+ * Wide viewport: every control side by side.
+ *
+ * `display: contents` rather than a nested flex row. As a box this wrapped internally, so on a
+ * viewport where the controls need two lines the search field ended up vertically centred against
+ * a two-line block — level with neither row. Flattening it makes every control a sibling in the
+ * one wrapping row, so they wrap together and sit on a shared baseline.
+ */
+.inline,
 .contents {
 	display: contents;
 }

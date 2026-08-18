@@ -21,6 +21,7 @@ import { Button } from '@/ds/button';
 import { Checkbox } from '@/ds/checkbox';
 import { IconInbox, IconWarning } from '@/ds/icons';
 import { Spinner } from '@/ds/spinner';
+import { BulkActions } from './BulkActions';
 import { IssueRow } from './IssueRow';
 import { useMediaQuery } from './hooks';
 import type { IssueFiltersApi } from './useIssueFilters';
@@ -54,9 +55,16 @@ export interface IssueListProps {
 	selectedIds: ReadonlySet<IssueId>;
 	onToggleSelected: (id: IssueId, selected: boolean) => void;
 	onSelectAll: (ids: readonly IssueId[], selected: boolean) => void;
+	onClearSelection: () => void;
 }
 
-export function IssueList({ filters, selectedIds, onToggleSelected, onSelectAll }: IssueListProps) {
+export function IssueList({
+	filters,
+	selectedIds,
+	onToggleSelected,
+	onSelectAll,
+	onClearSelection,
+}: IssueListProps) {
 	const repository = useRepository();
 	const scrollRef = useRef<HTMLDivElement>(null);
 	const stacked = useMediaQuery(STACKED_QUERY);
@@ -174,6 +182,9 @@ export function IssueList({ filters, selectedIds, onToggleSelected, onSelectAll 
 
 	const isEmpty = !issuesQuery.isPending && !issuesQuery.isError && issues.length === 0;
 
+	// The toolbar acts on the whole selection, including rows scrolled out of the window.
+	const selectedList = useMemo(() => [...selectedIds], [selectedIds]);
+
 	return (
 		<section className={styles.list} aria-label="Issues">
 			<div className={styles.header}>
@@ -258,6 +269,17 @@ export function IssueList({ filters, selectedIds, onToggleSelected, onSelectAll 
 					})}
 				</ul>
 			</div>
+
+			{/*
+			 * The selection toolbar floats over the list rather than appearing above it. Inserting a
+			 * panel into the flow pushed every row down at the exact moment you were clicking rows —
+			 * the second checkbox you reached for was no longer where you left it.
+			 */}
+			{selectedList.length > 0 && (
+				<div className={styles.selectionLayer}>
+					<BulkActions selectedIds={selectedList} onClear={onClearSelection} />
+				</div>
+			)}
 		</section>
 	);
 }
