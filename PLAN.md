@@ -116,10 +116,9 @@ chunk per impl.
 `features/issues/`: virtualized list, filter bar (AssigneePicker, LabelPicker, status and priority
 selects, text search), sorting, row selection, bulk actions menu, empty/loading/error states.
 
-The issue list uses TanStack Virtual permanently and is **not** part of the evaluation — only the
-combobox is. Do not wire it to `impls/`. _(Superseded in Phase 9: the issues list becomes the
-standalone-virtualizer surface, and the baseline List keeps this exact TanStack code as the
-control.)_
+_(Superseded in Phase 9: the issues list is now the standalone-virtualizer evaluation surface,
+reached through the `ds/list` seam. The baseline List keeps the original TanStack code, unchanged,
+as the control.)_
 
 **Done when:** 10k issues scroll smoothly in a production build; filters compose and round-trip
 through the URL; sorting works with cursor pagination; bulk actions apply to a selection.

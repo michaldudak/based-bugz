@@ -12,17 +12,18 @@ Base UI components too, so **nothing may be named or structured around virtualiz
 
 ## Stack
 
-| Concern                   | Choice                                                                                                   |
-| ------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Build                     | Vite 8                                                                                                   |
-| UI                        | React 19.2 (no React Compiler — see Evaluation rules)                                                    |
-| Language                  | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
-| Components                | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react`                        |
-| Styling                   | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library.              |
-| Data                      | TanStack Query 5 over a repository interface                                                             |
-| Virtualization (baseline) | TanStack Virtual 3                                                                                       |
-| Routing                   | React Router 8, declarative                                                                              |
-| Package manager           | pnpm                                                                                                     |
+| Concern                       | Choice                                                                                                   |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Build                         | Vite 8                                                                                                   |
+| UI                            | React 19.2 (no React Compiler — see Evaluation rules)                                                    |
+| Language                      | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
+| Components                    | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react`                        |
+| Styling                       | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library.              |
+| Data                          | TanStack Query 5 over a repository interface                                                             |
+| Virtualization (baseline)     | TanStack Virtual 3                                                                                       |
+| Virtualization (pr-5173 List) | `@mui/x-virtualizer` — approved for exactly that one use                                                 |
+| Routing                       | React Router 8, declarative                                                                              |
+| Package manager               | pnpm                                                                                                     |
 
 Do not add dependencies beyond this list without asking. Every extra library is a confounder in a
 comparison whose whole point is how much code an API makes you write.
@@ -279,7 +280,13 @@ per-impl bundle size falls out of the build. Switching is a runtime `?impl=` par
 subtree — no restart, no cross-contaminated state. Canary builds install side by side under distinct
 dependency names (`base-ui-a`, `base-ui-b`, `base-ui-c`); `react` and `react-dom` must dedupe to a
 single copy, and `@base-ui/react`'s internal siblings must **not** hoist into one shared copy across
-impls. Verify with `pnpm why` after any install.
+impls. Verify with `pnpm why` after any install. Canary URLs are pinned by commit sha, never by PR
+number — `@5173`-style refs float to the latest push. Bumping a sha is a deliberate, recorded act.
+`scripts/patch-canaries.mjs` runs from the root `postinstall` hook: it splits the canaries' package
+versions (`1.7.0-pr<N>`) so TypeScript does not collapse their types into stable's, and widens
+base-ui-5414's exports map so the app can publish the virtualization host its `ListVirtualizer`
+binds to. A plain `pnpm install` must always leave node_modules in the state the evaluation
+assumes — never patch node_modules by hand.
 
 **URL parameters** are the app's control surface, so any run is reproducible from a link:
 `?impl=` `?seed=` `?scale=` `?latency=` `?errorRate=` `?density=` `?theme=` `?dir=` `?fresh=`

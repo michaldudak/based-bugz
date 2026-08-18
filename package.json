@@ -14,12 +14,17 @@
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"test:e2e": "playwright test",
-		"test:e2e:report": "playwright show-report"
+		"test:e2e:report": "playwright show-report",
+		"postinstall": "node scripts/patch-canaries.mjs"
 	},
 	"dependencies": {
 		"@base-ui/react": "^1.7.0",
+		"@mui/x-virtualizer": "^0.6.3",
 		"@tanstack/react-query": "^5.101.4",
 		"@tanstack/react-virtual": "^3.14.9",
+		"base-ui-5173": "https://pkg.pr.new/mui/base-ui/@base-ui/react@91e45e1a9b7f0b0075f435ae52714541a11372fa",
+		"base-ui-5414": "https://pkg.pr.new/mui/base-ui/@base-ui/react@0181d7b877d4e5d963022d9d9a9e2fdb0bdca3ae",
+		"base-ui-5466": "https://pkg.pr.new/mui/base-ui/@base-ui/react@a873cbc2d3f99952072069fe29e6511a66a398e9",
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"react-router": "^8.3.0"
