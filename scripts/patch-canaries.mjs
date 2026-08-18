@@ -16,6 +16,7 @@
  */
 
 import { readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
@@ -38,6 +39,61 @@ const INTERNALS_ENTRY = {
 };
 
 let patched = 0;
+
+function resolveUtilsManifest(fromDir) {
+	try {
+		const requireFrom = createRequire(join(realpathSync(fromDir), 'package.json'));
+		return requireFrom.resolve('@base-ui/utils/package.json');
+	} catch {
+		return null;
+	}
+}
+
+/**
+ * The canaries resolve to the canary `@base-ui/utils` (see .pnpmfile.cjs), which declares the
+ * same version as the published one — the same TypeScript identity hazard as the canaries
+ * themselves, so it gets the same split. Guarded by comparing against stable's resolved utils:
+ * if both point at one instance something about the resolution went wrong, and renaming the copy
+ * stable relies on would be worse than failing loudly.
+ */
+function patchCanaryUtils(rootDir) {
+	const stableManifest = resolveUtilsManifest(join(rootDir, 'node_modules', '@base-ui', 'react'));
+	const canaryManifest = resolveUtilsManifest(join(rootDir, 'node_modules', 'base-ui-5466'));
+
+	if (canaryManifest === null) {
+		console.warn('[patch-canaries] could not resolve the canary @base-ui/utils - skipped');
+		return false;
+	}
+
+	if (canaryManifest === stableManifest) {
+		throw new Error(
+			'[patch-canaries] canaries and stable resolve @base-ui/utils to the same instance — ' +
+				'the .pnpmfile.cjs hook did not apply. Refusing to rename a shared manifest; ' +
+				'run pnpm install again so the hook participates in resolution.',
+		);
+	}
+
+	// Undo any accidental rename of the shared instance by an earlier version of this script.
+	if (stableManifest !== null) {
+		const stable = JSON.parse(readFileSync(stableManifest, 'utf8'));
+
+		if (stable.version !== '0.3.2') {
+			stable.version = '0.3.2';
+			writeFileSync(stableManifest, `${JSON.stringify(stable, null, 2)}\n`);
+			console.log('[patch-canaries] restored stable @base-ui/utils to 0.3.2');
+		}
+	}
+
+	const manifest = JSON.parse(readFileSync(canaryManifest, 'utf8'));
+
+	if (manifest.version === '0.3.2-canary') {
+		return false;
+	}
+
+	manifest.version = '0.3.2-canary';
+	writeFileSync(canaryManifest, `${JSON.stringify(manifest, null, 2)}\n`);
+	return true;
+}
 
 for (const { alias, version, widenExports } of CANARIES) {
 	let manifestPath;
@@ -70,6 +126,11 @@ for (const { alias, version, widenExports } of CANARIES) {
 			`[patch-canaries] ${alias} -> ${version}${widenExports ? ' (+internals exports)' : ''}`,
 		);
 	}
+}
+
+if (patchCanaryUtils(ROOT)) {
+	patched += 1;
+	console.log('[patch-canaries] canary @base-ui/utils -> 0.3.2-canary');
 }
 
 console.log(`[patch-canaries] done, ${patched} manifest(s) written`);
