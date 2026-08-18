@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router';
-import { useComboboxImpl } from '@/ds/combobox';
+import { useImplRegistry } from '@/ds/registry';
 import { Page } from '@/ds/page';
 import { Tabs } from '@/ds/tabs';
 import { PerfOverlay, PerfToggle } from '@/lab/perf';
@@ -17,7 +17,7 @@ import styles from './StressLabPage.module.css';
  */
 export function StressLabPage() {
 	const [searchParams, setSearchParams] = useSearchParams();
-	const { activeName } = useComboboxImpl();
+	const { activeName } = useImplRegistry();
 	const active = findStressCase(searchParams.get('case'));
 
 	function selectCase(id: string) {

@@ -24,9 +24,11 @@ export function readImplNames(): string[] {
 	}
 
 	const body = source.slice(start, end);
-	const names = [...body.matchAll(/(?:^|[\n{])\s*'?([A-Za-z0-9_-]+)'?\s*:\s*lazy\(/g)].map(
-		(match) => match[1] as string,
-	);
+	// Entries read `name: entry(` since the registry began carrying both surfaces; `lazy(` is
+	// still accepted so a flat registry would not silently vanish from the suite.
+	const names = [
+		...body.matchAll(/(?:^|[\n{])\s*'?([A-Za-z0-9_-]+)'?\s*:\s*(?:entry|lazy)\(/g),
+	].map((match) => match[1] as string);
 
 	if (names.length === 0) {
 		throw new Error(`No implementations found in ${REGISTRY_SOURCE}.`);
