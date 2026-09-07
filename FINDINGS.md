@@ -19,7 +19,12 @@ headline.
 3. **No end-reached signal** — paging is still observed from inside the renderer via a sentinel.
 4. **`resetScroll` exists but stays internal** — on `VirtualizerHandle`, reachable only through a
    list root's registry, not through `actionsRef`.
-5. **Tab-dismissal and PageUp/PageDown** — unchanged from stable, still expected failures.
+5. **PageUp/PageDown** — unchanged from stable, still an expected failure everywhere.
+6. **Tab-dismissal became platform-dependent.** The 2026-09-04 head dismisses the popup on Tab on
+   Linux — the first time any candidate has passed that test — but on macOS the same build
+   swallows Tab entirely: focus stays on the input and the popup stays open. Neither the old trap
+   (focus parked on the scroller) nor a clean pass; mechanism not yet reduced, worth raising
+   upstream before the PR merges.
 
 Confirmed still working on the same head: variable measured heights (deep keyboard navigation
 exact to 1px through a 328px row), `aria-activedescendant` on the input, the `--total-size`

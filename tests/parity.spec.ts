@@ -197,11 +197,14 @@ test.describe('combobox parity', () => {
 test.describe('unmet requirements', () => {
 	test('Tab closes the popup and moves focus past it', async ({ page, impl }) => {
 		/*
-		 * Expected to fail — red is the finding (see the describe comment). `test.fail()` keeps CI
-		 * green while the requirement stays unmet; an impl that satisfies it reports "unexpectedly
-		 * passed", which is the signal to scope this marker to the impls that still fail.
+		 * Expected to fail — red is the finding (see the describe comment) — except where reality
+		 * moved: the 2026-09-04 head of pr-5466 dismisses on Tab on Linux, which is exactly the
+		 * "unexpectedly passed" signal this marker exists to catch, so the marker is scoped down.
+		 * On macOS the same build swallows Tab entirely — focus stays on the input, popup stays
+		 * open — so the failure expectation remains there. Platform-dependent Tab behaviour is
+		 * itself a recorded finding (FINDINGS.md); this condition is that finding, encoded.
 		 */
-		test.fail();
+		test.fail(impl === 'baseline' || process.platform === 'darwin');
 
 		await gotoStress(page, listUrl(impl));
 		await openPopup(page);
