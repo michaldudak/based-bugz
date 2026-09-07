@@ -51,7 +51,6 @@
 	border-radius: var(--radius-sm);
 	background: transparent;
 	color: var(--text-muted);
-	cursor: pointer;
 }
 
 .iconButton:hover {
