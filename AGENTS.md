@@ -291,7 +291,10 @@ latest push is a deliberate `pnpm update base-ui-5466`, recorded like any depend
 package version (`-pr5466`) so TypeScript does not collapse its types into stable's, and does the
 same for the canary `@base-ui/utils` that `.pnpmfile.cjs` swaps in (the canary's manifest pins the
 published utils, which lacks subpaths the canary imports). A plain `pnpm install` must always leave
-node_modules in the state the evaluation assumes — never patch node_modules by hand.
+node_modules in the state the evaluation assumes — never patch node_modules by hand. The lockfile
+records a checksum of `.pnpmfile.cjs`, so any edit to that file — including a Prettier reformat —
+must be followed by `pnpm install` before committing, or CI's frozen install fails on the
+mismatch.
 
 **Adding a variant** touches exactly these places, and nothing else:
 
