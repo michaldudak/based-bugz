@@ -19,11 +19,15 @@ headline.
 3. **No end-reached signal** — paging is still observed from inside the renderer via a sentinel.
 4. **`resetScroll` exists but stays internal** — on `VirtualizerHandle`, reachable only through a
    list root's registry, not through `actionsRef`.
-5. **PageUp/PageDown** — unchanged from stable, still an expected failure everywhere.
-6. **Tab-dismissal became platform-dependent.** The 2026-09-04 head dismisses the popup on Tab on
-   Linux — the first time any candidate has passed that test — but on macOS the same build
-   swallows Tab entirely: focus stays on the input and the popup stays open. Neither the old trap
-   (focus parked on the scroller) nor a clean pass; mechanism not yet reduced, worth raising
+5. **PageUp/PageDown: implemented, but platform-split.** The 2026-09-04 head moves the highlight
+   by a page on Linux — the first candidate to satisfy this requirement — while the same build
+   still moves by one row on macOS. Possibly deliberate macOS keyboard-convention handling;
+   needs an upstream answer on whether the split is intended.
+6. **Tab-dismissal: nondeterministic on Linux, swallowed on macOS.** Identical CI runs of the
+   same head have both passed and failed the Tab test on Linux (dismissed vs popup left open);
+   on macOS, Tab does nothing — focus stays on the input, and the scroller is not involved (it
+   is not focusable). Encoded in the suite as expected-failure on macOS and an annotated skip on
+   Linux, because a coin flip can be pinned as neither pass nor failure. The race needs reducing
    upstream before the PR merges.
 
 Confirmed still working on the same head: variable measured heights (deep keyboard navigation

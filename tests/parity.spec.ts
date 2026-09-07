@@ -197,14 +197,20 @@ test.describe('combobox parity', () => {
 test.describe('unmet requirements', () => {
 	test('Tab closes the popup and moves focus past it', async ({ page, impl }) => {
 		/*
-		 * Expected to fail — red is the finding (see the describe comment) — except where reality
-		 * moved: the 2026-09-04 head of pr-5466 dismisses on Tab on Linux, which is exactly the
-		 * "unexpectedly passed" signal this marker exists to catch, so the marker is scoped down.
-		 * On macOS the same build swallows Tab entirely — focus stays on the input, popup stays
-		 * open — so the failure expectation remains there. Platform-dependent Tab behaviour is
-		 * itself a recorded finding (FINDINGS.md); this condition is that finding, encoded.
+		 * Three regimes, all recorded in FINDINGS.md:
+		 * - baseline fails everywhere (the original scroller Tab-trap) — expected failure;
+		 * - pr-5466 on macOS swallows Tab deterministically (focus stays on the input) —
+		 *   expected failure;
+		 * - pr-5466 on Linux is NONDETERMINISTIC on the 2026-09-04 head: identical CI runs have
+		 *   passed and failed this test. A coin flip can be pinned as neither pass nor failure,
+		 *   so it is skipped with this note until upstream stabilises it. The skip is the
+		 *   finding's encoding, not an evasion — un-skip to sample reality.
 		 */
 		test.fail(impl === 'baseline' || process.platform === 'darwin');
+		test.skip(
+			impl !== 'baseline' && process.platform !== 'darwin',
+			'Nondeterministic on the 2026-09-04 head of mui/base-ui#5466 — see FINDINGS.md',
+		);
 
 		await gotoStress(page, listUrl(impl));
 		await openPopup(page);
@@ -225,8 +231,13 @@ test.describe('unmet requirements', () => {
 	});
 
 	test('PageDown and PageUp move the highlight by more than one row', async ({ page, impl }) => {
-		// Expected to fail — red is the finding; same deal as the Tab test above.
-		test.fail();
+		/*
+		 * The 2026-09-04 head of pr-5466 implements paging navigation — the first candidate to
+		 * turn this green — but only off macOS, where the same build still moves by one row
+		 * (possibly deliberate platform-convention handling; raised in FINDINGS.md). Baseline
+		 * fails everywhere, as it always has.
+		 */
+		test.fail(impl === 'baseline' || process.platform === 'darwin');
 
 		await gotoStress(page, listUrl(impl));
 		await openPopup(page);
