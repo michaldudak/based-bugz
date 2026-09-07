@@ -43,8 +43,6 @@ const SCROLLPORT_FINDING = /^scrollable-region-focusable \[serious\] ×1 — /;
 
 const KNOWN_POPUP_VIOLATIONS: Record<string, readonly RegExp[]> = {
 	baseline: [],
-	'pr-5173': [SCROLLPORT_FINDING],
-	'pr-5414': [SCROLLPORT_FINDING],
 	'pr-5466': [SCROLLPORT_FINDING],
 };
 

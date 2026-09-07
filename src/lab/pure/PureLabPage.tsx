@@ -14,8 +14,6 @@ import { UserPickerLab } from '@/lab/combobox/UserPickerLab';
 
 const SURROUNDS: Record<string, ComponentType<{ children: ReactNode }>> = {
 	baseline: lazy(() => import('./SurroundStable')),
-	'pr-5173': lazy(() => import('./Surround5173')),
-	'pr-5414': lazy(() => import('./Surround5414')),
 	'pr-5466': lazy(() => import('./Surround5466')),
 };
 

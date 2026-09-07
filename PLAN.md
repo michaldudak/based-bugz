@@ -3,15 +3,15 @@
 Sequence for building Based Bugz. `AGENTS.md` holds the agreements and the reasoning; this file
 holds the order of work and what "done" means at each step. Update it as phases land.
 
-**Current state:** Phases 0–8 landed. The app is a working tracker: sign in, browse/filter/sort
-10,000 issues, create, edit inline, comment, delete with undo, ⌘K over everything, plus the design
-system gallery, the combobox lab, the stress lab, a perf overlay and a Playwright parity suite.
-Phase 9 steps 1–6 are implemented on the `virtualizer-variants` branch: all three canary
-implementations are live behind `?impl=`, both surfaces each. The parity matrix is green at 80/80
-with every recorded finding encoded in the suite — the canaries' scrollport finding pinned as an
-exact expectation, the two keyboard defects as expected failures — so CI goes red exactly when
-reality stops matching FINDINGS.md, in either direction. Remaining: the Safari/Firefox and
-VoiceOver passes, perf numbers, and the verdict write-up in FINDINGS.md.
+**Current state: the evaluation concluded — mui/base-ui#5466 is the chosen Virtualizer API
+(2026-09).** The pr-5173 and pr-5414 implementations are removed; `pr-5466` tracks the PR's latest
+build (re-verified 2026-09-07: suite 40/40 across both remaining projects, deep variable-height
+navigation exact to 1px, console clean) and `baseline` stays as the control until the PR merges.
+Still open on the winner, re-confirmed on the 2026-09-04 head: the scrollport is not
+keyboard-reachable (pinned in the a11y spec), no measurement-invalidation API (breakpoint crossing
+still costs the scroll position via key-remount), no end-reached signal (paging still observed
+from inside the renderer), and the two keyboard defects shared with stable (Tab-dismissal,
+PageUp/PageDown). Those are now upstream work for the PR, tracked in FINDINGS.md.
 
 No assertion in the parity suite was softened to make anything green. Defects and findings are
 encoded — expected failures for the baseline's two keyboard defects, pinned per-implementation

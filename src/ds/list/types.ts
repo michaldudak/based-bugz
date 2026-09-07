@@ -2,8 +2,8 @@
  * The List contract — the standalone half of the evaluation.
  *
  * Like the Combobox contract, it references nothing from Base UI or any virtualization library:
- * the baseline satisfies it with TanStack Virtual, pr-5173 with `@mui/x-virtualizer`, pr-5414 by
- * publishing a virtualization host of its own, pr-5466 with `<Virtualizer items>`. It is driven by
+ * the baseline satisfies it with TanStack Virtual, pr-5466 with `<Virtualizer items>` (and the
+ * two retired variants each satisfied it their own way — see FINDINGS.md). It is driven by
  * what the issues list genuinely needs and nothing more (AGENTS.md — evaluation rule 1).
  */
 

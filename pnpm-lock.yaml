@@ -4,7 +4,7 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
-pnpmfileChecksum: efu2gom6icrqfav3rxwq33wap4
+pnpmfileChecksum: fh6po5ouusu3ksvgbitafnyrye
 
 patchedDependencies:
   '@base-ui/react@1.7.0':
@@ -18,24 +18,15 @@ importers:
       '@base-ui/react':
         specifier: ^1.7.0
         version: 1.7.0(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@mui/x-virtualizer':
-        specifier: ^0.6.3
-        version: 0.6.3(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.101.4(react@19.2.8)
       '@tanstack/react-virtual':
         specifier: ^3.14.9
         version: 3.14.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      base-ui-5173:
-        specifier: https://pkg.pr.new/mui/base-ui/@base-ui/react@91e45e1a9b7f0b0075f435ae52714541a11372fa
-        version: '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@91e45e1a9b7f0b0075f435ae52714541a11372fa(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)'
-      base-ui-5414:
-        specifier: https://pkg.pr.new/mui/base-ui/@base-ui/react@0181d7b877d4e5d963022d9d9a9e2fdb0bdca3ae
-        version: '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@0181d7b877d4e5d963022d9d9a9e2fdb0bdca3ae(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)'
       base-ui-5466:
-        specifier: https://pkg.pr.new/mui/base-ui/@base-ui/react@a873cbc2d3f99952072069fe29e6511a66a398e9
-        version: '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@a873cbc2d3f99952072069fe29e6511a66a398e9(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)'
+        specifier: https://pkg.pr.new/mui/base-ui/@base-ui/react@5466
+        version: '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@5466(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)'
       react:
         specifier: ^19.2.8
         version: 19.2.8
@@ -119,44 +110,8 @@ packages:
       date-fns:
         optional: true
 
-  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@0181d7b877d4e5d963022d9d9a9e2fdb0bdca3ae':
-    resolution: {tarball: https://pkg.pr.new/mui/base-ui/@base-ui/react@0181d7b877d4e5d963022d9d9a9e2fdb0bdca3ae}
-    version: 1.7.0
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      '@date-fns/tz': ^1.2.0
-      '@types/react': ^17 || ^18 || ^19
-      date-fns: ^4.0.0
-      react: ^17 || ^18 || ^19
-      react-dom: ^17 || ^18 || ^19
-    peerDependenciesMeta:
-      '@date-fns/tz':
-        optional: true
-      '@types/react':
-        optional: true
-      date-fns:
-        optional: true
-
-  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@91e45e1a9b7f0b0075f435ae52714541a11372fa':
-    resolution: {tarball: https://pkg.pr.new/mui/base-ui/@base-ui/react@91e45e1a9b7f0b0075f435ae52714541a11372fa}
-    version: 1.7.0
-    engines: {node: '>=14.0.0'}
-    peerDependencies:
-      '@date-fns/tz': ^1.2.0
-      '@types/react': ^17 || ^18 || ^19
-      date-fns: ^4.0.0
-      react: ^17 || ^18 || ^19
-      react-dom: ^17 || ^18 || ^19
-    peerDependenciesMeta:
-      '@date-fns/tz':
-        optional: true
-      '@types/react':
-        optional: true
-      date-fns:
-        optional: true
-
-  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@a873cbc2d3f99952072069fe29e6511a66a398e9':
-    resolution: {tarball: https://pkg.pr.new/mui/base-ui/@base-ui/react@a873cbc2d3f99952072069fe29e6511a66a398e9}
+  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@5466':
+    resolution: {tarball: https://pkg.pr.new/mui/base-ui/@base-ui/react@5466}
     version: 1.7.0
     engines: {node: '>=14.0.0'}
     peerDependencies:
@@ -183,8 +138,8 @@ packages:
       '@types/react':
         optional: true
 
-  '@base-ui/utils@https://pkg.pr.new/mui/base-ui/@base-ui/utils@a873cbc2d3f99952072069fe29e6511a66a398e9':
-    resolution: {tarball: https://pkg.pr.new/mui/base-ui/@base-ui/utils@a873cbc2d3f99952072069fe29e6511a66a398e9}
+  '@base-ui/utils@https://pkg.pr.new/mui/base-ui/@base-ui/utils@5466':
+    resolution: {tarball: https://pkg.pr.new/mui/base-ui/@base-ui/utils@5466}
     version: 0.3.2
     peerDependencies:
       '@types/react': ^17 || ^18 || ^19
@@ -1351,36 +1306,10 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@0181d7b877d4e5d963022d9d9a9e2fdb0bdca3ae(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@5466(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@babel/runtime': 7.29.7
-      '@base-ui/utils': https://pkg.pr.new/mui/base-ui/@base-ui/utils@a873cbc2d3f99952072069fe29e6511a66a398e9(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@floating-ui/react-dom': 2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@floating-ui/utils': 0.2.12
-      '@mui/x-virtualizer': 0.6.3(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-      use-sync-external-store: 1.6.0(react@19.2.8)
-    optionalDependencies:
-      '@types/react': 19.2.18
-
-  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@91e45e1a9b7f0b0075f435ae52714541a11372fa(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@base-ui/utils': https://pkg.pr.new/mui/base-ui/@base-ui/utils@a873cbc2d3f99952072069fe29e6511a66a398e9(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@floating-ui/react-dom': 2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@floating-ui/utils': 0.2.12
-      '@mui/x-virtualizer': 0.6.3(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-      use-sync-external-store: 1.6.0(react@19.2.8)
-    optionalDependencies:
-      '@types/react': 19.2.18
-
-  '@base-ui/react@https://pkg.pr.new/mui/base-ui/@base-ui/react@a873cbc2d3f99952072069fe29e6511a66a398e9(patch_hash=gokjc5rgt6bspurq5ntjcu7d4u)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@base-ui/utils': https://pkg.pr.new/mui/base-ui/@base-ui/utils@a873cbc2d3f99952072069fe29e6511a66a398e9(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@base-ui/utils': https://pkg.pr.new/mui/base-ui/@base-ui/utils@5466(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@floating-ui/react-dom': 2.1.9(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@floating-ui/utils': 0.2.12
       '@mui/x-virtualizer': 0.6.3(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1401,7 +1330,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@base-ui/utils@https://pkg.pr.new/mui/base-ui/@base-ui/utils@a873cbc2d3f99952072069fe29e6511a66a398e9(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@base-ui/utils@https://pkg.pr.new/mui/base-ui/@base-ui/utils@5466(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@floating-ui/utils': 0.2.12

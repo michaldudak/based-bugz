@@ -4,26 +4,27 @@ A realistic issue tracker used as a testbed for Base UI components. It is **not*
 it is a product you can actually use, because the pains worth finding are the ones you hit on day
 two of using your own app, not the ones you think to write a test for.
 
-First evaluation target: three competing Combobox virtualization APIs from unmerged Base UI PRs,
-compared against the currently documented approach. Long term this app hosts evaluations of other
-Base UI components too, so **nothing may be named or structured around virtualization**.
+First evaluation, concluded 2026-09: three competing Combobox virtualization APIs from unmerged
+Base UI PRs, compared against the documented approach. mui/base-ui#5466 (dual-mode `Virtualizer`)
+won and is the one canary still installed; the evidence lives in FINDINGS.md. Long term this app
+hosts evaluations of other Base UI components too, so **nothing may be named or structured around
+virtualization**.
 
 ---
 
 ## Stack
 
-| Concern                       | Choice                                                                                                   |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Build                         | Vite 8                                                                                                   |
-| UI                            | React 19.2 (no React Compiler — see Evaluation rules)                                                    |
-| Language                      | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
-| Components                    | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react`                        |
-| Styling                       | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library.              |
-| Data                          | TanStack Query 5 over a repository interface                                                             |
-| Virtualization (baseline)     | TanStack Virtual 3                                                                                       |
-| Virtualization (pr-5173 List) | `@mui/x-virtualizer` — approved for exactly that one use                                                 |
-| Routing                       | React Router 8, declarative                                                                              |
-| Package manager               | pnpm                                                                                                     |
+| Concern                   | Choice                                                                                                   |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Build                     | Vite 8                                                                                                   |
+| UI                        | React 19.2 (no React Compiler — see Evaluation rules)                                                    |
+| Language                  | TypeScript 7 (`typescript@7` on `latest`; Vite never typechecks, so `tsc --noEmit` is a separate script) |
+| Components                | `@base-ui/react` 1.7 — note the package name, **not** `@base-ui-components/react`                        |
+| Styling                   | CSS Modules + CSS custom properties. No CSS-in-JS, no Tailwind, no other component library.              |
+| Data                      | TanStack Query 5 over a repository interface                                                             |
+| Virtualization (baseline) | TanStack Virtual 3                                                                                       |
+| Routing                   | React Router 8, declarative                                                                              |
+| Package manager           | pnpm                                                                                                     |
 
 Do not add dependencies beyond this list without asking. Every extra library is a confounder in a
 comparison whose whole point is how much code an API makes you write.
@@ -40,7 +41,7 @@ src/
   app/          # providers, routes, layout, config.ts (product name lives here)
   ds/           # design system: app-agnostic wrappers over @base-ui/react
   features/     # domain components: pickers, issue list, issue detail, command palette
-  impls/        # virtualization strategies: baseline, pr-a, pr-b, pr-c
+  impls/        # virtualization strategies: baseline (the control), pr-5466 (the chosen API)
   data/         # repository interface, in-memory implementation, seeded generator
   lab/          # stress routes + a ds gallery (no Storybook)
 ```
@@ -279,16 +280,18 @@ so renaming stays a one-liner.
 
 **Implementation switching.** Each impl is a lazy `import()`, so Vite emits one chunk per impl and
 per-impl bundle size falls out of the build. Switching is a runtime `?impl=` param that remounts the
-subtree — no restart, no cross-contaminated state. Canary builds install side by side under distinct
-dependency names (`base-ui-a`, `base-ui-b`, `base-ui-c`); `react` and `react-dom` must dedupe to a
-single copy, and `@base-ui/react`'s internal siblings must **not** hoist into one shared copy across
-impls. Verify with `pnpm why` after any install. Canary URLs are pinned by commit sha, never by PR
-number — `@5173`-style refs float to the latest push. Bumping a sha is a deliberate, recorded act.
-`scripts/patch-canaries.mjs` runs from the root `postinstall` hook: it splits the canaries' package
-versions (`1.7.0-pr<N>`) so TypeScript does not collapse their types into stable's, and widens
-base-ui-5414's exports map so the app can publish the virtualization host its `ListVirtualizer`
-binds to. A plain `pnpm install` must always leave node_modules in the state the evaluation
-assumes — never patch node_modules by hand.
+subtree — no restart, no cross-contaminated state. A canary build installs beside stable under a
+distinct dependency name (`base-ui-5466`); `react` and `react-dom` must dedupe to a single copy,
+and `@base-ui/react`'s internal siblings must **not** hoist into one shared copy across impls.
+Verify with `pnpm why` after any install. The canary URL uses the `@5466` PR ref — pkg.pr.new
+stopped serving per-commit URLs for this repo (verified 2026-09-07), so the pin is now the tarball
+integrity in `pnpm-lock.yaml`: a plain `pnpm install` never refetches, and refreshing to the PR's
+latest push is a deliberate `pnpm update base-ui-5466`, recorded like any dependency change.
+`scripts/patch-canaries.mjs` runs from the root `postinstall` hook: it suffixes the canary's
+package version (`-pr5466`) so TypeScript does not collapse its types into stable's, and does the
+same for the canary `@base-ui/utils` that `.pnpmfile.cjs` swaps in (the canary's manifest pins the
+published utils, which lacks subpaths the canary imports). A plain `pnpm install` must always leave
+node_modules in the state the evaluation assumes — never patch node_modules by hand.
 
 **Adding a variant** touches exactly these places, and nothing else:
 
@@ -336,11 +339,12 @@ is a reproducible finding rather than an impression.
 
 ## Open items
 
-- The three PRs are known and verified installable (2026-08-18): mui/base-ui #5173 (built-in
-  `Combobox.Virtualizer`), #5414 (context-only `ListVirtualizer`), #5466 (`Virtualizer` with
-  context + props). See PLAN.md Phase 9 for the verified plan, the type-identity hazard and its
-  postinstall fix, and the issues-list scope change (it becomes the standalone-virtualizer
-  evaluation surface; `@mui/x-virtualizer` is an approved dependency, used only by pr-5173's
-  List, the one variant with no standalone story of its own).
+- **The evaluation concluded (2026-09): mui/base-ui#5466 is the chosen Virtualizer API.** The
+  pr-5173 and pr-5414 implementations are removed; `pr-5466` tracks the PR head and `baseline`
+  stays as the control until the PR merges into a stable release, at which point the whole
+  impl seam can collapse to one implementation. Evidence and the still-open findings: FINDINGS.md
+  (scrollport keyboard-reachability, no measurement-invalidation API, no end-reached signal, and
+  the two keyboard defects shared with stable — all re-verified still present on the 2026-09-04
+  head).
 
 See `PLAN.md` for the implementation sequence.

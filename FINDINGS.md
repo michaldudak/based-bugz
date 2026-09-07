@@ -1,10 +1,30 @@
 # Findings
 
-The verdict on the three Combobox virtualization PRs, assembled as the evidence lands. Method and
+**Outcome (2026-09): mui/base-ui#5466 — the dual-mode `Virtualizer` — was chosen.** The pr-5173
+and pr-5414 implementations are removed from the app; everything below is preserved as the
+evidence base and as the worklist of what the winning PR still owes.
+
+The verdict on the three Combobox virtualization PRs, assembled as the evidence landed. Method and
 rules: `AGENTS.md`; sequence: `PLAN.md` Phase 9. Primary evidence is the diff of `src/impls/*` —
 how much code each API needs to satisfy identical real requirements, what leaks upward, and which
 requirements an API simply cannot express. Frame timings are supporting evidence, never the
 headline.
+
+## Still open on the winner (re-verified on the 2026-09-04 head, 2026-09-07)
+
+1. **Scrollport not keyboard-reachable** — `scrollable-region-focusable [serious]`, still pinned
+   in `tests/a11y.spec.ts`. The API has still not taken a position on the Tab-stop trade-off.
+2. **No measurement-invalidation API** — `VirtualizerActions` still exposes only `scrollToIndex`;
+   crossing a layout breakpoint still means `key=`-remounting and losing the scroll position.
+3. **No end-reached signal** — paging is still observed from inside the renderer via a sentinel.
+4. **`resetScroll` exists but stays internal** — on `VirtualizerHandle`, reachable only through a
+   list root's registry, not through `actionsRef`.
+5. **Tab-dismissal and PageUp/PageDown** — unchanged from stable, still expected failures.
+
+Confirmed still working on the same head: variable measured heights (deep keyboard navigation
+exact to 1px through a 328px row), `aria-activedescendant` on the input, the `--total-size`
+sizing contract, eager mode over 5,000 people, deep preselection, and a clean console in dev
+StrictMode across both surfaces.
 
 ## The candidates
 
