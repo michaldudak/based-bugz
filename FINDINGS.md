@@ -2,7 +2,9 @@
 
 **Outcome (2026-09): mui/base-ui#5466 — the dual-mode `Virtualizer` — was chosen.** The pr-5173
 and pr-5414 implementations are removed from the app; everything below is preserved as the
-evidence base and as the worklist of what the winning PR still owes.
+evidence base and as the worklist of what the winning PR still owes. Since 2026-09-09 the tracked
+canary is mui/base-ui#5617 — #5466 rebased onto the 1.8.0 head, same Virtualizer API, plus Select
+support — installed as `pr-5617`.
 
 The verdict on the three Combobox virtualization PRs, assembled as the evidence landed. Method and
 rules: `AGENTS.md`; sequence: `PLAN.md` Phase 9. Primary evidence is the diff of `src/impls/*` —
@@ -10,7 +12,7 @@ how much code each API needs to satisfy identical real requirements, what leaks 
 requirements an API simply cannot express. Frame timings are supporting evidence, never the
 headline.
 
-## Still open on the winner (re-verified on the 2026-09-04 head, 2026-09-07)
+## Still open on the winner (re-verified on the 2026-09-08 head of #5617, 2026-09-09)
 
 1. **Scrollport not keyboard-reachable** — `scrollable-region-focusable [serious]`, still pinned
    in `tests/a11y.spec.ts`. The API has still not taken a position on the Tab-stop trade-off.
@@ -19,16 +21,18 @@ headline.
 3. **No end-reached signal** — paging is still observed from inside the renderer via a sentinel.
 4. **`resetScroll` exists but stays internal** — on `VirtualizerHandle`, reachable only through a
    list root's registry, not through `actionsRef`.
-5. **PageUp/PageDown: implemented, but platform-split.** The 2026-09-04 head moves the highlight
-   by a page on Linux — the first candidate to satisfy this requirement — while the same build
-   still moves by one row on macOS. Possibly deliberate macOS keyboard-convention handling;
-   needs an upstream answer on whether the split is intended.
-6. **Tab-dismissal: nondeterministic on Linux, swallowed on macOS.** Identical CI runs of the
-   same head have both passed and failed the Tab test on Linux (dismissed vs popup left open);
+5. **Tab-dismissal: nondeterministic on Linux, swallowed on macOS.** Identical CI runs of the
+   2026-09-04 head both passed and failed the Tab test on Linux (dismissed vs popup left open);
    on macOS, Tab does nothing — focus stays on the input, and the scroller is not involved (it
-   is not focusable). Encoded in the suite as expected-failure on macOS and an annotated skip on
-   Linux, because a coin flip can be pinned as neither pass nor failure. The race needs reducing
-   upstream before the PR merges.
+   is not focusable). The macOS swallow reproduces unchanged on the #5617 head. Encoded in the
+   suite as expected-failure on macOS and an annotated skip on Linux, because a coin flip can be
+   pinned as neither pass nor failure. The race needs reducing upstream before the PR merges.
+
+**Closed on the #5617 head — PageUp/PageDown.** The 2026-09-04 #5466 head paged on Linux but
+still moved the highlight one row on macOS; the 2026-09-08 #5617 head pages on macOS too, so the
+platform split is gone and this is the first candidate to satisfy the paging requirement
+everywhere the suite runs. The expected-failure now scopes to the baseline alone; Linux
+confirmation rides on the next CI run.
 
 Confirmed still working on the same head: variable measured heights (deep keyboard navigation
 exact to 1px through a 328px row), `aria-activedescendant` on the input, the `--total-size`
@@ -116,6 +120,10 @@ violation, turns the suite red), and the two keyboard defects (Tab-dismissal, Pa
 expected failures that reproduce identically on all four implementations. Still owed for rule 8:
 the manual VoiceOver pass and the Safari/Firefox run.
 
+Re-run on the #5617 head, 2026-09-09: **40 passed** over 2 projects (baseline, pr-5617) × 20
+tests, with the aria-hidden patch now covering the canary too (see Packaging) and PageUp/PageDown
+expected-failing only on the baseline.
+
 ## Packaging and integration findings
 
 Found while making the comparison possible at all; they are about shipping these PRs, not their
@@ -126,6 +134,16 @@ APIs.
   installing a canary next to stable hits this. Worked around in `scripts/patch-canaries.mjs`.
 - **pr-5414's host primitives are not exported.** `internals/virtualization/*` ships in the tarball
   but the exports map does not cover it; standalone use requires widening it (same script).
+- **pnpm patches follow `name@version`, so a canary can silently inherit stable's patch.** The
+  local workaround for mui/base-ui#5528 (`markOthers` aria-hides outside content but leaves it
+  tabbable; axe `aria-hidden-focus`) is keyed `@base-ui/react@1.7.0` — which the 1.7.0-based
+  canary tarballs also matched, so every canary carried the stable-only patch throughout the
+  evaluation without anyone deciding that. Discovered 2026-09-09 when #5617's head bumped to
+  1.8.0, escaped the key, and `aria-hidden-focus` resurfaced on the canary alone. The patch now
+  covers both versions deliberately: #5528 is an upstream bug orthogonal to virtualization
+  (`FloatingFocusManager` unchanged since 2026-07-31), and patching one side while scanning both
+  would have recorded a patch artifact as an impl difference — exactly the false diff the a11y
+  suite exists to prevent.
 - **Canary builds pin the published `@base-ui/utils`, which cannot satisfy them.** All three PRs
   import utils subpaths (`clamp`, `areArraysEqual`, `formatNumber`, `shadowDom`,
   `stringifyLocale`) added after 0.3.2, but pkg.pr.new publishes only `@base-ui/react` with its

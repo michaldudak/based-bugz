@@ -8,14 +8,14 @@
  * stable along. What does distinguish them is the dependency the virtualization PRs added, so the
  * hook keys on that.
  *
- * The URL tracks the same commit as the base-ui-5466 alias in package.json — bump them together.
+ * The URL tracks the same commit as the base-ui-5617 alias in package.json — bump them together.
  * The version identity split happens post-install in scripts/patch-canaries.mjs.
  */
 
 'use strict';
 
 const CANARY_MARKER = '@mui/x-virtualizer';
-const CANARY_UTILS = 'https://pkg.pr.new/mui/base-ui/@base-ui/utils@5466';
+const CANARY_UTILS = 'https://pkg.pr.new/mui/base-ui/@base-ui/utils@5617';
 
 function readPackage(pkg) {
 	if (pkg.name === '@base-ui/react' && pkg.dependencies && pkg.dependencies[CANARY_MARKER]) {

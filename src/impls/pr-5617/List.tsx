@@ -1,5 +1,5 @@
 /**
- * pr-5466 (mui/base-ui#5466) — the same `<Virtualizer>`, here in its standalone props mode.
+ * pr-5617 (mui/base-ui#5466) — the same `<Virtualizer>`, here in its standalone props mode.
  *
  * With `items` of its own it needs no list around it: it is the scroll container, it measures the
  * rows, and it hands each row the accessibility metadata the mounted window would otherwise lie
@@ -10,8 +10,8 @@
  * virtualizer, so it has to ride inside a row).
  */
 
-import { Virtualizer } from 'base-ui-5466/virtualizer';
-import type { VirtualizerActions, VirtualizerItemProps } from 'base-ui-5466/virtualizer';
+import { Virtualizer } from 'base-ui-5617/virtualizer';
+import type { VirtualizerActions, VirtualizerItemProps } from 'base-ui-5617/virtualizer';
 import { useCallback, useEffect, useRef } from 'react';
 import type { CSSProperties } from 'react';
 import { listStyles as s } from '@/ds/list';

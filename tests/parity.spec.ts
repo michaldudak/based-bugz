@@ -199,9 +199,9 @@ test.describe('unmet requirements', () => {
 		/*
 		 * Three regimes, all recorded in FINDINGS.md:
 		 * - baseline fails everywhere (the original scroller Tab-trap) — expected failure;
-		 * - pr-5466 on macOS swallows Tab deterministically (focus stays on the input) —
+		 * - pr-5617 on macOS swallows Tab deterministically (focus stays on the input) —
 		 *   expected failure;
-		 * - pr-5466 on Linux is NONDETERMINISTIC on the 2026-09-04 head: identical CI runs have
+		 * - pr-5617 on Linux is NONDETERMINISTIC on the 2026-09-04 head: identical CI runs have
 		 *   passed and failed this test. A coin flip can be pinned as neither pass nor failure,
 		 *   so it is skipped with this note until upstream stabilises it. The skip is the
 		 *   finding's encoding, not an evasion — un-skip to sample reality.
@@ -209,7 +209,7 @@ test.describe('unmet requirements', () => {
 		test.fail(impl === 'baseline' || process.platform === 'darwin');
 		test.skip(
 			impl !== 'baseline' && process.platform !== 'darwin',
-			'Nondeterministic on the 2026-09-04 head of mui/base-ui#5466 — see FINDINGS.md',
+			'Nondeterministic on the head of mui/base-ui#5617 (supersedes #5466) — see FINDINGS.md',
 		);
 
 		await gotoStress(page, listUrl(impl));
@@ -232,12 +232,12 @@ test.describe('unmet requirements', () => {
 
 	test('PageDown and PageUp move the highlight by more than one row', async ({ page, impl }) => {
 		/*
-		 * The 2026-09-04 head of pr-5466 implements paging navigation — the first candidate to
-		 * turn this green — but only off macOS, where the same build still moves by one row
-		 * (possibly deliberate platform-convention handling; raised in FINDINGS.md). Baseline
-		 * fails everywhere, as it always has.
+		 * The tracked head implements paging navigation — the first candidate to turn this
+		 * green. The 2026-09-04 head moved by a page on Linux but by one row on macOS; the
+		 * 2026-09-08 head of mui/base-ui#5617 pages on macOS too, closing the platform split
+		 * (FINDINGS.md). Baseline fails everywhere, as it always has.
 		 */
-		test.fail(impl === 'baseline' || process.platform === 'darwin');
+		test.fail(impl === 'baseline');
 
 		await gotoStress(page, listUrl(impl));
 		await openPopup(page);

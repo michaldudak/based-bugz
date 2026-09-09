@@ -1,5 +1,5 @@
 /**
- * pr-5466 (mui/base-ui#5466) — the dual-mode `<Virtualizer>`, here in its context-binding mode.
+ * pr-5617 (mui/base-ui#5466) — the dual-mode `<Virtualizer>`, here in its context-binding mode.
  *
  * Dropped inside `<Combobox.List>` with no `items` of its own, the virtualizer takes the list's
  * filtered collection and its highlight from context. Everything the baseline hand-wires
@@ -14,8 +14,8 @@
  * contract stands, the adaptation is the finding).
  */
 
-import { Combobox as BaseCombobox } from 'base-ui-5466/combobox';
-import { Virtualizer } from 'base-ui-5466/virtualizer';
+import { Combobox as BaseCombobox } from 'base-ui-5617/combobox';
+import { Virtualizer } from 'base-ui-5617/virtualizer';
 import { useCallback, useMemo, useState } from 'react';
 import type { ComponentType, CSSProperties, ReactNode } from 'react';
 import {

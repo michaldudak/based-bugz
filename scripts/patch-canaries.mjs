@@ -16,8 +16,8 @@ import { join } from 'node:path';
 
 const ROOT = new URL('..', import.meta.url).pathname;
 
-const CANARY_ALIAS = 'base-ui-5466';
-const SUFFIX = '-pr5466';
+const CANARY_ALIAS = 'base-ui-5617';
+const SUFFIX = '-pr5617';
 
 function splitVersion(manifestPath, label) {
 	const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));

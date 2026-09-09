@@ -1,10 +1,10 @@
 /**
- * Pure-canary surroundings for pr-5466 (AGENTS.md — evaluation rule 12): a Dialog from the same
+ * Pure-canary surroundings for pr-5617 (AGENTS.md — evaluation rule 12): a Dialog from the same
  * canary build the combobox implementation uses, so a bug reproduced here cannot be an artifact
  * of stable and canary packages coordinating across a package boundary.
  */
 
-import { Dialog } from 'base-ui-5466/dialog';
+import { Dialog } from 'base-ui-5617/dialog';
 import type { ReactNode } from 'react';
 import styles from '@/ds/dialog/Dialog.module.css';
 

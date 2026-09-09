@@ -6,8 +6,8 @@
  * bundle size falls out of the build report for free.
  *
  * Every implementation provides both evaluated surfaces. The evaluation concluded in favour of
- * mui/base-ui#5466; `pr-5466` tracks that PR's head until it merges, and `baseline` remains the
- * documented-approach control it was measured against (FINDINGS.md).
+ * mui/base-ui#5466's Virtualizer; `pr-5617` tracks its successor PR (#5617, built on top of it,
+ * adding Select support), and `baseline` remains the documented-approach control (FINDINGS.md).
  */
 
 import { lazy } from 'react';
@@ -33,9 +33,9 @@ const IMPLS: Record<string, ImplEntry> = {
 		() => import('@/impls/baseline/Combobox'),
 		() => import('@/impls/baseline/List'),
 	),
-	'pr-5466': entry(
-		() => import('@/impls/pr-5466/Combobox'),
-		() => import('@/impls/pr-5466/List'),
+	'pr-5617': entry(
+		() => import('@/impls/pr-5617/Combobox'),
+		() => import('@/impls/pr-5617/List'),
 	),
 };
 
@@ -49,10 +49,10 @@ export const IMPL_OPTIONS: ReadonlyArray<{ value: string; label: string; descrip
 		description: 'Stable Base UI + TanStack Virtual, wired as the docs describe — the control.',
 	},
 	{
-		value: 'pr-5466',
-		label: 'pr-5466',
+		value: 'pr-5617',
+		label: 'pr-5617',
 		description:
-			'The chosen API (mui/base-ui#5466) — dual-mode Virtualizer: context-bound in the combobox, items prop in the issues list.',
+			'The chosen Virtualizer API — tracked via mui/base-ui#5617 (#5466 + Select support): context-bound in the combobox, items prop in the issues list.',
 	},
 ];
 
