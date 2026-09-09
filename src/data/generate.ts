@@ -26,6 +26,8 @@ import type {
 	ProjectId,
 	User,
 	UserId,
+	Version,
+	VersionId,
 } from './types';
 import { ISSUE_PRIORITIES, ISSUE_STATUSES } from './types';
 
@@ -38,6 +40,7 @@ export interface DatasetShape {
 	users: number;
 	labels: number;
 	projects: number;
+	versions: number;
 	issues: number;
 }
 
@@ -67,6 +70,9 @@ export function datasetShape(seed: string, scale: number): DatasetShape {
 		users: clamp(Math.round(issues / 2), 1, 1_000_000),
 		labels: clamp(Math.round(issues / 50), 8, 20_000),
 		projects: clamp(Math.floor(issues / 800), 3, 60),
+		// A long-lived product ships a build train, not a yearly release: the default 10k-issue
+		// dataset knows 1,250 versions, which is what makes the version picker worth evaluating.
+		versions: clamp(Math.round(issues / 8), 12, 12_000),
 	};
 }
 
@@ -82,6 +88,7 @@ export function datasetShape(seed: string, scale: number): DatasetShape {
 export const USER_ID_PREFIX = 'u';
 export const LABEL_ID_PREFIX = 'l';
 export const PROJECT_ID_PREFIX = 'p';
+export const VERSION_ID_PREFIX = 'v';
 export const ISSUE_ID_PREFIX = 'i';
 export const COMMENT_ID_PREFIX = 'c';
 
@@ -95,6 +102,10 @@ export function labelIdAt(index: number): LabelId {
 
 export function projectIdAt(index: number): ProjectId {
 	return `${PROJECT_ID_PREFIX}${index}`;
+}
+
+export function versionIdAt(index: number): VersionId {
+	return `${VERSION_ID_PREFIX}${index}`;
 }
 
 export function issueIdAt(index: number): IssueId {
@@ -878,6 +889,43 @@ export function makeProject(index: number): Project {
 	};
 }
 
+/*
+ * Versions form a build train: 12 patches to a minor, 10 minors to a major. Constant radices keep
+ * the name a closed form of the index — nothing walks the train — while the ordinal runs oldest to
+ * newest so early ordinals land in the 0.x era on their own.
+ */
+const VERSION_PATCHES_PER_MINOR = 12;
+const VERSION_MINORS_PER_MAJOR = 10;
+
+export function makeVersion(shape: DatasetShape, index: number): Version {
+	const ordinal = shape.versions - 1 - index;
+	const patch = ordinal % VERSION_PATCHES_PER_MINOR;
+	const minor = Math.floor(ordinal / VERSION_PATCHES_PER_MINOR) % VERSION_MINORS_PER_MAJOR;
+	const major = Math.floor(ordinal / (VERSION_PATCHES_PER_MINOR * VERSION_MINORS_PER_MAJOR));
+	let name = `${major}.${minor}.${patch}`;
+
+	// Deterministic decoration slots, same idea as the hostile name slots: prerelease tags and
+	// build metadata are what real version fields hold, and their extra length is what keeps a
+	// version list from being flatteringly uniform.
+	if (index % 11 === 4) {
+		name = `${name}-beta.${(ordinal % 3) + 1}`;
+	} else if (index % 29 === 7) {
+		name = `${name}-rc.1`;
+	} else if (index % 47 === 13) {
+		name = `${name}+build.${(hash32(`${shape.seed}:build:${index}`) % 0xffff).toString(16)}`;
+	}
+
+	// Strictly decreasing in `index`, like issues: index 0 is the current release.
+	const step = Math.max(HISTORY_SPAN_MS / shape.versions, 60_000);
+	const rng = createRng(shape.seed, 'version-time', index);
+
+	return {
+		id: versionIdAt(index),
+		name,
+		releasedAt: Math.round(DATA_EPOCH - index * step - rng() * step * 0.9),
+	};
+}
+
 /**
  * Strictly decreasing in `index`: issue 0 is the newest. That is what lets `sort=created` page
  * lazily in generation order without ever building or sorting an array.
@@ -928,6 +976,29 @@ function issueDescription(index: number, rng: () => number): string {
 	return paragraphs.join('\n\n');
 }
 
+/**
+ * Which release an issue was reported against. Its own rng stream, so adding the field left every
+ * previously generated issue exactly as it was.
+ *
+ * Issues and versions both run newest-first, so aligning the two indices puts an old report on an
+ * old release; the spread pushes only toward older versions, because nobody reports a bug against
+ * a build that did not exist yet.
+ */
+function issueAffectsVersion(shape: DatasetShape, index: number): VersionId | null {
+	const rng = createRng(shape.seed, 'issue-version', index);
+
+	// Roughly a quarter of reporters leave the field blank, so "no version" stays a first-class
+	// state the way "unassigned" is.
+	if (chance(rng, 0.28)) {
+		return null;
+	}
+
+	const align = (index / shape.issues) * shape.versions;
+	const spread = rng() ** 2 * shape.versions * 0.25;
+
+	return versionIdAt(clamp(Math.round(align + spread), 0, shape.versions - 1));
+}
+
 export function makeIssue(shape: DatasetShape, index: number): Issue {
 	const rng = createRng(shape.seed, 'issue', index);
 	const createdAt = issueCreatedAt(shape, index);
@@ -949,6 +1020,7 @@ export function makeIssue(shape: DatasetShape, index: number): Issue {
 		reporterId: userIdAt(int(rng, 0, shape.users - 1)),
 		labelIds,
 		projectId: projectIdAt(int(rng, 0, shape.projects - 1)),
+		affectsVersionId: issueAffectsVersion(shape, index),
 		estimate: chance(rng, 0.35) ? null : pick(rng, [1, 2, 3, 5, 8, 13, 21]),
 		createdAt,
 		updatedAt: Math.min(createdAt + int(rng, 0, 45) * DAY_MS, DATA_EPOCH),
@@ -1028,12 +1100,14 @@ export interface DataGenerator {
 	user(index: number): User;
 	label(index: number): Label;
 	project(index: number): Project;
+	version(index: number): Version;
 	issue(index: number): Issue;
 	/** Deterministic comment thread for a generated issue, oldest first. */
 	comments(index: number): readonly Comment[];
 	userById(id: UserId): User | null;
 	labelById(id: LabelId): Label | null;
 	projectById(id: ProjectId): Project | null;
+	versionById(id: VersionId): Version | null;
 	issueById(id: IssueId): Issue | null;
 }
 
@@ -1041,6 +1115,7 @@ export function createGenerator(shape: DatasetShape): DataGenerator {
 	const userMemo = createMemo<User>();
 	const labelMemo = createMemo<Label>();
 	const projectMemo = createMemo<Project>();
+	const versionMemo = createMemo<Version>();
 	const issueMemo = createMemo<Issue>();
 	const commentMemo = createMemo<readonly Comment[]>();
 
@@ -1050,6 +1125,7 @@ export function createGenerator(shape: DatasetShape): DataGenerator {
 		user: (index) => userMemo(index, (i) => makeUser(shape, i)),
 		label: (index) => labelMemo(index, (i) => makeLabel(shape, i)),
 		project: (index) => projectMemo(index, (i) => makeProject(i)),
+		version: (index) => versionMemo(index, (i) => makeVersion(shape, i)),
 		issue: (index) => issueMemo(index, (i) => makeIssue(shape, i)),
 
 		comments: (index) =>
@@ -1078,6 +1154,11 @@ export function createGenerator(shape: DatasetShape): DataGenerator {
 		projectById: (id) => {
 			const index = parseGeneratedIndex(PROJECT_ID_PREFIX, id);
 			return index === null || index >= shape.projects ? null : generator.project(index);
+		},
+
+		versionById: (id) => {
+			const index = parseGeneratedIndex(VERSION_ID_PREFIX, id);
+			return index === null || index >= shape.versions ? null : generator.version(index);
 		},
 
 		issueById: (id) => {

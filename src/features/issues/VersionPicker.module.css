@@ -1,0 +1,14 @@
+.name {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.meta {
+	margin-inline-start: auto;
+	/* `--text-muted`, not `--text-subtle`: at `--text-xs` the subtle tone fails WCAG contrast
+	 * against the highlighted row's hover surface, and axe agrees. */
+	color: var(--text-muted);
+	font-size: var(--text-xs);
+	white-space: nowrap;
+}

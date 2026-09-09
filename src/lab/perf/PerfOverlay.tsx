@@ -1,4 +1,4 @@
-import { useComboboxImpl } from '@/ds/combobox';
+import { useImplRegistry } from '@/ds/registry';
 import { Switch } from '@/ds/switch';
 import { usePerfReading, usePerfSwitch } from './usePerf';
 import type { PerfSnapshot } from './collector';
@@ -75,7 +75,7 @@ function Readout({ snapshot }: { snapshot: PerfSnapshot }) {
 }
 
 function PerfOverlayBody({ onHide }: { onHide: () => void }) {
-	const { activeName } = useComboboxImpl();
+	const { activeName } = useImplRegistry();
 	const { snapshot, reset } = usePerfReading(true);
 
 	return (

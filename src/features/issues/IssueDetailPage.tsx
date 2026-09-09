@@ -27,6 +27,7 @@ import {
 	PriorityField,
 	ProjectField,
 	StatusField,
+	VersionField,
 } from './IssueFields';
 import { InlineText } from './InlineText';
 import { IssueActivity } from './IssueActivity';
@@ -181,6 +182,10 @@ export function IssueDetailPage() {
 					value={issue.projectId}
 					// A project is not optional on an issue, so a cleared value is not a write.
 					onChange={(projectId) => projectId !== null && save({ projectId })}
+				/>
+				<VersionField
+					value={issue.affectsVersionId}
+					onChange={(affectsVersionId) => save({ affectsVersionId })}
 				/>
 				<AssigneeField value={issue.assigneeId} onChange={(assigneeId) => save({ assigneeId })} />
 				<LabelsField value={issue.labelIds} onChange={(labelIds) => save({ labelIds })} />

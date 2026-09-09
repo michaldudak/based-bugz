@@ -1,4 +1,4 @@
-import { ComboboxImplBoundary, useComboboxImpl } from './registry';
+import { ImplBoundary, useImplRegistry } from '@/ds/registry';
 import type { ComboboxProps } from './types';
 
 /**
@@ -10,15 +10,15 @@ import type { ComboboxProps } from './types';
  * maths — nothing else (AGENTS.md — evaluation rule 2).
  */
 export function Combobox<T>(props: ComboboxProps<T>) {
-	const { active: Impl } = useComboboxImpl();
+	const { Combobox: Impl } = useImplRegistry();
 
 	// The single cast in the system. `ComboboxProps<T>` uses T both co- and contravariantly, so it
 	// cannot be assigned to the registry's opaque element type without one.
 	const implProps = props as unknown as ComboboxProps<never>;
 
 	return (
-		<ComboboxImplBoundary>
+		<ImplBoundary>
 			<Impl {...implProps} />
-		</ComboboxImplBoundary>
+		</ImplBoundary>
 	);
 }

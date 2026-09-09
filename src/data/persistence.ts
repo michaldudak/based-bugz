@@ -88,6 +88,9 @@ function isIssue(value: unknown): value is Issue {
 		isNonEmptyString(value.reporterId) &&
 		isStringArray(value.labelIds) &&
 		isNonEmptyString(value.projectId) &&
+		// `undefined` is accepted deliberately: logs persisted before the field existed still
+		// replay, and the `issue_created` branch below normalizes the hole to `null`.
+		(value.affectsVersionId == null || isNonEmptyString(value.affectsVersionId)) &&
 		(value.estimate === null || isFiniteNumber(value.estimate)) &&
 		isFiniteNumber(value.createdAt) &&
 		isFiniteNumber(value.updatedAt)
@@ -141,7 +144,12 @@ export function parseActivityEvent(value: unknown): ActivityEvent | null {
 	switch (value.type) {
 		case 'issue_created':
 			return isNonEmptyString(value.issueId) && isIssue(value.issue)
-				? { ...base, type: 'issue_created', issueId: value.issueId, issue: value.issue }
+				? {
+						...base,
+						type: 'issue_created',
+						issueId: value.issueId,
+						issue: { ...value.issue, affectsVersionId: value.issue.affectsVersionId ?? null },
+					}
 				: null;
 
 		case 'issue_field_changed':

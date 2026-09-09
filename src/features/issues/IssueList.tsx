@@ -1,25 +1,24 @@
 /**
- * The virtualized issue list.
+ * The issue list — the standalone half of the evaluation.
  *
- * This list uses `@tanstack/react-virtual` directly and permanently. It is **not** part of the
- * Combobox evaluation (PLAN.md — Phase 5): only the pickers in the filter bar route through
- * `ds/combobox`, and wiring the list through `impls/` would mean the control being measured also
- * had to satisfy requirements no combobox has.
+ * Virtualization is reached through `ds/list`, which resolves to the active implementation from
+ * `?impl=` (PLAN.md — Phase 9). This file owns everything that is *not* virtualization: queries,
+ * id resolution, selection, and the loading/empty/error states, which render in place of the list
+ * rather than inside it so no implementation has to model them.
  *
  * Everything that narrows or orders the result happens in the repository. The only array operation
  * here is concatenating the pages React Query has already fetched.
  */
 
 import { keepPreviousData, useInfiniteQuery, useQuery } from '@tanstack/react-query';
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { useEffect, useMemo, useRef } from 'react';
-import type { CSSProperties } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router';
 import { useRepository } from '@/data';
 import type { Issue, IssueId, Label, LabelId, Page, User, UserId } from '@/data';
 import { Button } from '@/ds/button';
 import { Checkbox } from '@/ds/checkbox';
 import { IconInbox, IconWarning } from '@/ds/icons';
+import { List } from '@/ds/list';
 import { Spinner } from '@/ds/spinner';
 import { BulkActions } from './BulkActions';
 import { IssueRow } from './IssueRow';
@@ -29,24 +28,11 @@ import styles from './IssueList.module.css';
 
 const PAGE_SIZE = 50;
 
-/** Rows still below the viewport when the next page is requested. */
-const END_REACHED_THRESHOLD = 12;
-
 /** Pre-measurement guesses. Stacked mobile rows are roughly three lines instead of one. */
 const ROW_ESTIMATE = 44;
 const ROW_ESTIMATE_STACKED = 104;
 
 const STACKED_QUERY = '(max-width: 900px)';
-
-function rowStyle(start: number): CSSProperties {
-	return {
-		position: 'absolute',
-		top: 0,
-		insetInlineStart: 0,
-		width: '100%',
-		transform: `translateY(${start}px)`,
-	};
-}
 
 const EMPTY_ISSUES: readonly Issue[] = [];
 
@@ -66,7 +52,6 @@ export function IssueList({
 	onClearSelection,
 }: IssueListProps) {
 	const repository = useRepository();
-	const scrollRef = useRef<HTMLDivElement>(null);
 	const stacked = useMediaQuery(STACKED_QUERY);
 	const { search } = useLocation();
 
@@ -126,41 +111,14 @@ export function IssueList({
 		[labelsQuery.data],
 	);
 
-	const hasSentinel = issuesQuery.hasNextPage || issuesQuery.isFetchingNextPage;
-	const rowCount = issues.length + (hasSentinel ? 1 : 0);
-
-	const virtualizer = useVirtualizer({
-		count: rowCount,
-		getScrollElement: () => scrollRef.current,
-		estimateSize: () => (stacked ? ROW_ESTIMATE_STACKED : ROW_ESTIMATE),
-		getItemKey: (index) => issues[index]?.id ?? 'sentinel',
-		overscan: 10,
-	});
-
-	// Crossing the layout breakpoint invalidates every measurement taken on the other side of it.
-	useEffect(() => {
-		virtualizer.measure();
-	}, [stacked, virtualizer]);
-
-	// A filter change is a different result set; keeping the old scroll offset would drop the user
-	// into the middle of rows they have not seen.
-	useEffect(() => {
-		scrollRef.current?.scrollTo({ top: 0 });
-	}, [filters.key]);
-
-	const virtualItems = virtualizer.getVirtualItems();
-	const lastVisibleIndex = virtualItems[virtualItems.length - 1]?.index ?? -1;
 	const { hasNextPage, isFetchingNextPage, fetchNextPage } = issuesQuery;
 
-	useEffect(() => {
-		if (
-			hasNextPage &&
-			!isFetchingNextPage &&
-			lastVisibleIndex >= rowCount - END_REACHED_THRESHOLD
-		) {
+	// The List reports proximity to the end; whether that means anything is decided here.
+	const handleEndReached = useCallback(() => {
+		if (hasNextPage && !isFetchingNextPage) {
 			void fetchNextPage();
 		}
-	}, [hasNextPage, isFetchingNextPage, fetchNextPage, lastVisibleIndex, rowCount]);
+	}, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
 	const loadedIds = useMemo(() => issues.map((issue) => issue.id), [issues]);
 	const selectedLoaded = loadedIds.reduce(
@@ -181,9 +139,28 @@ export function IssueList({
 			: `${loadedIds.length.toLocaleString()} of ${total.toLocaleString()}`;
 
 	const isEmpty = !issuesQuery.isPending && !issuesQuery.isError && issues.length === 0;
+	const showList = !issuesQuery.isPending && !issuesQuery.isError && !isEmpty;
 
 	// The toolbar acts on the whole selection, including rows scrolled out of the window.
 	const selectedList = useMemo(() => [...selectedIds], [selectedIds]);
+
+	const renderItem = useCallback(
+		(issue: Issue, index: number, rowProps: Parameters<typeof IssueRow>[0]['rowProps']) => (
+			<IssueRow
+				key={issue.id}
+				issue={issue}
+				usersById={usersById}
+				labelsById={labelsById}
+				selected={selectedIds.has(issue.id)}
+				onToggleSelected={onToggleSelected}
+				search={search}
+				position={index + 1}
+				setSize={total ?? -1}
+				rowProps={rowProps}
+			/>
+		),
+		[usersById, labelsById, selectedIds, onToggleSelected, search, total],
+	);
 
 	return (
 		<section className={styles.list} aria-label="Issues">
@@ -208,67 +185,48 @@ export function IssueList({
 				)}
 			</div>
 
-			<div className={styles.scroller} ref={scrollRef}>
-				{issuesQuery.isPending && (
-					<div className={styles.state}>
-						<Spinner size={18} label="Loading issues" />
-					</div>
-				)}
+			{issuesQuery.isPending && (
+				<div className={styles.state}>
+					<Spinner size={18} label="Loading issues" />
+				</div>
+			)}
 
-				{issuesQuery.isError && (
-					<div className={styles.state}>
-						<IconWarning />
-						<p>Could not load issues.</p>
-						<Button onClick={() => void issuesQuery.refetch()}>Try again</Button>
-					</div>
-				)}
+			{issuesQuery.isError && (
+				<div className={styles.state}>
+					<IconWarning />
+					<p>Could not load issues.</p>
+					<Button onClick={() => void issuesQuery.refetch()}>Try again</Button>
+				</div>
+			)}
 
-				{isEmpty && (
-					<div className={styles.state}>
-						<IconInbox />
-						<p>{filters.isFiltered ? 'No issues match these filters.' : 'No issues yet.'}</p>
-						{filters.isFiltered && <Button onClick={filters.clear}>Clear filters</Button>}
-					</div>
-				)}
+			{isEmpty && (
+				<div className={styles.state}>
+					<IconInbox />
+					<p>{filters.isFiltered ? 'No issues match these filters.' : 'No issues yet.'}</p>
+					{filters.isFiltered && <Button onClick={filters.clear}>Clear filters</Button>}
+				</div>
+			)}
 
-				<ul className={styles.rows} style={{ height: virtualizer.getTotalSize() }}>
-					{virtualItems.map((virtualItem) => {
-						const issue = issues[virtualItem.index];
-
-						if (issue === undefined) {
-							return (
-								<li
-									key="sentinel"
-									ref={virtualizer.measureElement}
-									data-index={virtualItem.index}
-									style={rowStyle(virtualItem.start)}
-									className={styles.sentinel}
-								>
-									<Spinner size={14} />
-									Loading more…
-								</li>
-							);
-						}
-
-						return (
-							<IssueRow
-								key={issue.id}
-								issue={issue}
-								usersById={usersById}
-								labelsById={labelsById}
-								selected={selectedIds.has(issue.id)}
-								onToggleSelected={onToggleSelected}
-								search={search}
-								position={virtualItem.index + 1}
-								setSize={total ?? -1}
-								rowRef={virtualizer.measureElement}
-								index={virtualItem.index}
-								style={rowStyle(virtualItem.start)}
-							/>
-						);
-					})}
-				</ul>
-			</div>
+			{showList && (
+				<List<Issue>
+					items={issues}
+					itemKey={(issue) => issue.id}
+					estimateItemHeight={() => (stacked ? ROW_ESTIMATE_STACKED : ROW_ESTIMATE)}
+					renderItem={renderItem}
+					measureVersion={stacked ? 'stacked' : 'wide'}
+					resetKey={filters.key}
+					onEndReached={handleEndReached}
+					aria-label="Issue results"
+					trailing={
+						hasNextPage || isFetchingNextPage ? (
+							<div className={styles.sentinel}>
+								<Spinner size={14} />
+								Loading more…
+							</div>
+						) : undefined
+					}
+				/>
+			)}
 
 			{/*
 			 * The selection toolbar floats over the list rather than appearing above it. Inserting a

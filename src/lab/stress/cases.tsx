@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useSearchParams } from 'react-router';
 import { Button } from '@/ds/button';
+import { Switch } from '@/ds/switch';
 import { Dialog } from '@/ds/dialog';
 import { Popover } from '@/ds/popover';
+import { PEOPLE_MODE_PARAM, usePeopleLoadMode } from '@/features/people';
 import { StressIssuePicker } from './StressIssuePicker';
 import { StressUserPicker } from './StressUserPicker';
+import { StressVersionPicker } from './StressVersionPicker';
 import styles from './StressLabPage.module.css';
 
 export interface StressCase {
@@ -18,6 +21,12 @@ export interface StressCase {
 
 /** Where the deep preselected value sits when `?deep=` is absent. */
 export const DEFAULT_DEEP_INDEX = 4000;
+
+/**
+ * The version case's default preselection. Versions run at an eighth of the issue count
+ * (`datasetShape`), so this sits deep in the default 1,250-row list without falling off the end.
+ */
+export const DEFAULT_VERSION_DEEP_INDEX = 800;
 
 function useNumberParam(key: string, fallback: number): number {
 	const [searchParams] = useSearchParams();
@@ -36,7 +45,14 @@ function useNumberParam(key: string, fallback: number): number {
  * `scale` is read once, from `window.location.search`, when the repository is constructed — so
  * changing it is a navigation, not a state update. These are real links for that reason.
  */
-function ScaleLinks({ presets }: { presets: readonly number[] }) {
+function ScaleLinks({
+	presets,
+	describe = (scale) => `${(scale / 2).toLocaleString()} people`,
+}: {
+	presets: readonly number[];
+	/** Label per preset — cases care about different entities derived from the same `?scale=`. */
+	describe?: (scale: number) => string;
+}) {
 	const [searchParams] = useSearchParams();
 	const current = searchParams.get('scale');
 
@@ -55,7 +71,7 @@ function ScaleLinks({ presets }: { presets: readonly number[] }) {
 							href={`?${next.toString()}`}
 							aria-current={current === String(scale) ? 'page' : undefined}
 						>
-							{(scale / 2).toLocaleString()} people
+							{describe(scale)}
 						</a>
 					</span>
 				);
@@ -65,15 +81,45 @@ function ScaleLinks({ presets }: { presets: readonly number[] }) {
 }
 
 function ScaleCase() {
+	const [, setSearchParams] = useSearchParams();
+	const mode = usePeopleLoadMode();
+
+	function toggleEager(eager: boolean) {
+		setSearchParams(
+			(current) => {
+				const next = new URLSearchParams(current);
+
+				if (eager) {
+					next.set(PEOPLE_MODE_PARAM, 'eager');
+				} else {
+					next.delete(PEOPLE_MODE_PARAM);
+				}
+
+				return next;
+			},
+			{ replace: true },
+		);
+	}
+
 	return (
 		<>
 			<p className={styles.caseNote}>
 				<code>?scale=</code> is the issue count and every other entity derives from it, so the
 				people list is half of it — <code>?scale=200000</code> is 100,000 people. Nothing
-				materializes: the generator is a pure <code>(seed, index) → entity</code> function and the
-				picker pages 40 rows at a time, so switching datasets is as cheap as switching pages.
+				materializes: the generator is a pure <code>(seed, index) → entity</code> function, so
+				switching datasets is as cheap as switching pages. Paged loading grows the list under the
+				virtualizer as you scroll; eager loading drains everyone into memory first and filters
+				locally, which removes the async boundary and leaves virtualization as the only thing being
+				measured.
 			</p>
 			<ScaleLinks presets={[10_000, 200_000, 2_000_000]} />
+			<p className={styles.links}>
+				<Switch
+					label="Everyone in memory (eager loading)"
+					checked={mode === 'eager'}
+					onCheckedChange={toggleEager}
+				/>
+			</p>
 			<StressUserPicker testId="stress-picker" label="Assignee" />
 		</>
 	);
@@ -219,6 +265,29 @@ function ZoomReadout() {
 	);
 }
 
+function VersionSelectCase() {
+	const deep = useNumberParam('deep', DEFAULT_VERSION_DEEP_INDEX);
+
+	return (
+		<>
+			<p className={styles.caseNote}>
+				The Select surface: no query box, the whole release list local by the time the popup opens —
+				versions run at an eighth of <code>?scale=</code>. The selected release sits at position{' '}
+				{deep.toLocaleString()}, so opening has to land on a row that was never mounted. Try
+				typeahead (type <code>3.</code>), <kbd>End</kbd>, <kbd>Home</kbd> and <kbd>PageDown</kbd> —
+				every one of them has to work against rows outside the mounted window. <code>?deep=</code>{' '}
+				moves the selection.
+			</p>
+			<ScaleLinks
+				presets={[10_000, 100_000]}
+				// Mirrors the `datasetShape` clamp, so the link never promises more than it delivers.
+				describe={(scale) => `${Math.min(Math.round(scale / 8), 12_000).toLocaleString()} versions`}
+			/>
+			<StressVersionPicker testId="stress-picker" label="Affects version" preselectIndex={deep} />
+		</>
+	);
+}
+
 function ZoomCase() {
 	return (
 		<>
@@ -238,7 +307,7 @@ function ZoomCase() {
 export const STRESS_CASES: readonly StressCase[] = [
 	{
 		id: 'scale',
-		title: '100k rows',
+		title: 'Scale',
 		breaks:
 			'The popup opens blank with a correctly sized scrollbar, or scrolling past the loaded pages leaves a gap where rows should be.',
 		render: () => <ScaleCase />,
@@ -270,6 +339,13 @@ export const STRESS_CASES: readonly StressCase[] = [
 		breaks:
 			'Selecting a row dismisses the popover too, or the popup is treated as an outside click by the layer beneath it.',
 		render: () => <PopoverCase />,
+	},
+	{
+		id: 'version',
+		title: 'Version select',
+		breaks:
+			'Opening shows the top of the list instead of the selected release, End or typeahead sticks inside the mounted window, or the highlight leaves the viewport.',
+		render: () => <VersionSelectCase />,
 	},
 	{
 		id: 'preselected',

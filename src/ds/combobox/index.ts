@@ -2,13 +2,6 @@ export { Combobox } from './Combobox';
 export { buildRows, estimateRowHeight, rowIndexOfItem } from './rows';
 export type { BuildRowsOptions } from './rows';
 export {
-	ComboboxImplBoundary,
-	ComboboxImplFallback,
-	ComboboxImplProvider,
-	useComboboxImpl,
-} from './registry';
-export type { ComboboxImplRegistry, OpaqueComboboxImpl } from './registry';
-export {
 	ComboboxChip,
 	ComboboxCreateContent,
 	ComboboxEmpty,

@@ -33,6 +33,8 @@ export type {
 	ProjectId,
 	User,
 	UserId,
+	Version,
+	VersionId,
 } from './types';
 
 export {
@@ -73,6 +75,7 @@ export type {
 	SortDirection,
 	UserQuery,
 	UsersRepository,
+	VersionsRepository,
 } from './repository';
 
 export {

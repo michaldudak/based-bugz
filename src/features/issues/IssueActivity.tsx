@@ -27,6 +27,8 @@ import type {
 	ProjectId,
 	User,
 	UserId,
+	Version,
+	VersionId,
 } from '@/data';
 import { Badge } from '@/ds/badge';
 import { Button } from '@/ds/button';
@@ -52,6 +54,7 @@ interface Lookups {
 	users: ReadonlyMap<UserId, User>;
 	labels: ReadonlyMap<LabelId, Label>;
 	projects: ReadonlyMap<ProjectId, Project>;
+	versions: ReadonlyMap<VersionId, Version>;
 }
 
 /** The only object-valued field is `labelIds`, so this is the whole narrowing story. */
@@ -181,6 +184,21 @@ function describe(event: IssueActivityEvent, lookups: Lookups): ReactNode {
 			);
 		}
 
+		case 'affectsVersionId': {
+			const to = asText(event.to);
+
+			if (to === null) {
+				return <>cleared the affected version</>;
+			}
+
+			return (
+				<>
+					set the affected version to{' '}
+					<span className={styles.value}>{lookups.versions.get(to)?.name ?? to}</span>
+				</>
+			);
+		}
+
 		case 'estimate':
 			return event.to === null ? (
 				<>cleared the estimate</>
@@ -228,6 +246,7 @@ function collectReferences(events: readonly IssueActivityEvent[]) {
 	const users = new Set<UserId>();
 	const labels = new Set<LabelId>();
 	const projects = new Set<ProjectId>();
+	const versions = new Set<VersionId>();
 
 	for (const event of events) {
 		users.add(event.actorId);
@@ -265,12 +284,23 @@ function collectReferences(events: readonly IssueActivityEvent[]) {
 				}
 			}
 		}
+
+		if (event.field === 'affectsVersionId') {
+			for (const value of [event.from, event.to]) {
+				const id = asText(value);
+
+				if (id !== null) {
+					versions.add(id);
+				}
+			}
+		}
 	}
 
 	return {
 		userIds: [...users].toSorted(),
 		labelIds: [...labels].toSorted(),
 		projectIds: [...projects].toSorted(),
+		versionIds: [...versions].toSorted(),
 	};
 }
 
@@ -320,13 +350,22 @@ export function IssueActivity({ issueId }: IssueActivityProps) {
 		staleTime: Infinity,
 	});
 
+	const versions = useQuery({
+		queryKey: ['versions', 'by-ids', references.versionIds],
+		queryFn: ({ signal }) => repository.versions.byIds(references.versionIds, { signal }),
+		enabled: references.versionIds.length > 0,
+		placeholderData: keepPreviousData,
+		staleTime: Infinity,
+	});
+
 	const lookups = useMemo<Lookups>(
 		() => ({
 			users: new Map((users.data ?? []).map((user) => [user.id, user])),
 			labels: new Map((labels.data ?? []).map((label) => [label.id, label])),
 			projects: new Map((projects.data ?? []).map((project) => [project.id, project])),
+			versions: new Map((versions.data ?? []).map((version) => [version.id, version])),
 		}),
-		[users.data, labels.data, projects.data],
+		[users.data, labels.data, projects.data, versions.data],
 	);
 
 	const total = activity.data?.pages[0]?.total ?? events.length;

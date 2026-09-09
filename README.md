@@ -7,9 +7,12 @@ Demos make components look fine. Real apps have 10,000 issues, a hostile dataset
 over 5,000 people that has to stay responsive while the network is slow, and a user who navigates by
 keyboard. This app exists to surface the difference.
 
-Its first job is comparing three competing approaches to Combobox virtualization — installed side by
-side and swappable at runtime — against the currently documented approach. After that it stays
-around as the testing ground for whatever component comes next.
+Its first job — comparing three competing approaches to Combobox virtualization, installed side by
+side and swappable at runtime against the documented approach — is done: mui/base-ui#5466 won, and
+the app now tracks its successor mui/base-ui#5617 (the same Virtualizer plus Select support)
+against the baseline, with the issue's "Affects version" field as the virtualized-Select surface
+(see FINDINGS.md for the evidence). It stays around as the testing ground for whatever component
+comes next.
 
 ## Stack
 

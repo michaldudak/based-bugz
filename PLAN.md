@@ -3,15 +3,20 @@
 Sequence for building Based Bugz. `AGENTS.md` holds the agreements and the reasoning; this file
 holds the order of work and what "done" means at each step. Update it as phases land.
 
-**Current state:** Phases 0–8 landed. The app is a working tracker: sign in, browse/filter/sort
-10,000 issues, create, edit inline, comment, delete with undo, ⌘K over everything, plus the design
-system gallery, the combobox lab, the stress lab, a perf overlay and a Playwright parity suite.
-The three PR URLs are known, canary builds are verified installable side by side, and Phase 9 below
-is the verified plan for them. Nothing in it is implemented yet.
+**Current state: the evaluation concluded — mui/base-ui#5466 is the chosen Virtualizer API
+(2026-09).** The pr-5173 and pr-5414 implementations are removed; `pr-5466` tracks the PR's latest
+build (re-verified 2026-09-07: suite 40/40 across both remaining projects, deep variable-height
+navigation exact to 1px, console clean) and `baseline` stays as the control until the PR merges.
+Still open on the winner, re-confirmed on the 2026-09-04 head: the scrollport is not
+keyboard-reachable (pinned in the a11y spec), no measurement-invalidation API (breakpoint crossing
+still costs the scroll position via key-remount), no end-reached signal (paging still observed
+from inside the renderer), and the two keyboard defects shared with stable (Tab-dismissal,
+PageUp/PageDown). Those are now upstream work for the PR, tracked in FINDINGS.md.
 
-The parity suite is **deliberately red in five places**. Each failure is a reproduced defect, not a
-flaky assertion, and no assertion was softened to make the baseline green — see
-"Known baseline failures" below. That red is the number the three PRs are competing against.
+No assertion in the parity suite was softened to make anything green. Defects and findings are
+encoded — expected failures for the baseline's two keyboard defects, pinned per-implementation
+expectations for the canaries' scrollport finding — so the suite is green exactly while reality
+matches the findings, and red the moment either side moves.
 
 **Strategy:** build the whole app against `impls/baseline` — stable `@base-ui/react` + TanStack
 Virtual, wired as the docs describe. That is the control the three PRs must beat, it needs no canary
@@ -116,10 +121,9 @@ chunk per impl.
 `features/issues/`: virtualized list, filter bar (AssigneePicker, LabelPicker, status and priority
 selects, text search), sorting, row selection, bulk actions menu, empty/loading/error states.
 
-The issue list uses TanStack Virtual permanently and is **not** part of the evaluation — only the
-combobox is. Do not wire it to `impls/`. _(Superseded in Phase 9: the issues list becomes the
-standalone-virtualizer surface, and the baseline List keeps this exact TanStack code as the
-control.)_
+_(Superseded in Phase 9: the issues list is now the standalone-virtualizer evaluation surface,
+reached through the `ds/list` seam. The baseline List keeps the original TanStack code, unchanged,
+as the control.)_
 
 **Done when:** 10k issues scroll smoothly in a production build; filters compose and round-trip
 through the URL; sorting works with cursor pagination; bulk actions apply to a selection.
@@ -258,6 +262,26 @@ package does not export.
 Docs to update when step 1 lands: AGENTS.md stack table (`@mui/x-virtualizer` allowed), the
 Phase 5 note that the issues list is now an evaluation surface, and the Conventions section
 (sha pinning, postinstall script — version splitting plus the 5414 exports-map widening).
+
+### Phase 10 — the Select surface (landed 2026-09-09)
+
+mui/base-ui#5617 superseded #5466 (same Virtualizer, rebased, plus Select support), and the app
+grew a third evaluated surface to exercise it:
+
+1. **Data · M** — `Version` entity (`datasetShape`: issues/8, capped at 12,000; closed-form
+   semver names, newest first), `Issue.affectsVersionId`, `versions.all()` as the repository's
+   second deliberate bulk read, event-log/persistence/activity coverage for the new field.
+2. **Seam · M** — `ds/select` split into `StaticSelect` (code-declared options, stable Base UI,
+   no seam) and the contract-driven `Select` resolved through the registry, which became
+   `{ Combobox, List, Select }`.
+3. **Impls · L** — `baseline/Select.tsx` (stable + TanStack, 164 lines: anchor row, nested
+   spacer, hand scroll-to-selected) and `pr-5617/Select.tsx` (canary `<Virtualizer>` in
+   `Select.List`, 106 lines, no bridge code).
+4. **Feature · M** — `VersionPicker` as the issue's "Affects version" field (detail page and
+   create dialog), activity-feed sentences, stress-lab `version` case, pure-lab section with
+   `?pick=`.
+5. **Tests · M** — `select.spec.ts` parity + expected-failure findings, an axe case for the open
+   select popup. Findings recorded in FINDINGS.md (The Select surface).
 
 ---
 

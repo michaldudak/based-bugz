@@ -22,6 +22,8 @@ export { LabelPicker } from './LabelPicker';
 export type { LabelPickerProps } from './LabelPicker';
 export { ProjectPicker } from './ProjectPicker';
 export type { ProjectPickerProps } from './ProjectPicker';
+export { VersionPicker } from './VersionPicker';
+export type { VersionPickerProps } from './VersionPicker';
 export { issuePath, issuesPath } from './routes';
 export {
 	issueKeys,

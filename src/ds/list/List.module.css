@@ -1,0 +1,21 @@
+/*
+ * The stylesheet every List implementation renders through — the standalone counterpart of
+ * Combobox.module.css. Implementations own the scroll container and measurement, never the look.
+ */
+
+.scroller {
+	flex: 1;
+	min-height: 0;
+	overflow-anchor: none;
+	overflow-y: auto;
+	scrollbar-gutter: stable;
+}
+
+/** The sized spacer rows are positioned inside, for implementations that place rows themselves. */
+.viewport {
+	position: relative;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}

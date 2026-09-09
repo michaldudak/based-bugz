@@ -25,6 +25,8 @@ import type {
 	ProjectId,
 	User,
 	UserId,
+	Version,
+	VersionId,
 } from './types';
 
 /* -------------------------------------------------------------------------------------------- */
@@ -187,6 +189,15 @@ export interface UsersRepository {
 	search(query: UserQuery, page: PageRequest): Promise<Page<User>>;
 	/** Found users in the order requested. Unknown ids are dropped, never thrown on. */
 	byIds(ids: readonly UserId[], options?: ReadOptions): Promise<User[]>;
+	/**
+	 * Every user, in one simulated round-trip. Exists for the eager loading strategy
+	 * (`?people=eager`): still async, abortable and failure-injected like every read, but
+	 * deliberately not paginated — the strategy's subject is a complete local array, and draining
+	 * it page by page would measure the fake network instead of the virtualization the strategy
+	 * exists to isolate. An `HttpRepository` would serve this from a bulk endpoint, which is what
+	 * real apps that ship eager pickers actually do.
+	 */
+	all(options?: ReadOptions): Promise<readonly User[]>;
 }
 
 export interface LabelsRepository {
@@ -200,6 +211,18 @@ export interface ProjectsRepository {
 	/** Always reports `total`: the project count is small and known. */
 	list(page: PageRequest): Promise<Page<Project>>;
 	byIds(ids: readonly ProjectId[], options?: ReadOptions): Promise<Project[]>;
+}
+
+export interface VersionsRepository {
+	/**
+	 * Every version, newest first, in one simulated round-trip — the same deliberate bulk read as
+	 * `users.all()`, and for the same reason: a version field is a select over the complete
+	 * release list, and real apps serve that list from one endpoint. Still async, abortable and
+	 * failure-injected like every read (AGENTS.md — evaluation rule 3).
+	 */
+	all(options?: ReadOptions): Promise<readonly Version[]>;
+	/** Found versions in the order requested. Unknown ids are dropped, never thrown on. */
+	byIds(ids: readonly VersionId[], options?: ReadOptions): Promise<Version[]>;
 }
 
 export interface IssuesRepository {
@@ -240,6 +263,7 @@ export interface Repository {
 	users: UsersRepository;
 	labels: LabelsRepository;
 	projects: ProjectsRepository;
+	versions: VersionsRepository;
 	issues: IssuesRepository;
 	comments: CommentsRepository;
 	activity: ActivityRepository;

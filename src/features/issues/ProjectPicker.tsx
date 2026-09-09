@@ -1,7 +1,7 @@
 /**
  * The project field.
  *
- * Unlike the assignee and label pickers this is a `<Select>`, not a Combobox: the repository caps
+ * Unlike the assignee and label pickers this is a `<StaticSelect>`, not a Combobox: the repository caps
  * projects at a few dozen (`datasetShape`), so there is nothing here to virtualize and a searchable
  * popup would be ceremony. It still reads through the paged, abortable contract — a picker that
  * got a synchronous array would stop testing anything (AGENTS.md — evaluation rule 3).
@@ -11,8 +11,8 @@ import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { useRepository } from '@/data';
 import type { Page, Project, ProjectId } from '@/data';
-import { Select } from '@/ds/select';
-import type { SelectOption, SelectSize } from '@/ds/select';
+import { StaticSelect } from '@/ds/select';
+import type { StaticSelectOption, SelectSize } from '@/ds/select';
 
 const PAGE_SIZE = 25;
 
@@ -54,7 +54,7 @@ export function ProjectPicker({
 	const { hasNextPage, isFetchingNextPage, fetchNextPage } = projects;
 
 	/*
-	 * A `<Select>` shows every option at once, so the cursor is followed to the end rather than on
+	 * A `<StaticSelect>` shows every option at once, so the cursor is followed to the end rather than on
 	 * scroll. That is only defensible because the count is bounded and known — the same loop over
 	 * `issues.list` would be the client-side full scan this codebase refuses to do.
 	 */
@@ -76,7 +76,7 @@ export function ProjectPicker({
 		staleTime: Infinity,
 	});
 
-	const items = useMemo<Array<SelectOption<ProjectId>>>(() => {
+	const items = useMemo<Array<StaticSelectOption<ProjectId>>>(() => {
 		const loaded = (projects.data?.pages ?? []).flatMap((page) => page.items);
 		const known = loaded.some((project) => project.id === value);
 		const resolved = selected.data?.[0];
@@ -100,7 +100,7 @@ export function ProjectPicker({
 	}, [projects.data, selected.data, value]);
 
 	return (
-		<Select<ProjectId>
+		<StaticSelect<ProjectId>
 			items={items}
 			value={value}
 			onValueChange={onChange}

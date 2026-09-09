@@ -1,13 +1,18 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { MAX_PAGE_LIMIT, foldText, matchesUserText, useRepository } from '@/data';
+import { foldText, matchesUserText, useRepository } from '@/data';
 import type { Page, User } from '@/data';
 import type { ComboboxStatus } from '@/ds/combobox';
 import { usePeopleLoadMode } from './mode';
 import type { PeopleLoadMode } from './mode';
 
-/** Page size while paging on demand. Small enough that a page boundary is felt, not hidden. */
+/** Default page size while paging on demand. Small enough that a page boundary is felt, not hidden. */
 const PAGED_PAGE_SIZE = 40;
+
+export interface PeopleSearchOptions {
+	/** Paged mode only — eager mode always drains at the repository's maximum page size. */
+	pageSize?: number;
+}
 
 /** Only paged mode debounces, and only because it is protecting the network. */
 const PAGED_DEBOUNCE_MS = 200;
@@ -39,8 +44,8 @@ export interface PeopleSearchResult {
 	mode: PeopleLoadMode;
 	/** Eager mode only: how many people are in memory so far. */
 	loadedCount: number;
-	/** Eager mode only: true until the whole list has been drained. */
-	draining: boolean;
+	/** Eager mode only: true while the single bulk request is in flight. */
+	loadingAll: boolean;
 	/**
 	 * The query actually in effect. In paged mode it lags the typed text by the debounce; in eager
 	 * mode it is the typed text. Callers whose own rows depend on the query — a synthetic
@@ -56,9 +61,13 @@ export interface PeopleSearchResult {
  * conditionally — switching mode therefore remounts nothing and the two strategies share the same
  * component tree, which is what makes them comparable.
  */
-export function usePeopleSearch(rawQuery: string): PeopleSearchResult {
+export function usePeopleSearch(
+	rawQuery: string,
+	options: PeopleSearchOptions = {},
+): PeopleSearchResult {
 	const repository = useRepository();
 	const mode = usePeopleLoadMode();
+	const pageSize = options.pageSize ?? PAGED_PAGE_SIZE;
 
 	/*
 	 * Debouncing exists to spare the network, and eager mode has no network left to spare: the list
@@ -72,50 +81,31 @@ export function usePeopleSearch(rawQuery: string): PeopleSearchResult {
 	/* ---- paged: one page at a time, driven by the viewport ---------------------------------- */
 
 	const paged = useInfiniteQuery({
-		queryKey: ['people', 'paged', search],
+		queryKey: ['people', 'paged', search, pageSize],
 		initialPageParam: undefined as string | undefined,
 		queryFn: ({ pageParam, signal }) =>
 			repository.users.search(
 				{ text: search === '' ? undefined : search },
-				{ cursor: pageParam, limit: PAGED_PAGE_SIZE, signal },
+				{ cursor: pageParam, limit: pageSize, signal },
 			),
 		getNextPageParam: (lastPage: Page<User>) => lastPage.nextCursor,
 		enabled: mode === 'paged',
 	});
 
-	/* ---- eager: drain the whole list once, then filter it locally ---------------------------- */
+	/* ---- eager: everyone, in one simulated request ------------------------------------------ */
 
-	const eager = useInfiniteQuery({
-		// Deliberately not keyed by `search`: this is the entire people list, fetched once and
-		// reused for every query and every picker on the page.
+	const eager = useQuery({
+		// The whole people list, fetched once and reused for every query and every picker on the
+		// page. One round-trip on purpose: draining pages would spend seconds of simulated latency
+		// measuring the fake network, and the strategy exists to measure virtualization instead.
 		queryKey: ['people', 'all'],
-		initialPageParam: undefined as string | undefined,
-		queryFn: ({ pageParam, signal }) =>
-			repository.users.search({}, { cursor: pageParam, limit: MAX_PAGE_LIMIT, signal }),
-		getNextPageParam: (lastPage: Page<User>) => lastPage.nextCursor,
+		queryFn: ({ signal }) => repository.users.all({ signal }),
 		enabled: mode === 'eager',
 		staleTime: Infinity,
 		gcTime: Infinity,
 	});
 
-	const eagerHasNextPage = eager.hasNextPage;
-	const eagerFetching = eager.isFetchingNextPage;
-	const eagerFetchNextPage = eager.fetchNextPage;
-
-	// Keep pulling until the list is exhausted. Nothing about this is driven by scrolling — that is
-	// the whole point of the mode: the picker displays, it never asks.
-	useEffect(() => {
-		if (mode !== 'eager' || !eagerHasNextPage || eagerFetching) {
-			return;
-		}
-
-		void eagerFetchNextPage();
-	}, [mode, eagerHasNextPage, eagerFetching, eagerFetchNextPage]);
-
-	const everyone = useMemo(
-		() => (eager.data?.pages ?? []).flatMap((page) => page.items),
-		[eager.data],
-	);
+	const everyone = useMemo(() => eager.data ?? [], [eager.data]);
 
 	const eagerItems = useMemo(() => {
 		if (search === '') {
@@ -142,7 +132,7 @@ export function usePeopleSearch(rawQuery: string): PeopleSearchResult {
 			total: eagerItems.length,
 			mode,
 			loadedCount: everyone.length,
-			draining: eagerHasNextPage,
+			loadingAll: eager.isPending,
 			query: search,
 		};
 	}
@@ -164,7 +154,7 @@ export function usePeopleSearch(rawQuery: string): PeopleSearchResult {
 		total: paged.data?.pages[0]?.total,
 		mode,
 		loadedCount: pagedItems.length,
-		draining: false,
+		loadingAll: false,
 		query: search,
 	};
 }

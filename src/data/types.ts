@@ -11,6 +11,7 @@ export type UserId = string;
 export type IssueId = string;
 export type LabelId = string;
 export type ProjectId = string;
+export type VersionId = string;
 export type CommentId = string;
 export type ActivityEventId = string;
 
@@ -74,6 +75,19 @@ export interface Project {
 	name: string;
 }
 
+/**
+ * A release the tracker knows about — the Bugzilla-style "affects version" vocabulary. Versions
+ * are generated reference data like projects, but there are orders of magnitude more of them:
+ * a long-lived product ships thousands of builds, and every one of them is somebody's bug report.
+ */
+export interface Version {
+	id: VersionId;
+	/** The version string, e.g. `5.42.7` or `6.0.0-beta.2`. Newest-first by generated index. */
+	name: string;
+	/** Epoch ms. Strictly decreasing with index: index 0 is the current release. */
+	releasedAt: number;
+}
+
 export interface Issue {
 	id: IssueId;
 	/** Human-facing identifier, e.g. `BUG-1234`. Unique, stable, and sortable numerically. */
@@ -86,6 +100,8 @@ export interface Issue {
 	reporterId: UserId;
 	labelIds: readonly LabelId[];
 	projectId: ProjectId;
+	/** The release the bug was reported against. `null` when the reporter could not say. */
+	affectsVersionId: VersionId | null;
 	estimate: number | null;
 	createdAt: number;
 	updatedAt: number;
@@ -108,6 +124,7 @@ export const EDITABLE_ISSUE_FIELDS = [
 	'assigneeId',
 	'labelIds',
 	'projectId',
+	'affectsVersionId',
 	'estimate',
 ] as const;
 
@@ -127,6 +144,7 @@ export interface NewIssue {
 	assigneeId?: UserId | null;
 	labelIds?: readonly LabelId[];
 	projectId: ProjectId;
+	affectsVersionId?: VersionId | null;
 	estimate?: number | null;
 }
 
