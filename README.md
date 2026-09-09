@@ -9,8 +9,10 @@ keyboard. This app exists to surface the difference.
 
 Its first job — comparing three competing approaches to Combobox virtualization, installed side by
 side and swappable at runtime against the documented approach — is done: mui/base-ui#5466 won, and
-the app now tracks that PR's builds against the baseline (see FINDINGS.md for the evidence). It
-stays around as the testing ground for whatever component comes next.
+the app now tracks its successor mui/base-ui#5617 (the same Virtualizer plus Select support)
+against the baseline, with the issue's "Affects version" field as the virtualized-Select surface
+(see FINDINGS.md for the evidence). It stays around as the testing ground for whatever component
+comes next.
 
 ## Stack
 

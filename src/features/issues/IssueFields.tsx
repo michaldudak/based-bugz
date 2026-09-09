@@ -1,5 +1,5 @@
 /**
- * The five editable issue fields, shared by the create dialog and the detail header.
+ * The editable issue fields, shared by the create dialog and the detail header.
  *
  * They live together because "editable in place" and "fillable in a dialog" are the same control
  * with a different commit moment: the dialog holds a draft until submit, the detail page writes on
@@ -8,7 +8,7 @@
 
 import { useId } from 'react';
 import type { ReactNode } from 'react';
-import type { IssuePriority, IssueStatus, LabelId, ProjectId, UserId } from '@/data';
+import type { IssuePriority, IssueStatus, LabelId, ProjectId, UserId, VersionId } from '@/data';
 import { Field } from '@/ds/field';
 import {
 	IconCircle,
@@ -18,11 +18,12 @@ import {
 	IconPencil,
 } from '@/ds/icons';
 import type { IconProps } from '@/ds/icons';
-import { Select } from '@/ds/select';
-import type { SelectOption, SelectSize } from '@/ds/select';
+import { StaticSelect } from '@/ds/select';
+import type { StaticSelectOption, SelectSize } from '@/ds/select';
 import { AssigneePicker } from './AssigneePicker';
 import { LabelPicker } from './LabelPicker';
 import { ProjectPicker } from './ProjectPicker';
+import { VersionPicker } from './VersionPicker';
 import { PRIORITY_LABEL, PRIORITY_ORDER, STATUS_LABEL, STATUS_ORDER } from './meta';
 import type { AssigneeValue } from './useIssueFilters';
 import styles from './IssueFields.module.css';
@@ -37,17 +38,19 @@ const STATUS_ICON: Record<IssueStatus, (props: IconProps) => ReactNode> = {
 	cancelled: IconCircleSlash,
 };
 
-const STATUS_OPTIONS: Array<SelectOption<IssueStatus>> = STATUS_ORDER.map((status) => {
+const STATUS_OPTIONS: Array<StaticSelectOption<IssueStatus>> = STATUS_ORDER.map((status) => {
 	const Glyph = STATUS_ICON[status];
 
 	return { value: status, label: STATUS_LABEL[status], icon: <Glyph size={14} /> };
 });
 
-const PRIORITY_OPTIONS: Array<SelectOption<IssuePriority>> = PRIORITY_ORDER.map((priority) => ({
-	value: priority,
-	label: PRIORITY_LABEL[priority],
-	icon: <span className={styles.priorityDot} data-priority={priority} />,
-}));
+const PRIORITY_OPTIONS: Array<StaticSelectOption<IssuePriority>> = PRIORITY_ORDER.map(
+	(priority) => ({
+		value: priority,
+		label: PRIORITY_LABEL[priority],
+		icon: <span className={styles.priorityDot} data-priority={priority} />,
+	}),
+);
 
 /** The issue field is `UserId | null`; the picker's own value type spells "nobody" explicitly. */
 export function assigneeValueOf(assigneeId: UserId | null): AssigneeValue {
@@ -88,7 +91,7 @@ export interface StatusFieldProps {
 export function StatusField({ value, onChange, size, disabled }: StatusFieldProps) {
 	return (
 		<Field label="Status" nativeLabel={false}>
-			<Select<IssueStatus>
+			<StaticSelect<IssueStatus>
 				items={STATUS_OPTIONS}
 				value={value}
 				// Base UI reports `null` for a cleared value; this control has no empty state, so a
@@ -112,7 +115,7 @@ export interface PriorityFieldProps {
 export function PriorityField({ value, onChange, size, disabled }: PriorityFieldProps) {
 	return (
 		<Field label="Priority" nativeLabel={false}>
-			<Select<IssuePriority>
+			<StaticSelect<IssuePriority>
 				items={PRIORITY_OPTIONS}
 				value={value}
 				onValueChange={(next) => next !== null && onChange(next)}
@@ -143,6 +146,30 @@ export function ProjectField({ value, onChange, size, disabled, error }: Project
 				className={styles.control}
 			/>
 		</Field>
+	);
+}
+
+export interface VersionFieldProps {
+	value: VersionId | null;
+	onChange: (value: VersionId | null) => void;
+	size?: SelectSize;
+	disabled?: boolean;
+}
+
+export function VersionField({ value, onChange, size, disabled }: VersionFieldProps) {
+	return (
+		<PickerField label="Affects version">
+			{(id) => (
+				<VersionPicker
+					id={id}
+					value={value}
+					onChange={onChange}
+					size={size}
+					disabled={disabled}
+					className={styles.control}
+				/>
+			)}
+		</PickerField>
 	);
 }
 

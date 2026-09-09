@@ -6,7 +6,7 @@ import { Button } from '@/ds/button';
 import { Field } from '@/ds/field';
 import { Input } from '@/ds/input';
 import { Page } from '@/ds/page';
-import { Select } from '@/ds/select';
+import { StaticSelect } from '@/ds/select';
 import { Separator } from '@/ds/separator';
 import { PEOPLE_MODE_PARAM, parsePeopleMode } from '@/features/people';
 import styles from './SettingsPage.module.css';
@@ -76,14 +76,14 @@ export function SettingsPage() {
 				<div className={styles.grid}>
 					<Field label="Theme" nativeLabel={false}>
 						{/* Base UI's onValueChange is nullable for clearable selects; ours never clear. */}
-						<Select
+						<StaticSelect
 							items={THEMES}
 							value={theme}
 							onValueChange={(value) => value !== null && setTheme(value)}
 						/>
 					</Field>
 					<Field label="Density" nativeLabel={false}>
-						<Select
+						<StaticSelect
 							items={DENSITIES}
 							value={density}
 							onValueChange={(value) => value !== null && setDensity(value)}
@@ -94,7 +94,7 @@ export function SettingsPage() {
 						nativeLabel={false}
 						description="RTL is where popup positioning tends to break."
 					>
-						<Select
+						<StaticSelect
 							items={DIRECTIONS}
 							value={dir}
 							onValueChange={(value) => value !== null && setDirection(value)}
@@ -118,7 +118,7 @@ export function SettingsPage() {
 						nativeLabel={false}
 						description="Paged asks the repository for more as you scroll. Eager loads all 5,000 once, then filters locally."
 					>
-						<Select
+						<StaticSelect
 							items={PEOPLE_MODES}
 							value={peopleMode}
 							onValueChange={(value) => {

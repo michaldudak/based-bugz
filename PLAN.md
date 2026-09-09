@@ -263,6 +263,26 @@ Docs to update when step 1 lands: AGENTS.md stack table (`@mui/x-virtualizer` al
 Phase 5 note that the issues list is now an evaluation surface, and the Conventions section
 (sha pinning, postinstall script — version splitting plus the 5414 exports-map widening).
 
+### Phase 10 — the Select surface (landed 2026-09-09)
+
+mui/base-ui#5617 superseded #5466 (same Virtualizer, rebased, plus Select support), and the app
+grew a third evaluated surface to exercise it:
+
+1. **Data · M** — `Version` entity (`datasetShape`: issues/8, capped at 12,000; closed-form
+   semver names, newest first), `Issue.affectsVersionId`, `versions.all()` as the repository's
+   second deliberate bulk read, event-log/persistence/activity coverage for the new field.
+2. **Seam · M** — `ds/select` split into `StaticSelect` (code-declared options, stable Base UI,
+   no seam) and the contract-driven `Select` resolved through the registry, which became
+   `{ Combobox, List, Select }`.
+3. **Impls · L** — `baseline/Select.tsx` (stable + TanStack, 164 lines: anchor row, nested
+   spacer, hand scroll-to-selected) and `pr-5617/Select.tsx` (canary `<Virtualizer>` in
+   `Select.List`, 106 lines, no bridge code).
+4. **Feature · M** — `VersionPicker` as the issue's "Affects version" field (detail page and
+   create dialog), activity-feed sentences, stress-lab `version` case, pure-lab section with
+   `?pick=`.
+5. **Tests · M** — `select.spec.ts` parity + expected-failure findings, an axe case for the open
+   select popup. Findings recorded in FINDINGS.md (The Select surface).
+
 ---
 
 ## Loading strategies

@@ -12,7 +12,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
-import type { IssuePriority, IssueStatus, LabelId, ProjectId, UserId } from '@/data';
+import type { IssuePriority, IssueStatus, LabelId, ProjectId, UserId, VersionId } from '@/data';
 import { Button } from '@/ds/button';
 import { Dialog } from '@/ds/dialog';
 import { Field } from '@/ds/field';
@@ -25,6 +25,7 @@ import {
 	PriorityField,
 	ProjectField,
 	StatusField,
+	VersionField,
 } from './IssueFields';
 import { useCreateIssue } from './mutations';
 import { issuePath } from './routes';
@@ -38,6 +39,7 @@ interface Draft {
 	assigneeId: UserId | null;
 	labelIds: readonly LabelId[];
 	projectId: ProjectId | null;
+	affectsVersionId: VersionId | null;
 }
 
 const EMPTY_DRAFT: Draft = {
@@ -48,6 +50,7 @@ const EMPTY_DRAFT: Draft = {
 	assigneeId: null,
 	labelIds: [],
 	projectId: null,
+	affectsVersionId: null,
 };
 
 export interface CreateIssueDialogProps {
@@ -114,6 +117,7 @@ export function CreateIssueDialog({ open, onOpenChange }: CreateIssueDialogProps
 			assigneeId: draft.assigneeId,
 			labelIds: draft.labelIds,
 			projectId: draft.projectId,
+			affectsVersionId: draft.affectsVersionId,
 		});
 	}
 
@@ -152,6 +156,10 @@ export function CreateIssueDialog({ open, onOpenChange }: CreateIssueDialogProps
 						value={draft.projectId}
 						onChange={(projectId) => update({ projectId })}
 						error={projectError}
+					/>
+					<VersionField
+						value={draft.affectsVersionId}
+						onChange={(affectsVersionId) => update({ affectsVersionId })}
 					/>
 					<AssigneeField
 						value={draft.assigneeId}

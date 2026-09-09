@@ -60,6 +60,7 @@ import type {
 	SortDirection,
 	UserQuery,
 	UsersRepository,
+	VersionsRepository,
 } from './repository';
 import { SEARCH_RESULT_KINDS } from './repository';
 import {
@@ -86,6 +87,8 @@ import type {
 	ProjectId,
 	User,
 	UserId,
+	Version,
+	VersionId,
 } from './types';
 import { hash32 } from './rng';
 
@@ -318,6 +321,7 @@ export class InMemoryRepository implements Repository {
 	readonly users: UsersRepository;
 	readonly labels: LabelsRepository;
 	readonly projects: ProjectsRepository;
+	readonly versions: VersionsRepository;
 	readonly issues: IssuesRepository;
 	readonly comments: CommentsRepository;
 	readonly activity: ActivityRepository;
@@ -385,6 +389,16 @@ export class InMemoryRepository implements Repository {
 					ids
 						.map((id) => this.projectById(id))
 						.filter((project): project is Project => project !== null),
+				),
+		};
+
+		this.versions = {
+			all: (readOptions) => this.read(readOptions?.signal, () => this.allVersionsSync()),
+			byIds: (ids, readOptions) =>
+				this.read(readOptions?.signal, () =>
+					ids
+						.map((id) => this.versionById(id))
+						.filter((version): version is Version => version !== null),
 				),
 		};
 
@@ -516,6 +530,10 @@ export class InMemoryRepository implements Repository {
 
 	private projectById(id: ProjectId): Project | null {
 		return this.generator.projectById(id);
+	}
+
+	private versionById(id: VersionId): Version | null {
+		return this.generator.versionById(id);
 	}
 
 	private labelCount(): number {
@@ -769,6 +787,17 @@ export class InMemoryRepository implements Repository {
 
 		for (let index = 0; index < this.shape.users; index += 1) {
 			items.push(this.generator.user(index));
+		}
+
+		return items;
+	}
+
+	/** Newest first, matching generated index order — the order every version picker wants. */
+	private allVersionsSync(): readonly Version[] {
+		const items: Version[] = [];
+
+		for (let index = 0; index < this.shape.versions; index += 1) {
+			items.push(this.generator.version(index));
 		}
 
 		return items;
@@ -1185,6 +1214,10 @@ export class InMemoryRepository implements Repository {
 			reporterId: options.actorId,
 			labelIds: (input.labelIds ?? []).filter((id) => this.labelById(id) !== null),
 			projectId: input.projectId,
+			affectsVersionId:
+				input.affectsVersionId != null && this.versionById(input.affectsVersionId) !== null
+					? input.affectsVersionId
+					: null,
 			estimate: input.estimate ?? null,
 			createdAt: at,
 			updatedAt: at,
@@ -1498,6 +1531,10 @@ export class InMemoryRepository implements Repository {
 					? issue.assigneeId
 					: null,
 			labelIds: issue.labelIds.filter((id) => this.labelById(id) !== null),
+			affectsVersionId:
+				issue.affectsVersionId !== null && this.versionById(issue.affectsVersionId) !== null
+					? issue.affectsVersionId
+					: null,
 		};
 	}
 
@@ -1533,6 +1570,16 @@ export class InMemoryRepository implements Repository {
 				return typeof value === 'string' && this.projectById(value) !== null
 					? { ...issue, projectId: value }
 					: null;
+
+			case 'affectsVersionId': {
+				if (value === null) {
+					return { ...issue, affectsVersionId: null };
+				}
+
+				return typeof value === 'string' && this.versionById(value) !== null
+					? { ...issue, affectsVersionId: value }
+					: null;
+			}
 
 			case 'estimate': {
 				if (value === null) {

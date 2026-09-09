@@ -46,8 +46,22 @@ const KNOWN_POPUP_VIOLATIONS: Record<string, readonly RegExp[]> = {
 	'pr-5617': [SCROLLPORT_FINDING],
 };
 
+/**
+ * The Select popup's own table: Base UI's Select moves real DOM focus between options, so the
+ * combobox findings do not automatically carry over — a scroller with focusable content inside
+ * it is not the same axe question as one without.
+ */
+const KNOWN_SELECT_VIOLATIONS: Record<string, readonly RegExp[]> = {
+	baseline: [],
+	'pr-5617': [],
+};
+
 function expectedPopupViolations(impl: string): unknown[] {
 	return (KNOWN_POPUP_VIOLATIONS[impl] ?? []).map((pattern) => expect.stringMatching(pattern));
+}
+
+function expectedSelectViolations(impl: string): unknown[] {
+	return (KNOWN_SELECT_VIOLATIONS[impl] ?? []).map((pattern) => expect.stringMatching(pattern));
 }
 
 function scan(page: Page, ...regions: string[]) {
@@ -122,6 +136,18 @@ test.describe('accessibility', () => {
 
 		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual(
 			expectedPopupViolations(impl),
+		);
+	});
+
+	test('the open version picker has no violations beyond the pinned findings', async ({
+		page,
+		impl,
+	}) => {
+		await gotoStress(page, stressUrl(impl, { case: 'version', scale: SCALE }));
+		await openPopup(page);
+
+		expect(summarize(await scan(page, CASE_BODY, POPUP).analyze())).toEqual(
+			expectedSelectViolations(impl),
 		);
 	});
 

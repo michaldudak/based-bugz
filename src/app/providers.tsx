@@ -42,6 +42,7 @@ export function Providers({ children }: { children: ReactNode }) {
 			available: IMPL_NAMES,
 			Combobox: components.Combobox,
 			List: components.List,
+			Select: components.Select,
 		};
 	}, [searchParams]);
 

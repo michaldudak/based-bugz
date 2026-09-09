@@ -11,6 +11,7 @@ import { Page } from '@/ds/page';
 import { useImplRegistry } from '@/ds/registry';
 import { Spinner } from '@/ds/spinner';
 import { UserPickerLab } from '@/lab/combobox/UserPickerLab';
+import { VersionSelectLab } from '@/lab/select/VersionSelectLab';
 
 const SURROUNDS: Record<string, ComponentType<{ children: ReactNode }>> = {
 	baseline: lazy(() => import('./SurroundStable')),
@@ -38,6 +39,7 @@ export function PureLabPage() {
 			<Suspense fallback={<Spinner size={16} label="Loading surroundings" />}>
 				<Surround>
 					<UserPickerLab />
+					<VersionSelectLab />
 				</Surround>
 			</Suspense>
 		</Page>

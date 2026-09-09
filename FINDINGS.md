@@ -27,6 +27,8 @@ headline.
    is not focusable). The macOS swallow reproduces unchanged on the #5617 head. Encoded in the
    suite as expected-failure on macOS and an annotated skip on Linux, because a coin flip can be
    pinned as neither pass nor failure. The race needs reducing upstream before the PR merges.
+6. **Select: the first open mounts the whole collection while hidden** — see The Select surface.
+7. **Select: the first open drops scroll-to-selected** — see The Select surface.
 
 **Closed on the #5617 head — PageUp/PageDown.** The 2026-09-04 #5466 head paged on Linux but
 still moved the highlight one row on macOS; the 2026-09-08 #5617 head pages on macOS too, so the
@@ -111,6 +113,64 @@ Rule 1: these are headline findings, not implementation defects.
 - **None of the three PRs changes Tab-dismissal or PageDown/PageUp** — the canaries fail the same
   two expected-failure tests as the baseline.
 
+## The Select surface (added 2026-09-09, mui/base-ui#5617)
+
+\#5617 extends the chosen Virtualizer with Select support, so the app grew a third evaluated
+surface: `ds/select`'s data-driven Select, dogfooded as the issue's "Affects version" field over
+a release list that scales with the dataset (1,250 versions at the default 10k issues, 12,000 at
+the cap) and stress-cased at `/lab/stress?case=version`. The baseline is stable 1.7.0 + TanStack
+Virtual assembled by analogy with the documented combobox recipe — no Select recipe exists, and
+the gap shows. App-code cost: baseline `Select.tsx` is 164 non-comment lines, pr-5617's is 106.
+Findings are encoded in `tests/select.spec.ts` as per-implementation expected failures.
+
+### What the canary earned
+
+- **Collection-aware keyboard over unmounted rows.** End, Home, PageDown and typeahead (including
+  digit prefixes like `5.9`) all land on rows that were never mounted and arrive scrolled into
+  view, with honest `aria-posinset`/`aria-setsize` supplied by the virtualizer. First candidate
+  to satisfy any of this on any surface.
+- **No bridge code.** `alignItemWithTrigger` turns itself off; the impl has no scroll-element
+  state, no scroll-to-selected effect, no highlight tracking — `Select.Root items` plus a
+  `<Virtualizer>` in `Select.List` is the whole story.
+
+### pr-5617 regressions (reproduced pure — rule 12, `/lab/pure?pick=`)
+
+- **The first open mounts the whole collection while the popup is still hidden.** 12,000 options
+  mount and unmount before anything shows: ~1.1–1.4 s click-to-popup on the production preview,
+  against the baseline's ~370 ms windowed open of the same list. It settles to ~19 mounted rows
+  afterwards, so only the first open pays.
+- **The first open drops scroll-to-selected.** The popup shows the top of the list with the
+  selection thousands of rows below; closing and reopening lands it exactly. Dev StrictMode masks
+  the defect — the doubled effects give the pending scroll a second chance — so it only exists
+  where rule 7 says to measure: the production build.
+
+### What stable Select cannot express (the control's findings)
+
+- **A committed selection reverts to `null` unless its item stays mounted.** `SelectPositioner`
+  treats "selected value not among the registered items" as "the item was removed" and resets the
+  value on any registration-map change that loses it — in a windowed list, that includes every
+  close, since the hidden popup's window is empty. Enter and pointer selection both visibly
+  commit, then immediately revert. The app-side fix is an **anchor row**: the selected item kept
+  mounted outside the window at all times.
+- **Keyboard is grounded in registration order.** End, Home and PageDown land on mount-order
+  edges — often off screen, and nothing scrolls the highlight into view, because Select has no
+  `onItemHighlighted` to build the bridge the combobox baseline uses — and typeahead matches
+  mounted labels only. There is no `virtualized` opt-out on `Select.Root`.
+- **`Select.List` swallows the `style` prop in 1.7.0**, so the sized-spacer assembly that works on
+  `Combobox.List` renders a zero-height list; the spacer must nest inside the listbox as an extra
+  `role="presentation"` layer. The #5617 head forwards the style — fixed upstream, worth a
+  release.
+- **`itemToStringValue` is mandatory with object values**, or the hidden form input serializes
+  every value as `[object Object]`.
+
+### Select accessibility
+
+The open select popup scans clean on both implementations — the pinned-findings list is empty.
+The combobox's `scrollable-region-focusable` finding does not carry over, because the Select
+pattern moves real DOM focus between options, so the scrollport has focusable content. The one
+violation the first scan did find — the release rows' meta text failing contrast at `--text-xs` —
+was the app's own CSS and was fixed rather than pinned.
+
 ## Parity and accessibility matrix
 
 `pnpm test:e2e`, production preview, 2026-08-18: **80 passed** over 4 projects × 20 tests, with
@@ -120,9 +180,9 @@ violation, turns the suite red), and the two keyboard defects (Tab-dismissal, Pa
 expected failures that reproduce identically on all four implementations. Still owed for rule 8:
 the manual VoiceOver pass and the Safari/Firefox run.
 
-Re-run on the #5617 head, 2026-09-09: **40 passed** over 2 projects (baseline, pr-5617) × 20
-tests, with the aria-hidden patch now covering the canary too (see Packaging) and PageUp/PageDown
-expected-failing only on the baseline.
+Re-run on the #5617 head, 2026-09-09: **56 passed** over 2 projects (baseline, pr-5617) × 28
+tests, now including the Select suite, with the aria-hidden patch covering the canary too (see
+Packaging) and PageUp/PageDown expected-failing only on the baseline.
 
 ## Packaging and integration findings
 

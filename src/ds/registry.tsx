@@ -1,11 +1,11 @@
 /**
- * The implementation seam, for both evaluated surfaces.
+ * The implementation seam, for every evaluated surface.
  *
  * `ds/` never imports `impls/` — the app supplies the registry instead. That keeps the layer rule
- * absolute (and lint-enforceable) while still letting `<Combobox>` and `<List>` resolve an
- * implementation at runtime from `?impl=`. Each implementation provides both components; switching
- * `?impl=` swaps the whole family, so you experience one PR's approach throughout the app rather
- * than a mixture.
+ * absolute (and lint-enforceable) while still letting `<Combobox>`, `<List>` and `<Select>`
+ * resolve an implementation at runtime from `?impl=`. Each implementation provides all three
+ * components; switching `?impl=` swaps the whole family, so you experience one PR's approach
+ * throughout the app rather than a mixture.
  */
 
 import { Suspense, createContext, use } from 'react';
@@ -13,10 +13,12 @@ import type { ComponentType, ReactNode } from 'react';
 import { Spinner } from '@/ds/spinner';
 import type { ComboboxProps } from './combobox/types';
 import type { ListProps } from './list/types';
+import type { SelectProps } from './select/types';
 
 /** Implementations are stored opaquely: `React.lazy` cannot carry a generic signature. */
 export type OpaqueComboboxImpl = ComponentType<ComboboxProps<never>>;
 export type OpaqueListImpl = ComponentType<ListProps<never>>;
+export type OpaqueSelectImpl = ComponentType<SelectProps<never>>;
 
 export interface ImplRegistry {
 	/** Name of the implementation resolved from `?impl=`, for labelling measurements. */
@@ -25,6 +27,7 @@ export interface ImplRegistry {
 	available: readonly string[];
 	Combobox: OpaqueComboboxImpl;
 	List: OpaqueListImpl;
+	Select: OpaqueSelectImpl;
 }
 
 const RegistryContext = createContext<ImplRegistry | null>(null);

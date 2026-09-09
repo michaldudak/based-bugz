@@ -25,6 +25,8 @@ import type {
 	ProjectId,
 	User,
 	UserId,
+	Version,
+	VersionId,
 } from './types';
 
 /* -------------------------------------------------------------------------------------------- */
@@ -211,6 +213,18 @@ export interface ProjectsRepository {
 	byIds(ids: readonly ProjectId[], options?: ReadOptions): Promise<Project[]>;
 }
 
+export interface VersionsRepository {
+	/**
+	 * Every version, newest first, in one simulated round-trip — the same deliberate bulk read as
+	 * `users.all()`, and for the same reason: a version field is a select over the complete
+	 * release list, and real apps serve that list from one endpoint. Still async, abortable and
+	 * failure-injected like every read (AGENTS.md — evaluation rule 3).
+	 */
+	all(options?: ReadOptions): Promise<readonly Version[]>;
+	/** Found versions in the order requested. Unknown ids are dropped, never thrown on. */
+	byIds(ids: readonly VersionId[], options?: ReadOptions): Promise<Version[]>;
+}
+
 export interface IssuesRepository {
 	/** `total` only when `query.filter` selects everything. */
 	list(query: IssueQuery, page: PageRequest): Promise<Page<Issue>>;
@@ -249,6 +263,7 @@ export interface Repository {
 	users: UsersRepository;
 	labels: LabelsRepository;
 	projects: ProjectsRepository;
+	versions: VersionsRepository;
 	issues: IssuesRepository;
 	comments: CommentsRepository;
 	activity: ActivityRepository;

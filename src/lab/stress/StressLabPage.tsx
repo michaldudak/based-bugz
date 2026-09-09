@@ -36,7 +36,7 @@ export function StressLabPage() {
 			<Page.Header actions={<PerfToggle />}>
 				<Page.Title>Stress lab</Page.Title>
 				<Page.Subtitle>
-					One picker, seven ways to break it. Implementation: <code>{activeName}</code>.
+					One picker, eight ways to break it. Implementation: <code>{activeName}</code>.
 				</Page.Subtitle>
 			</Page.Header>
 

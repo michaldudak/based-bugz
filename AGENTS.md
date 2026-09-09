@@ -6,9 +6,10 @@ two of using your own app, not the ones you think to write a test for.
 
 First evaluation, concluded 2026-09: three competing Combobox virtualization APIs from unmerged
 Base UI PRs, compared against the documented approach. mui/base-ui#5466 (dual-mode `Virtualizer`)
-won and is the one canary still installed; the evidence lives in FINDINGS.md. Long term this app
-hosts evaluations of other Base UI components too, so **nothing may be named or structured around
-virtualization**.
+won; the tracked canary is now its successor mui/base-ui#5617 — the same API rebased onto the
+1.8.0 head, plus Select support, which added the third evaluated surface. The evidence lives in
+FINDINGS.md. Long term this app hosts evaluations of other Base UI components too, so **nothing
+may be named or structured around virtualization**.
 
 ---
 
@@ -41,7 +42,7 @@ src/
   app/          # providers, routes, layout, config.ts (product name lives here)
   ds/           # design system: app-agnostic wrappers over @base-ui/react
   features/     # domain components: pickers, issue list, issue detail, command palette
-  impls/        # virtualization strategies: baseline (the control), pr-5466 (the chosen API)
+  impls/        # virtualization strategies: baseline (the control), pr-5617 (the chosen API)
   data/         # repository interface, in-memory implementation, seeded generator
   lab/          # stress routes + a ds gallery (no Storybook)
 ```
@@ -54,7 +55,7 @@ evaluation, so treat them as build errors even before a lint rule enforces them.
 - `ds/` imports `@base-ui/react`, tokens, and its own CSS. It must **not** import `features/`,
   `data/`, or any domain type. Everything in `ds/` is generic.
 - `features/` imports `ds/` and `data/`. It must **not** import from `impls/` — it reaches
-  virtualization only through `ds/combobox`.
+  virtualization only through the `ds/` seams (`ds/combobox`, `ds/list`, `ds/select`).
 - `impls/` imports its own aliased Base UI build, a virtualization library, and the contract types
   and CSS from `ds/combobox`. It must **not** import `features/` or `data/`, and it is **generic over
   `T`** — an impl that knows what a `User` is has already cheated.
@@ -281,16 +282,19 @@ so renaming stays a one-liner.
 **Implementation switching.** Each impl is a lazy `import()`, so Vite emits one chunk per impl and
 per-impl bundle size falls out of the build. Switching is a runtime `?impl=` param that remounts the
 subtree — no restart, no cross-contaminated state. A canary build installs beside stable under a
-distinct dependency name (`base-ui-5466`); `react` and `react-dom` must dedupe to a single copy,
+distinct dependency name (`base-ui-5617`); `react` and `react-dom` must dedupe to a single copy,
 and `@base-ui/react`'s internal siblings must **not** hoist into one shared copy across impls.
-Verify with `pnpm why` after any install. The canary URL uses the `@5466` PR ref — pkg.pr.new
+Verify with `pnpm why` after any install. The canary URL uses the `@5617` PR ref — pkg.pr.new
 stopped serving per-commit URLs for this repo (verified 2026-09-07), so the pin is now the tarball
 integrity in `pnpm-lock.yaml`: a plain `pnpm install` never refetches, and refreshing to the PR's
-latest push is a deliberate `pnpm update base-ui-5466`, recorded like any dependency change.
+latest push is a deliberate `pnpm update base-ui-5617`, recorded like any dependency change.
 `scripts/patch-canaries.mjs` runs from the root `postinstall` hook: it suffixes the canary's
-package version (`-pr5466`) so TypeScript does not collapse its types into stable's, and does the
+package version (`-pr5617`) so TypeScript does not collapse its types into stable's, and does the
 same for the canary `@base-ui/utils` that `.pnpmfile.cjs` swaps in (the canary's manifest pins the
-published utils, which lacks subpaths the canary imports). A plain `pnpm install` must always leave
+published utils, which lacks subpaths the canary imports). The `mui/base-ui#5528` aria-hidden
+workaround is a pnpm patch keyed by `name@version`, applied to **both** stable 1.7.0 and the
+canary's 1.8.0 on purpose: the a11y suite scans both implementations, and patching one side would
+manufacture an impl diff (FINDINGS.md — Packaging). A plain `pnpm install` must always leave
 node_modules in the state the evaluation assumes — never patch node_modules by hand. The lockfile
 records a checksum of `.pnpmfile.cjs`, so any edit to that file — including a Prettier reformat —
 must be followed by `pnpm install` before committing, or CI's frozen install fails on the
@@ -298,7 +302,7 @@ mismatch.
 
 **Adding a variant** touches exactly these places, and nothing else:
 
-1. `src/impls/<name>/Combobox.tsx` and `List.tsx` — the implementation itself.
+1. `src/impls/<name>/Combobox.tsx`, `List.tsx` and `Select.tsx` — the implementation itself.
 2. The registry entry in `src/app/impls.ts` — the parity suite discovers implementations from this
    literal (`tests/impls.ts` parses it and throws if the shape changes), so tests need no edit.
 3. `IMPL_OPTIONS` in the same file — the topbar switcher menu. This list is hand-maintained on
@@ -334,7 +338,8 @@ library question, but it is a separate evaluation with its own harness if it eve
 **Testing.** A minimal Playwright keyboard-parity suite is the objective backing for rule 8: one
 spec — open, type, arrow up/down, page up/down, home/end, enter, escape, tab-out,
 scroll-to-selected-on-open — parameterized over every impl via `?impl=`, run against the production
-preview build, plus an axe scan per impl route. It is a parity check, not a test pyramid: the app's
+preview build, plus an axe scan per impl route and a Select counterpart (`select.spec.ts`) for the
+third surface — windowing, typeahead and Home/End against unmounted rows, selection commit. It is a parity check, not a test pyramid: the app's
 correctness bar stays "you notice when using it"; the suite exists so "impl X breaks keyboard nav"
 is a reproducible finding rather than an impression.
 
@@ -343,11 +348,11 @@ is a reproducible finding rather than an impression.
 ## Open items
 
 - **The evaluation concluded (2026-09): mui/base-ui#5466 is the chosen Virtualizer API.** The
-  pr-5173 and pr-5414 implementations are removed; `pr-5466` tracks the PR head and `baseline`
-  stays as the control until the PR merges into a stable release, at which point the whole
-  impl seam can collapse to one implementation. Evidence and the still-open findings: FINDINGS.md
-  (scrollport keyboard-reachability, no measurement-invalidation API, no end-reached signal, and
-  the two keyboard defects shared with stable — all re-verified still present on the 2026-09-04
-  head).
+  pr-5173 and pr-5414 implementations are removed; `pr-5617` (#5466 rebased plus Select support)
+  tracks the PR head and `baseline` stays as the control until the PR merges into a stable
+  release, at which point the whole impl seam can collapse to one implementation. Evidence and
+  the still-open findings: FINDINGS.md (scrollport keyboard-reachability, no
+  measurement-invalidation API, no end-reached signal, the Tab race — and on the Select surface,
+  the full-collection pre-mount on first open and the dropped first-open scroll-to-selected).
 
 See `PLAN.md` for the implementation sequence.

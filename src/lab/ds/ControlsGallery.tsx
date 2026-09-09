@@ -16,7 +16,7 @@ import { Input } from '@/ds/input';
 import { Kbd } from '@/ds/kbd';
 import { Page } from '@/ds/page';
 import { ScrollArea } from '@/ds/scroll-area';
-import { Select } from '@/ds/select';
+import { StaticSelect } from '@/ds/select';
 import { Separator } from '@/ds/separator';
 import { Switch } from '@/ds/switch';
 import { Tabs } from '@/ds/tabs';
@@ -156,7 +156,7 @@ export function ControlsGallery() {
 					</Demo>
 					<Demo label="around a Select (nativeLabel=false)">
 						<Field label="Priority" nativeLabel={false} description="Drives sort order.">
-							<Select items={PLAIN_ITEMS} placeholder="Choose a priority" />
+							<StaticSelect items={PLAIN_ITEMS} placeholder="Choose a priority" />
 						</Field>
 					</Demo>
 					{/* The checkbox carries its own label here, so the Field supplies only
@@ -203,19 +203,23 @@ export function ControlsGallery() {
 			<Section title="Select">
 				<div className={styles.grid}>
 					<Demo label="placeholder">
-						<Select items={PLAIN_ITEMS} placeholder="Choose a priority" />
+						<StaticSelect items={PLAIN_ITEMS} placeholder="Choose a priority" />
 					</Demo>
 					<Demo label="icons + a disabled item">
-						<Select items={STATUS_ITEMS} value={status} onValueChange={(next) => setStatus(next)} />
+						<StaticSelect
+							items={STATUS_ITEMS}
+							value={status}
+							onValueChange={(next) => setStatus(next)}
+						/>
 					</Demo>
 					<Demo label="size=sm">
-						<Select size="sm" items={PLAIN_ITEMS} defaultValue="high" />
+						<StaticSelect size="sm" items={PLAIN_ITEMS} defaultValue="high" />
 					</Demo>
 					<Demo label="disabled">
-						<Select items={PLAIN_ITEMS} defaultValue="low" disabled />
+						<StaticSelect items={PLAIN_ITEMS} defaultValue="low" disabled />
 					</Demo>
 					<Demo label="long labels truncate">
-						<Select
+						<StaticSelect
 							items={[
 								{ value: 'a', label: 'Assignee picker regression on momentum scroll (iOS)' },
 								{ value: 'b', label: 'Short' },

@@ -123,6 +123,18 @@
 	overscroll-behavior: contain;
 }
 
+/*
+ * The spacer a windowing implementation sizes to the whole collection, with rows absolutely
+ * positioned inside it. Unused by `StaticSelect`, which renders every option.
+ */
+.viewport {
+	position: relative;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
 .item {
 	display: grid;
 	grid-template-columns: 1rem 1fr;
